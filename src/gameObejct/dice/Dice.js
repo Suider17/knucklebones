@@ -12,17 +12,9 @@ export default class Dice extends Phaser.Physics.Arcade.Sprite {
       status: null,
       position: [0, 0], //[row,column]
     };
-  }
+  } 
 
-  load(scene) {
-    Object.entries(stringPaths).forEach(([key, path]) => {
-      scene.load.image(key, path);
-    });
-  }
-
-  create(scene) {
-    Object.entries(stringPaths).forEach(([key, path]) => {
-      scene.load.image(key, path);
-    });
+  roll() {
+    this.atributes = Phaser.Math.Between(1, 6);
   }
 }
