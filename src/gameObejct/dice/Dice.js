@@ -15,8 +15,6 @@ export default class Dice extends Phaser.GameObjects.Sprite {
 
     this.setFrame(this.atributes.value);
     this.setOrigin(0, 0);
-    this.setInteractive();
-    this.setMouseEvents();
 
     scene.add.existing(this).setScale(this.atributes.scale);
   }
@@ -28,36 +26,24 @@ export default class Dice extends Phaser.GameObjects.Sprite {
     this.atributes.blocked = true;
   }
 
-  setMouseEvents() {
-    this.on("pointerover", () => {
-      !this.atributes.blocked && this.play("diceFaces");
-    });
-
-    this.on("pointerout", () => {
-      if (!this.atributes.blocked) {
-        this.stop("diceFaces");
-        this.setFrame(0);
-      }
-    });
-
-    this.on("pointerdown", () => {
-      !this.atributes.blocked && this.roll();
-    });
-  }
-
   resetValue() {
     this.atributes.value = 0;
   }
-
   getValue() {
     return this.atributes.value;
   }
-
+  setValue(value) {
+    !this.atributes.blocked && (this.atributes.value = value);
+    this.setFrame(this.atributes.value);
+  }
   unlockDice() {
     this.atributes.blocked = false;
   }
 
   reScaleDice(scale) {
     this.scale(scale);
+  }
+  lockDice() {
+    this.atributes.blocked = true;
   }
 }

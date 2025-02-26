@@ -5,6 +5,7 @@ export default class Board extends Phaser.GameObjects.Container {
     super(scene, x, y);
 
     this.dice = [];
+    this.totals = [];
   }
 
   fillBoard() {
@@ -27,5 +28,34 @@ export default class Board extends Phaser.GameObjects.Container {
       // Añadir el dado al array
       this.dice.push(newDice);
     }
+
+    this.totals[0] = this.scene.add.text(500, 120, 0, {
+      fontSize: "32px",
+      color: "#ffffff",
+    });
+    this.totals[1] = this.scene.add.text(625, 120, 0, {
+      fontSize: "32px",
+      color: "#ffffff",
+    });
+    this.totals[2] = this.scene.add.text(750, 120, 0, {
+      fontSize: "32px",
+      color: "#ffffff",
+    });
+  }
+
+  enableBoardDiceEvent() {
+    this.dice.forEach((dice) => {
+      dice.setInteractive();
+    });
+  }
+  disableBoardDiceEvent() {
+    this.dice.forEach((dice) => {
+      dice.disableInteractive();
+    });
+  }
+
+  updateSingleTotal(column, value) {
+    let total = parseInt(this.totals[column].text);
+    this.totals[column].setText(parseInt((total += value)));
   }
 }

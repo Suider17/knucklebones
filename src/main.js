@@ -3,6 +3,10 @@ import Board from "./gameObejct/diceBox/Board";
 import Dice from "./gameObejct/dice/Dice";
 import loadRollingDiceSprites from "./gameObejct/dice/dice.assets";
 import createDiceAnimation from "./gameObejct/dice/dice.animator";
+import {
+  setRollingDiceEvents,
+  setMouseDownEvent,
+} from "./gameObejct/dice/dice.events";
 class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: "MainScene" });
@@ -32,9 +36,11 @@ class MainScene extends Phaser.Scene {
       blocked: false,
       scale: 1,
     };
-
+    //rolling dice
     this.entities.rollingDice = new Dice(this, 0, 0, "diceFaces", atributes);
+    this.entities.rollingDice.setInteractive();
     createDiceAnimation(this);
+    setRollingDiceEvents(this.entities.rollingDice);
 
     const boardContainer = this.add.container(640, 360);
     const boardSprite = this.add.image(0, 0, "diceBox");
@@ -42,13 +48,35 @@ class MainScene extends Phaser.Scene {
 
     this.entities.board = new Board(this, 0, 0);
     this.entities.board.fillBoard();
+    this.entities.board.enableBoardDiceEvent();
+    this.entities.board.dice.forEach((dice) => {
+      setMouseDownEvent(
+        (dado, scene) => {
+          dado.unlockDice();
+          dado.setValue(this.diceValue);
+          dado.lockDice();
+          scene.entities.board.disableBoardDiceEvent();
+          scene.entities.rollingDice.resetValue();
+          console.log(dado.atributes.position[0]);
+          scene.entities.board.updateSingleTotal(
+            dado.atributes.position[0],
+            dado.atributes.value
+          );
+        },
+        dice,
+        this
+      );
+    });
     boardContainer.add(this.entities.board);
   }
 
   update() {
-    if (this.entities.rollingDice.value != 0) {
+    if (this.entities.rollingDice.getValue() != 0) {
       this.diceValue = this.entities.rollingDice.getValue();
-      this.entities.rollingDice.resetValue();
+      this.entities.board.enableBoardDiceEvent();
+    } else {
+      this.entities.rollingDice.unlockDice();
+      this.entities.rollingDice.setFrame(0);
     }
   }
 }
