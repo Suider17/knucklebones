@@ -1,11 +1,13 @@
 import Dice from "../dice/Dice";
 
 export default class Board extends Phaser.GameObjects.Container {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, id) {
     super(scene, x, y);
 
     this.dice = [];
     this.totals = [];
+    this.columns = [];
+    this.id = id;
   }
 
   fillBoard() {
@@ -41,6 +43,26 @@ export default class Board extends Phaser.GameObjects.Container {
       fontSize: "32px",
       color: "#ffffff",
     });
+
+    //add areas
+    this.columns[0] = this.scene.add.zone(500, 360, 100, 380);
+    this.columns[1] = this.scene.add.zone(640, 360, 100, 380);
+    this.columns[2] = this.scene.add.zone(775, 360, 100, 380);
+
+    // Dibujar un rectángulo para visualizar la zona
+    this.scene.add
+      .graphics()
+      .lineStyle(4, 0xffffff)
+      .strokeRect(450, 170, 100, 380);
+    const graphics = this.scene.add
+      .graphics()
+      .lineStyle(4, 0x00ff01)
+      .strokeRect(590, 170, 100, 380); // Borde verde, grosor 2 // (x, y, width, height)
+
+    this.scene.add
+      .graphics()
+      .lineStyle(4, 0x00000)
+      .strokeRect(725, 170, 100, 380);
   }
 
   enableBoardDiceEvent() {
@@ -57,5 +79,16 @@ export default class Board extends Phaser.GameObjects.Container {
   updateSingleTotal(column, value) {
     let total = parseInt(this.totals[column].text);
     this.totals[column].setText(parseInt((total += value)));
+  }
+
+  enableBoardColumnEvent() {
+    this.columns.forEach((column) => {
+      column.setInteractive();
+    });
+  }
+  disableBoardDiceEvent() {
+    this.columns.forEach((column) => {
+      column.disableInteractive();
+    });
   }
 }

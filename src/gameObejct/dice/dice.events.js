@@ -1,4 +1,5 @@
-export function setRollingDiceEvents(dice) {
+export function setRollingDiceEvents(scene) {
+  const dice = scene.entities.rollingDice;
   dice.on("pointerover", () => {
     !dice.atributes.blocked && dice.play("diceFaces");
   });
@@ -11,7 +12,10 @@ export function setRollingDiceEvents(dice) {
   });
 
   dice.on("pointerdown", () => {
-    !dice.atributes.blocked && dice.roll();
+    if (!dice.atributes.blocked) {
+      dice.roll();
+      scene.validations.waitAsignation_player1 = true;
+    }
   });
 }
 

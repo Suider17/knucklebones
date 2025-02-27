@@ -1,22 +1,21 @@
-export default class Dice extends Phaser.GameObjects.Sprite {
-  constructor(scene, x, y, texture, atributes) {
+export default class RollingDice extends Phaser.GameObjects.Sprite {
+  constructor(scene, x, y, texture, value) {
     super(scene, x, y, texture);
 
     this.atributes = {
-      value: 0,
+      value: value,
       mod: "",
       status: "",
       position: [0, 0], //[row,column]
       blocked: false,
-      scale: 1,
     };
-
-    this.atributes = atributes;
 
     this.setFrame(this.atributes.value);
     this.setOrigin(0, 0);
+    this.setInteractive();
+    this.setMouseEvents();
 
-    scene.add.existing(this).setScale(this.atributes.scale);
+    scene.add.existing(this);
   }
 
   roll() {
@@ -24,27 +23,34 @@ export default class Dice extends Phaser.GameObjects.Sprite {
     this.anims.isPlaying && this.anims.stop();
     this.setFrame(this.atributes.value);
     this.atributes.blocked = true;
-    this.scene.validations.waitAsignation = true;
+  }
+
+  setMouseEvents() {
+    this.on("pointerover", () => {
+      !this.atributes.blocked && this.play("rollingDice");
+    });
+
+    this.on("pointerout", () => {
+      if (!this.atributes.blocked) {
+        this.stop("rollingDice");
+        this.setFrame(0);
+      }
+    });
+
+    this.on("pointerdown", () => {
+      !this.atributes.blocked && this.roll();
+    });
   }
 
   resetValue() {
     this.atributes.value = 0;
   }
+
   getValue() {
     return this.atributes.value;
   }
-  setValue(value) {
-    !this.atributes.blocked && (this.atributes.value = value);
-    this.setFrame(this.atributes.value);
-  }
+
   unlockDice() {
     this.atributes.blocked = false;
-  }
-
-  reScaleDice(scale) {
-    this.scale(scale);
-  }
-  lockDice() {
-    this.atributes.blocked = true;
   }
 }
