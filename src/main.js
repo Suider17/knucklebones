@@ -30,23 +30,26 @@ class MainScene extends Phaser.Scene {
     this.sprites.rollingDice = loadRollingDiceSprites(this);
   }
   create() {
+    //======
+    //ANimations
+    createDiceAnimation(this);
+
     //==== Player 1 ====//
     //==================
     this.P1.turn = true;
     this.P1.dice = new Dice(this, 300, 600, "diceFaces", dice(3, 3));
     this.P1.dice.setInteractive();
-    createDiceAnimation(this);
     setPlayerDiceEvents(this.P1);
     this.P1.board = new Board(this, 200, 200, 1);
     this.P1.board.fillBoard();
     boardEvents(this, this.P1.board, this.P1);
-    this.P1.board.enableBoardColumnEvent();
     this.P1.board.setPosition(500, 520); //<================== update board1 position
 
     //==== Player 2 ====//
     //==================
 
     this.P2.dice = new Dice(this, 1000, 200, "diceFaces", dice(4, 4));
+    setPlayerDiceEvents(this.P2);
     this.P2.board = new Board(this, 200, 200, 1);
     this.P2.board.fillBoard();
     this.P2.board.setPosition(900, 380); //<================== update board1 position
@@ -59,16 +62,16 @@ class MainScene extends Phaser.Scene {
       if (this.P1.isValueAssigned) {
         this.props.diceValue = this.P1.dice.getValue();
         //console.log(this.props);
-        this.P1.board.enableBoardColumnEvent();
+        //this.P1.board.enableBoardColumnEvent();
+      } else {
       }
     }
     //turno del jugador 2
     else if (this.P2.turn) {
-      if (this.P1.isValueAssigned) {
-        this.diceValue = this.entisties.dice_player2.getValue();
-        this.entities.board_2.enableBoardColumnEvent();
+      if (this.P2.isValueAssigned) {
+        this.P2.dice.setInteractive();
+        this.props.diceValue = this.P1.dice.getValue();
       } else {
-        //console.log("hoal");
       }
     }
     //enfrentamiento de

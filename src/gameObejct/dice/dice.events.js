@@ -15,6 +15,7 @@ export function setPlayerDiceEvents(player) {
     if (!dice.atributes.blocked) {
       dice.roll(player);
       player.isValueAssigned = true;
+      player.board.enableBoardColumnEvent();
     }
   });
 }
