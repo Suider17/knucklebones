@@ -1,5 +1,5 @@
-export function setRollingDiceEvents(scene) {
-  const dice = scene.entities.rollingDice;
+export function setPlayerDiceEvents(player) {
+  const dice = player.dice;
   dice.on("pointerover", () => {
     !dice.atributes.blocked && dice.play("diceFaces");
   });
@@ -13,24 +13,8 @@ export function setRollingDiceEvents(scene) {
 
   dice.on("pointerdown", () => {
     if (!dice.atributes.blocked) {
-      dice.roll();
-      scene.validations.waitAsignation_player1 = true;
+      dice.roll(player);
+      player.isValueAssigned = true;
     }
-  });
-}
-
-export function setMouseDownEvent(callback, dice, scene) {
-  dice.on("pointerdown", () => {
-    callback(dice, scene);
-  });
-}
-export function setMouseOverEvent(callback, dice) {
-  dice.on("pointerover", () => {
-    callback(dice);
-  });
-}
-export function setMouseOutEvent(callback, dice) {
-  dice.on("pointerout", () => {
-    callback(dice);
   });
 }

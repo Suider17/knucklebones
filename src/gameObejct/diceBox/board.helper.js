@@ -1,4 +1,6 @@
-export function putDiceValueInColumn(scene, board, index) {
+export function putDiceValueInColumn(scene, player, index) {
+  const rollingDice = player.dice;
+  const board = player.board;
   const diceOfRow = board.dice.filter(
     (dice) => dice.atributes.position[0] === index
   );
@@ -18,26 +20,34 @@ export function putDiceValueInColumn(scene, board, index) {
     console.log("AQUI NO HAY ESPACIO MI CHAVO");
   } else {
     frontDice.unlockDice();
-    frontDice.setValue(scene.diceValue);
+    frontDice.setValue(scene.props.diceValue);
     frontDice.lockDice();
-    scene.entities.board_1.updateSingleTotal(
+    board.updateSingleTotal(
       frontDice.atributes.position[0],
       frontDice.atributes.value
     );
     board.disableBoardDiceEvent();
-    scene.validations.waitAsignation = false;
-    scene.entities.rollingDice.resetValue();
-    scene.entities.rollingDice.setFrame(0);
-    scene.entities.rollingDice.lockDice();
-    scene.validations.waitAsignation_player1 = false;
-    endPlayerOneTurn(scene);
+    player.isValueAssigned = true;
+    rollingDice.unlockDice();
+    rollingDice.resetValue();
+    rollingDice.setFrame(0);
+    rollingDice.lockDice();
+    changeTurn(player, scene);
   }
 }
 
-export function startPlayerOneTurn() {}
-export function startPlayerTwoTurn() {}
-export function endPlayerOneTurn(scene) {
-  scene.validations.turn_player1 = false;
-  scene.validations.turn_player2 = true;
+export function startPlayerOneTurn(scene) {}
+export function startPlayerTwoTurn(scene) {
+  scene.P2.turn = true;
 }
-export function endPlayerTwoTurn() {}
+
+export function endPlayerOneTurn(scene) {
+  scene.P1.turn = false;
+}
+export function endPlayerTwoTurn(scene) {}
+export function changeTurn(player, scene) {
+  if (player.id == "p1") {
+    endPlayerOneTurn(scene);
+    startPlayerTwoTurn(scene);
+  }
+}

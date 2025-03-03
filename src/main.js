@@ -3,42 +3,25 @@ import Board from "./gameObejct/diceBox/Board";
 import Dice from "./gameObejct/dice/Dice";
 import loadRollingDiceSprites from "./gameObejct/dice/dice.assets";
 import createDiceAnimation from "./gameObejct/dice/dice.animator";
-import { setRollingDiceEvents } from "./gameObejct/dice/dice.events";
-import {
-  setBoardMouseDownEvent,
-  asignationDiceEvent,
-} from "./gameObejct/diceBox/board.events";
+import { setPlayerDiceEvents } from "./gameObejct/dice/dice.events";
+import { boardEvents } from "./gameObejct/diceBox/board.events";
+import player from "./models/player";
+import dice from "./models/dice";
 class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: "MainScene" });
 
-    //objeto para guardar los dados
-    this.entities = {
-      rollingDice: null,
-      board_1: null,
-      board_2: null,
-    };
-    this.animations = {};
-    this.diceValue = 0;
-    this.sprites = {};
-    this.validations = {
-      waitAsignation_player1: false,
-      waitAsignation_player2: false,
-      turn_player1: true,
-      turn_player2: false,
-      crashBoards: false,
-      endRun: true,
-    };
-    this.atributes = { round: 0, turn: 0 };
+    //Entidades complejas de la partida
+    this.P1 = player();
+    this.P2 = player();
 
-    this.RollingDiceAtributes = {
-      value: 0,
-      mod: "",
-      status: "",
-      position: [3, 3], //[row,column]
-      blocked: false,
-      scale: 1,
+    this.props = {
+      round: 0, //numero de vueltas que se le ha dado a los turnos
+      gameOver: false, //si la partida ya acabó
+      isDuelPhase: false, //si es fase de duelos
+      diceValue: 0,
     };
+    this.sprites = {};
   }
   preload() {
     this.load.image("diceBox", "/assets/backgroudns/DiceBox.png");
@@ -47,53 +30,56 @@ class MainScene extends Phaser.Scene {
     this.sprites.rollingDice = loadRollingDiceSprites(this);
   }
   create() {
-    //rolling dice
-    this.entities.rollingDice = new Dice(
-      this,
-      0,
-      0,
-      "diceFaces",
-      this.RollingDiceAtributes
-    );
-    this.entities.rollingDice.setInteractive();
+    //==== Player 1 ====//
+    //==================
+    this.P1.turn = true;
+    this.P1.dice = new Dice(this, 300, 600, "diceFaces", dice(3, 3));
+    this.P1.dice.setInteractive();
     createDiceAnimation(this);
-    setRollingDiceEvents(this);
+    setPlayerDiceEvents(this.P1);
+    this.P1.board = new Board(this, 200, 200, 1);
+    this.P1.board.fillBoard();
+    boardEvents(this, this.P1.board, this.P1);
+    this.P1.board.enableBoardColumnEvent();
+    this.P1.board.setPosition(500, 520); //<================== update board1 position
 
-    const boardContainer = this.add.container(640, 360);
-    const boardSprite = this.add.image(0, 0, "diceBox");
-    boardContainer.add(boardSprite);
+    //==== Player 2 ====//
+    //==================
 
-    this.entities.board_1 = new Board(this, 0, 0, 1);
-    this.entities.board_1.fillBoard();
-    asignationDiceEvent(this);
-
-    boardContainer.add(this.entities.board_1);
+    this.P2.dice = new Dice(this, 1000, 200, "diceFaces", dice(4, 4));
+    this.P2.board = new Board(this, 200, 200, 1);
+    this.P2.board.fillBoard();
+    this.P2.board.setPosition(900, 380); //<================== update board1 position
+    this.P2.board.angle = 180;
   }
 
   update() {
     //turno del jugador 1
-    if (this.validations.turn_player1 && !this.validations.turn_player2) {
-      if (this.validations.waitAsignation_player1) {
-        this.diceValue = this.entities.rollingDice.getValue();
-        this.entities.board_1.enableBoardColumnEvent();
+    if (this.P1.turn) {
+      if (this.P1.isValueAssigned) {
+        this.props.diceValue = this.P1.dice.getValue();
+        //console.log(this.props);
+        this.P1.board.enableBoardColumnEvent();
       }
     }
     //turno del jugador 2
-    else if (!this.validations.turn_player1 && this.validations.turn_player2) {
-      if (this.validations.waitAsignation_player2) {
-        this.diceValue = this.entities.rollingDice.getValue();
-        this.entities.board_1.enableBoardColumnEvent();
+    else if (this.P2.turn) {
+      if (this.P1.isValueAssigned) {
+        this.diceValue = this.entisties.dice_player2.getValue();
+        this.entities.board_2.enableBoardColumnEvent();
+      } else {
+        //console.log("hoal");
       }
     }
     //enfrentamiento de
-    else if (this.validations.turn_player1 && this.validations.turn_player2) {
+    else {
     }
   }
 }
 const config = {
   type: Phaser.CANVAS,
   width: 1400,
-  height: 800,
+  height: 950,
   scene: MainScene,
   backgroundColor: "#262626",
   render: {

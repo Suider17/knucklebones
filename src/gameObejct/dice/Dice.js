@@ -1,5 +1,5 @@
 export default class Dice extends Phaser.GameObjects.Sprite {
-  constructor(scene, x, y, texture, atributes) {
+  constructor(scene, x, y, texture, atributes, board) {
     super(scene, x, y, texture);
 
     this.atributes = {
@@ -9,26 +9,27 @@ export default class Dice extends Phaser.GameObjects.Sprite {
       position: [0, 0], //[row,column]
       blocked: false,
       scale: 1,
+      board: board ?? 0,
     };
-
     this.atributes = atributes;
 
     this.setFrame(this.atributes.value);
     this.setOrigin(0, 0);
 
-    scene.add.existing(this).setScale(this.atributes.scale);
+    const thisDice = scene.add.existing(this).setScale(this.atributes.scale);
+    if (this.atributes.board == 2) thisDice.angle = 180;
   }
 
-  roll() {
+  roll(player) {
     this.atributes.value = Phaser.Math.Between(1, 10);
     this.anims.isPlaying && this.anims.stop();
     this.setFrame(this.atributes.value);
     this.atributes.blocked = true;
-    this.scene.validations.waitAsignation = true;
+    player.isValueAssigned = false;
   }
 
   resetValue() {
-    this.atributes.value = 0;
+    this.atributes.value = !this.atributes.blocked && 0;
   }
   getValue() {
     return this.atributes.value;

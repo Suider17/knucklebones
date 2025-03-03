@@ -6,11 +6,11 @@ export function setBoardMouseDownEvent(callback, column, scene) {
   });
 }
 
-export function asignationDiceEvent(scene) {
-  const board = scene.entities.board_1;
+export function boardEvents(scene, board, player) {
   board.columns.forEach((column, index) => {
     column.on("pointerdown", () => {
-      putDiceValueInColumn(scene, board, index);
+      putDiceValueInColumn(scene, player, index);
+      console.log("click");
     });
   });
 }
