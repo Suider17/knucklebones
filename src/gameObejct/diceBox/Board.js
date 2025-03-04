@@ -59,38 +59,6 @@ export default class Board extends Phaser.GameObjects.Container {
         this.add(this.totals[i]);
       }
     }
-
-    //
-    // this.totals[1] = this.scene.add.text(625, 120, 0, {
-    //   fontSize: "32px",
-    //   color: "#ffffff",
-    // });
-    // this.totals[2] = this.scene.add.text(750, 120, 0, {
-    //   fontSize: "32px",
-    //   color: "#ffffff",
-    // });
-
-    // // Dibujar un rectángulo para visualizar la zona
-    // this.scene.add
-    //   .graphics()
-    //   .lineStyle(4, 0xffffff)
-    //   .strokeRect(450, 170, 100, 380);
-    // const graphics = this.scene.add
-    //   .graphics()
-    //   .lineStyle(4, 0x00ff01)
-    //   .strokeRect(590, 170, 100, 380); // Borde verde, grosor 2 // (x, y, width, height)
-
-    // this.scene.add
-    //   .graphics()
-    //   .lineStyle(4, 0x00000)
-    //   .strokeRect(725, 170, 100, 380);
-
-    // const bounds = this.getBounds();
-    // console.log(bounds);
-
-    // const graph = this.scene.add.graphics();
-    // graph.lineStyle(2, 0xff0000); // Color rojo y grosor 2px
-    // graph.strokeRect(bounds.x, bounds.y, bounds.width, bounds.height);
   }
 
   enableBoardDiceEvent() {

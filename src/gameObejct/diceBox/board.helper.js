@@ -20,7 +20,7 @@ export function putDiceValueInColumn(scene, player, index) {
     console.log("AQUI NO HAY ESPACIO MI CHAVO");
   } else {
     frontDice.unlockDice();
-    frontDice.setValue(scene.props.diceValue);
+    frontDice.setValue(rollingDice.atributes.value);
     frontDice.lockDice();
     board.updateSingleTotal(
       frontDice.atributes.position[0],
@@ -32,22 +32,25 @@ export function putDiceValueInColumn(scene, player, index) {
     rollingDice.resetValue();
     rollingDice.setFrame(0);
     rollingDice.lockDice();
-    changeTurn(player, scene);
+    changeTurn(scene);
   }
 }
 
-export function startPlayerOneTurn(scene) {}
-export function startPlayerTwoTurn(scene) {
-  scene.P2.turn = true;
+export function startPlayerTurn(player) {
+  console.log("Inicia Turno: " + player.id);
+  player.turn = true;
+  player.dice.setInteractive();
+  player.dice.unlockDice();
 }
+export function endPlayerTurn(player) {
+  console.log("Finaliza Turno: " + player.id);
+  player.turn = false;
+  player.dice.disableInteractive();
+}
+export function changeTurn(scene) {
+  const endTurn_player = scene.P1.turn ? scene.P1 : scene.P2;
+  const startTurn_player = scene.P1.turn ? scene.P2 : scene.P1;
 
-export function endPlayerOneTurn(scene) {
-  scene.P1.turn = false;
-}
-export function endPlayerTwoTurn(scene) {}
-export function changeTurn(player, scene) {
-  if (player.id == "p1") {
-    endPlayerOneTurn(scene);
-    startPlayerTwoTurn(scene);
-  }
+  endPlayerTurn(endTurn_player);
+  startPlayerTurn(startTurn_player);
 }

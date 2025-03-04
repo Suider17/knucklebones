@@ -7,6 +7,7 @@ import { setPlayerDiceEvents } from "./gameObejct/dice/dice.events";
 import { boardEvents } from "./gameObejct/diceBox/board.events";
 import player from "./models/player";
 import dice from "./models/dice";
+import { startPlayerTurn } from "./gameObejct/diceBox/board.helper";
 class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: "MainScene" });
@@ -14,6 +15,7 @@ class MainScene extends Phaser.Scene {
     //Entidades complejas de la partida
     this.P1 = player();
     this.P2 = player();
+    this.P2.id = "p2";
 
     this.props = {
       round: 0, //numero de vueltas que se le ha dado a los turnos
@@ -38,12 +40,15 @@ class MainScene extends Phaser.Scene {
     //==================
     this.P1.turn = true;
     this.P1.dice = new Dice(this, 300, 600, "diceFaces", dice(3, 3));
-    this.P1.dice.setInteractive();
     setPlayerDiceEvents(this.P1);
     this.P1.board = new Board(this, 200, 200, 1);
     this.P1.board.fillBoard();
     boardEvents(this, this.P1.board, this.P1);
     this.P1.board.setPosition(500, 520); //<================== update board1 position
+
+    //====
+    //Inicio de turno
+    startPlayerTurn(this.P1);
 
     //==== Player 2 ====//
     //==================
@@ -52,6 +57,7 @@ class MainScene extends Phaser.Scene {
     setPlayerDiceEvents(this.P2);
     this.P2.board = new Board(this, 200, 200, 1);
     this.P2.board.fillBoard();
+    boardEvents(this, this.P2.board, this.P2);
     this.P2.board.setPosition(900, 380); //<================== update board1 position
     this.P2.board.angle = 180;
   }
@@ -60,17 +66,12 @@ class MainScene extends Phaser.Scene {
     //turno del jugador 1
     if (this.P1.turn) {
       if (this.P1.isValueAssigned) {
-        this.props.diceValue = this.P1.dice.getValue();
-        //console.log(this.props);
-        //this.P1.board.enableBoardColumnEvent();
       } else {
       }
     }
     //turno del jugador 2
     else if (this.P2.turn) {
       if (this.P2.isValueAssigned) {
-        this.P2.dice.setInteractive();
-        this.props.diceValue = this.P1.dice.getValue();
       } else {
       }
     }

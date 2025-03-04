@@ -10,7 +10,6 @@ export function boardEvents(scene, board, player) {
   board.columns.forEach((column, index) => {
     column.on("pointerdown", () => {
       putDiceValueInColumn(scene, player, index);
-      console.log("click");
     });
   });
 }
