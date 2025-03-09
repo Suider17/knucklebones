@@ -1,7 +1,7 @@
 export function loaDiceSprites(scene) {
   return scene.load.spritesheet(
     "diceFaces",
-    "assets/spriteSheets/RollDice.png",
+    "assets/spriteSheets/diceFaces.png",
     {
       frameWidth: 128,
       frameHeight: 128,

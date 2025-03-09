@@ -1,32 +1,12 @@
 export function putDiceValueInColumn(scene, player, index) {
   const rollingDice = player.dice;
   const board = player.board;
-  const diceOfRow = board.dice.filter(
+  const diceOfColumn = board.dice.filter(
     (dice) => dice.atributes.position[0] === index
   );
   let frontDice = null;
 
-  frontDice = diceOfRow.reduce((min, obj) => {
-    // Verifica que el objeto tenga value en 0 antes de compararlo
-    if (
-      obj.atributes.value === 0 &&
-      [1, 2, 3, 4, 5, 6, 7, 9].includes(rollingDice.atributes.value)
-    ) {
-      return min === null ||
-        obj.atributes.position[1] < min.atributes.position[1]
-        ? obj
-        : min;
-    } else if (
-      obj.atributes.mods.length < 2 &&
-      [8, 9].includes(rollingDice.atributes.value)
-    ) {
-      return min === null ||
-        obj.atributes.position[1] < min.atributes.position[1]
-        ? obj
-        : min;
-    }
-    return min; // Si no cumple la condición, mantiene el mínimo actual
-  }, null);
+  frontDice = availableDiceOrSlot(diceOfColumn, rollingDice);
 
   if (frontDice === null) {
     console.log("AQUI NO HAY ESPACIO MI CHAVO");
@@ -37,17 +17,17 @@ export function putDiceValueInColumn(scene, player, index) {
       frontDice.setValue(frontDice.atributes.value);
     }
     player.checkEmptyModSlot(player);
+    frontDice.hideBorder(player.dice.atributes.value);
+    frontDice.hideBorder(player.dice.atributes.value);
     frontDice.lockDice();
 
-    board.setFrontLine(
-      frontDice.atributes.position[0],
-      frontDice.atributes.value
-    );
+    // board.setFrontLine(
+    //   frontDice.atributes.position[0],
+    //   frontDice.atributes.value
+    // );
 
-    board.updateSingleTotal(
-      frontDice.atributes.position[0],
-      frontDice.atributes.value
-    );
+    board.calculateCombos(frontDice.atributes.position[0]);
+
     board.disableBoardDiceEvent();
     player.isValueAssigned = true;
     rollingDice.resetDice();
@@ -111,4 +91,27 @@ export function setUntilDuelCounter(scene) {
     scene.P1.dice.lockDice();
     scene.P2.dice.lockDice();
   }
+}
+
+export function availableDiceOrSlot(diceOfColumn, rollingDice) {
+  let dice = diceOfColumn;
+  return dice.reduce((min, obj) => {
+    // Verifica que el objeto tenga value en 0 cuando sea menor que 7
+    // verifica que el objeto sea menor que 7 pero diferente de 0
+    if (
+      (obj.atributes.value === 0 &&
+        (rollingDice.atributes.value < 7 ||
+          [9, 10].includes(rollingDice.atributes.value))) ||
+      (obj.atributes.value < 7 &&
+        obj.atributes.value !== 0 &&
+        obj.atributes.mods.length < 2 &&
+        [7, 8].includes(rollingDice.atributes.value))
+    ) {
+      return min === null ||
+        obj.atributes.position[1] < min.atributes.position[1]
+        ? obj
+        : min;
+    }
+    return min; // Si no cumple la condición, mantiene el mínimo actual
+  }, null);
 }

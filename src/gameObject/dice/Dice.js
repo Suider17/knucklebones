@@ -7,8 +7,11 @@ export default class Dice extends Phaser.GameObjects.Container {
 
     this.atributes = dice(0, 0, board);
     this.mod1 = null;
+    this.mod1_border = null;
     this.mod2 = null;
+    this.mod2_border = null;
     this.diceSprite = scene.add.sprite(0, 0, texture);
+    this.diceSprite_border = null;
     this.atributes = atributes;
 
     this.diceSprite.setFrame(this.atributes.value);
@@ -29,6 +32,48 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.mod2 = scene.add.sprite(60, 100, "diceMods").setScale(0.3).setAlpha(0);
     this.add([this.mod1, this.mod2]);
     //=======
+    //=======
+    //BORDERS
+    //=====   DICE
+    this.diceSprite_border = this.scene.add.graphics();
+    this.diceSprite_border.lineStyle(4, 0xff0000); // Grosor y color del borde (rojo)
+    this.diceSprite_border
+      .strokeRect(
+        this.diceSprite.x - this.diceSprite.width / 2, // Ajuste para centrar
+        this.diceSprite.y - this.diceSprite.height / 2,
+        this.diceSprite.width,
+        this.diceSprite.height
+      )
+      .setAlpha(0);
+    this.add(this.diceSprite_border);
+    //=====   MOD1
+
+    this.mod1_border = this.scene.add.graphics();
+    this.mod1_border.lineStyle(4, 0xff0000); // Grosor y color del borde (rojo)
+    this.mod1_border
+      .strokeRect(
+        -230, // Ajuste para centrar
+        270,
+        this.mod1.width,
+        this.mod1.height
+      )
+      .setAlpha(0)
+      .setScale(0.3);
+
+    //=====   MOD2
+
+    this.mod2_border = this.scene.add.graphics();
+    this.mod2_border.lineStyle(4, 0xff0000); // Grosor y color del borde (rojo)
+    this.mod2_border
+      .strokeRect(
+        140, // Ajuste para centrar
+        270,
+        this.mod2.width,
+        this.mod2.height
+      )
+      .setAlpha(0)
+      .setScale(0.3);
+    this.add([this.mod1_border, this.mod2_border]);
   }
 
   roll(player, diceStyle = "d_10") {
@@ -46,11 +91,12 @@ export default class Dice extends Phaser.GameObjects.Container {
     return this.atributes.value;
   }
   setValue(value) {
+
     if (!this.atributes.blocked) {
-      if ([8, 9].includes(value)) {
+      if ([7, 8].includes(value)) {
         this.setDiceMod(value);
         return false;
-      } else if (value < 8) {
+      } else if (value < 6 || value == 9) {
         this.atributes.value = value;
         this.diceSprite.setFrame(this.atributes.value);
         return false;
@@ -92,5 +138,28 @@ export default class Dice extends Phaser.GameObjects.Container {
   showModSprite() {
     this.atributes.mods[0] && this.mod1.setAlpha(1);
     this.atributes.mods[1] && this.mod2.setAlpha(1);
+  }
+
+  showBorder(playerDiceValue) {
+    const sprite = this.diceSprite;
+    const slotSprite =
+      this.atributes.mods.length === 0
+        ? this.mod1_border
+        : this.atributes.mods.length === 1
+        ? this.mod2_border
+        : null;
+    if (playerDiceValue < 6 || [9, 10].includes(playerDiceValue)) {
+      this.diceSprite_border.setAlpha(1);
+    } else if ([7, 8].includes(playerDiceValue) && slotSprite) {
+      slotSprite.setAlpha(1);
+    }
+  }
+  hideBorder(playerDiceValue) {
+    if (playerDiceValue < 6 || [9, 10].includes(playerDiceValue)) {
+      this.diceSprite_border.setAlpha(0);
+    } else if ([7, 8].includes(playerDiceValue)) {
+      this.mod1_border.setAlpha(0);
+      this.mod2_border.setAlpha(0);
+    }
   }
 }

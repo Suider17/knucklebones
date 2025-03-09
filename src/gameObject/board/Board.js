@@ -80,11 +80,8 @@ export default class Board extends Phaser.GameObjects.Container {
     });
   }
 
-  updateSingleTotal(column, value) {
-    if (value < 7) {
-      let total = parseInt(this.totals[column].text);
-      this.totals[column].setText(parseInt((total += value)));
-    }
+  updateSingleTotal(column, score = 0) {
+    this.totals[column].setText(parseInt(score));
   }
 
   enableBoardColumnEvent() {
@@ -98,13 +95,81 @@ export default class Board extends Phaser.GameObjects.Container {
     });
   }
 
-  setFrontLine(column, value) {
-    if (
-      this.dice.some((d, index) => {
-        return d.atributes.position[(index, column)] && d.atributes.value == 7;
-      })
-    ) {
-      console.log("sihay");
+  // setFrontLine(column, value) {
+  //   if (
+  //     this.dice.some((d, index) => {
+  //       return d.atributes.position[(index, column)] && d.atributes.value == 7;
+  //     })
+  //   ) {
+  //     console.log("sihay");
+  //   }
+  // }
+
+  calculateCombos(column) {
+    let totalScore = 0;
+    let multiplier = 1;
+    let diceValueMultiplier = 1;
+    let repeatedDice = []; // Arreglo para almacenar los dados repetidos
+
+    // Filtrar los dados en la columna especificada y que tengan valores entre 1 y 6
+    const diceOfColumn = this.dice.filter(
+      (dice) =>
+        dice.atributes.position[0] === column && // Misma columna
+        dice.atributes.value >= 1 &&
+        dice.atributes.value <= 6 // Valores entre 1 y 6
+    );
+
+    // Crear un objeto para contar las repeticiones de cada valor
+    const valueCounts = {};
+
+    // Contar cuántos dados tienen cada valor
+    diceOfColumn.forEach((dice) => {
+      const value = dice.atributes.value;
+      if (valueCounts[value]) {
+        valueCounts[value].count++; // Incrementar el contador
+        valueCounts[value].dice.push(dice); // Añadir el dado al arreglo
+      } else {
+        valueCounts[value] = {
+          count: 1, // Iniciar el contador
+          dice: [dice], // Iniciar el arreglo de dados
+        };
+      }
+    });
+
+    // Buscar el valor que más se repite (si lo hay) y sus datos
+    for (const value in valueCounts) {
+      if (valueCounts[value].count > multiplier) {
+        multiplier = valueCounts[value].count; // Número de repeticiones
+        diceValueMultiplier = parseInt(value); // Valor que se repite
+        repeatedDice = valueCounts[value].dice; // Dados que se repiten
+      }
+    }
+
+    // Calcular la suma total de los dados en la columna
+    const sumOfDice = diceOfColumn.reduce(
+      (acc, dice) => acc + dice.atributes.value,
+      0
+    );
+
+    // Si hay un combo (más de un dado con el mismo valor), aplicar la fórmula
+    if (multiplier > 1) {
+      totalScore = diceValueMultiplier * multiplier * multiplier;
+    } else {
+      // Si no hay repetición, asignamos el totalScore como la suma de los valores de la columna
+      totalScore = sumOfDice;
+    }
+
+    this.updateSingleTotal(column, totalScore);
+
+    // Retornar el puntaje total, el valor repetido, el multiplicador y los dados repetidos
+    if (multiplier === 2) {
+      repeatedDice.forEach((d) => {
+        d.diceSprite.setFrame(d.atributes.value + 10);
+      });
+    } else if (multiplier === 3) {
+      repeatedDice.forEach((d) => {
+        d.diceSprite.setFrame(d.atributes.value + 16);
+      });
     }
   }
 }
