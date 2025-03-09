@@ -1,3 +1,4 @@
+import dice from "../../models/dice";
 import Dice from "../dice/Dice";
 
 export default class Board extends Phaser.GameObjects.Container {
@@ -19,20 +20,22 @@ export default class Board extends Phaser.GameObjects.Container {
 
     // Crear 9 instancias de Dice y añadirlas al array
     for (let i = 0; i < 9; i++) {
-      const x = 30 + (i % 3) * 130; // Distribución en filas de 3
-      const y = 30 + Math.floor(i / 3) * 130; // Distribución en columnas de 3
+      const x = 70 + (i % 3) * 130; // Distribución en filas de 3
+      const y = 70 + Math.floor(i / 3) * 130; // Distribución en columnas de 3
 
-      const atributes = {
-        value: 0,
-        mod: "",
-        status: "",
-        position: [i % 3, Math.floor(i / 3)], //[row,column]
-        blocked: true,
-        scale: 0.6,
-      };
+      const atributes = dice(i % 3, Math.floor(i / 3));
+      atributes.scale = 0.6;
+      atributes.blocked = true;
 
       // Crear una instancia de Dice
-      const newDice = new Dice(this.scene, x, y, "diceFaces", atributes);
+      const newDice = new Dice(
+        this.scene,
+        x,
+        y,
+        "diceFaces",
+        atributes,
+        this.id
+      );
       // Añadir el dado al array
       this.dice.push(newDice);
       this.add(newDice);
@@ -41,7 +44,7 @@ export default class Board extends Phaser.GameObjects.Container {
       if (i < 3) {
         //=== columns
         this.columns[i] = this.scene.add
-          .zone(x - 17, y - 17, 115, 380)
+          .zone(x - 55, y - 55, 115, 380)
           .setOrigin(0, 0);
 
         this.add(this.columns[i]);
@@ -49,13 +52,18 @@ export default class Board extends Phaser.GameObjects.Container {
         const zoneReferences = this.scene.add
           .graphics()
           .lineStyle(4, 0xffffff)
-          .strokeRect(x - 17, y - 17, 115, 380);
+          .strokeRect(x - 55, y - 55, 115, 380);
         this.add(zoneReferences);
         //===== total
-        this.totals[i] = this.scene.add.text(x, y - 60, 0, {
+        this.totals[i] = this.scene.add.text(x, y - 90, 0, {
           fontSize: "32px",
           color: "#ffffff",
         });
+
+        if (this.id == 2) {
+          this.totals[i].angle = 180;
+        }
+
         this.add(this.totals[i]);
       }
     }
@@ -73,8 +81,10 @@ export default class Board extends Phaser.GameObjects.Container {
   }
 
   updateSingleTotal(column, value) {
-    let total = parseInt(this.totals[column].text);
-    this.totals[column].setText(parseInt((total += value)));
+    if (value < 7) {
+      let total = parseInt(this.totals[column].text);
+      this.totals[column].setText(parseInt((total += value)));
+    }
   }
 
   enableBoardColumnEvent() {
@@ -86,5 +96,15 @@ export default class Board extends Phaser.GameObjects.Container {
     this.columns.forEach((column) => {
       column.disableInteractive();
     });
+  }
+
+  setFrontLine(column, value) {
+    if (
+      this.dice.some((d, index) => {
+        return d.atributes.position[(index, column)] && d.atributes.value == 7;
+      })
+    ) {
+      console.log("sihay");
+    }
   }
 }
