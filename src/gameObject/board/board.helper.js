@@ -22,10 +22,7 @@ export function putDiceValueInColumn(scene, player, index) {
     frontDice.hideBorder(player.dice.atributes.value);
     frontDice.lockDice();
 
-    // board.setFrontLine(
-    //   frontDice.atributes.position[0],
-    //   frontDice.atributes.value
-    // );
+    board.setFrontLine(frontDice.atributes.position[0]);
 
     board.calculateCombos(frontDice.atributes.position[0]);
 
@@ -129,13 +126,9 @@ export function availableDiceOrSlot(diceOfColumn, rollingDice) {
 }
 
 export function hasAtackMod(player) {
-  return player.board.dice.some((_d) => {
-    _d.mods?.some((mod) => mod == 8);
-  });
+  return player.board.dice.some((_d) => _d.mods?.some((mod) => mod === 8));
 }
 
 export function hasKamikazeDice(player) {
-  return player.board.dice.some((_d) => {
-    _d.atributes.value == 10;
-  });
+  return player.board.dice.some((_d) => _d.atributes.value === 9);
 }

@@ -95,15 +95,80 @@ export default class Board extends Phaser.GameObjects.Container {
     });
   }
 
-  // setFrontLine(column, value) {
-  //   if (
-  //     this.dice.some((d, index) => {
-  //       return d.atributes.position[(index, column)] && d.atributes.value == 7;
-  //     })
-  //   ) {
-  //     console.log("sihay");
-  //   }
-  // }
+  setFrontLine(column, player) {
+    // Filtrar los dados que estén en la columna indicada.
+    const diceInColumn = this.dice.filter(
+      (dice) => dice.atributes.position[0] === column
+    );
+
+    // if (diceInColumn.some((_d) => _d.mods?.some((mod) => mod === 8))) {
+    //   //si tiene modificador de ataque ordenarlo
+    //   let sorted = false;
+    //   let modedDice = null;
+    //   let count = 0;
+
+    //   while (!sorted) {
+    //     if (
+    //       diceInColumn[diceInColumn.length - count - 1].mods?.some((mod) =>
+    //         [7, 8].includes(mod)
+    //       )
+    //     ) {
+    //       modedDice = diceInColumn[diceInColumn.length - count - 1];
+
+    //       //si el de mod está en la ultima posicion
+    //       if ((modedDice.atributes.position[1] = 2)) {
+    //         //si la primera posicion no tiene de ataque
+    //         if (!diceInColumn[0].mods?.some((mod) => mod === 8)) {
+    //           diceInColumn.forEach((dice) => {
+    //             dice.atributes.position[1]++;
+    //           });
+    //         } else if (!diceInColumn[1].mods?.some((mod) => mod === 8)) {
+    //         }
+    //       } else if ((modedDice.atributes.position[1] = 1)) {
+    //       }
+    //     }
+
+    //     sorted = true;
+    //   }
+    // } else if (diceInColumn.some((_d) => _d.atributes.value === 9)) {
+    //   let sorted = false;
+    //   let modedDice = null;
+    //   let count = 0;
+
+    //   while (!sorted) {
+    //     if (
+    //       diceInColumn[diceInColumn.length - count - 1].mods?.some((mod) =>
+    //         [7, 8].includes(mod)
+    //       )
+    //     ) {
+    //       modedDice = diceInColumn[diceInColumn.length - count - 1];
+
+    //       //si el de mod está en la ultima posicion
+    //       if ((modedDice.atributes.position[1] = 2)) {
+    //         //si la primera posicion no tiene de ataque
+    //         if (!diceInColumn[0].mods?.some((mod) => mod === 8)) {
+    //           diceInColumn.forEach((dice) => {
+    //             dice.atributes.position[1]++;
+    //           });
+    //         } else if (!diceInColumn[1].mods?.some((mod) => mod === 8)) {
+    //         }
+    //       } else if ((modedDice.atributes.position[1] = 1)) {
+    //       }
+    //     }
+
+    //     sorted = true;
+    //   }
+    // }
+
+    // // Actualizar la posición (la fila) de cada dado en la columna según su orden.
+    // diceInColumn.forEach((die, index) => {
+    //   // Actualizamos la fila del dado (position[0])
+    //   die.atributes.position[1] = index;
+
+    //   // Opcional: Si manejas posiciones visuales, podrías actualizar 'y' en función de index.
+    //   // Por ejemplo: die.y = baseY + index * cellHeight;
+    // });
+  }
 
   calculateCombos(column) {
     let totalScore = 0;
