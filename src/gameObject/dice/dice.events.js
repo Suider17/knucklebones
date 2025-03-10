@@ -13,7 +13,7 @@ export function setPlayerDiceEvents(player) {
 
   dice.on("pointerdown", () => {
     if (!dice.atributes.blocked) {
-      dice.roll(player, !player.emptyModSlot ? "d_6" : "d_10");
+      dice.roll(player, !player.emptyModSlot ? "d_6" : "d_11");
       player.board.enableBoardColumnEvent();
     }
   });

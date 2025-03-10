@@ -12,6 +12,7 @@ export function putDiceValueInColumn(scene, player, index) {
     console.log("AQUI NO HAY ESPACIO MI CHAVO");
   } else {
     frontDice.unlockDice();
+
     if (frontDice.setValue(rollingDice.atributes.value)) {
       frontDice.roll(player, "d_6");
       frontDice.setValue(frontDice.atributes.value);
@@ -90,6 +91,17 @@ export function setUntilDuelCounter(scene) {
 
     scene.P1.dice.lockDice();
     scene.P2.dice.lockDice();
+
+    //verificar si van a haber ataques
+    //si hay dado con modificador de ataque o dado kamikaze
+    if (
+      hasAtackMod(scene.P1) ||
+      hasKamikazeDice(scene.P1) ||
+      hasAtackMod(scene.P2) ||
+      hasKamikazeDice(scene.P2)
+    ) {
+      console.log("hay ataque");
+    }
   }
 }
 
@@ -114,4 +126,16 @@ export function availableDiceOrSlot(diceOfColumn, rollingDice) {
     }
     return min; // Si no cumple la condición, mantiene el mínimo actual
   }, null);
+}
+
+export function hasAtackMod(player) {
+  return player.board.dice.some((_d) => {
+    _d.mods?.some((mod) => mod == 8);
+  });
+}
+
+export function hasKamikazeDice(player) {
+  return player.board.dice.some((_d) => {
+    _d.atributes.value == 10;
+  });
 }

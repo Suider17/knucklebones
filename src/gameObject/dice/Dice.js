@@ -76,7 +76,7 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.add([this.mod1_border, this.mod2_border]);
   }
 
-  roll(player, diceStyle = "d_10") {
+  roll(player, diceStyle = "d_11") {
     this.atributes.value = customRandom(diceStyle);
     this.diceSprite.anims.isPlaying && this.diceSprite.anims.stop();
     this.diceSprite.setFrame(this.atributes.value);
@@ -91,12 +91,12 @@ export default class Dice extends Phaser.GameObjects.Container {
     return this.atributes.value;
   }
   setValue(value) {
-
+    console.log(value);
     if (!this.atributes.blocked) {
       if ([7, 8].includes(value)) {
         this.setDiceMod(value);
         return false;
-      } else if (value < 6 || value == 9) {
+      } else if (value <= 6 || value == 9) {
         this.atributes.value = value;
         this.diceSprite.setFrame(this.atributes.value);
         return false;
