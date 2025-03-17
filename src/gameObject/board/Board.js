@@ -100,11 +100,26 @@ export default class Board extends Phaser.GameObjects.Container {
     });
   }
 
-  setFrontLine(column, player) {
+  setFrontLine(column) {
     // Filtrar los dados que estén en la columna indicada.
     const diceInColumn = this.dice.filter(
       (dice) => dice.atributes.position[0] === column
     );
+    diceInColumn.reduce((min, obj) => {
+      // Verifica que el objeto tenga value en 0 cuando sea menor que 7
+      // verifica que el objeto sea menor que 7 pero diferente de 0
+      if (
+        obj.atributes.value === 0 &&
+        (rollingDice.atributes.value < 7 ||
+          [9, 10].includes(rollingDice.atributes.value))
+      ) {
+        return min === null ||
+          obj.atributes.position[1] < min.atributes.position[1]
+          ? obj
+          : min;
+      }
+      return min; // Si no cumple la condición, mantiene el mínimo actual
+    }, null);
 
     // if (diceInColumn.some((_d) => _d.mods?.some((mod) => mod === 8))) {
     //   //si tiene modificador de ataque ordenarlo

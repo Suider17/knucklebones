@@ -19,7 +19,6 @@ export function putDiceValueInColumn(scene, player, index) {
     }
     player.checkEmptyModSlot(player);
     frontDice.hideBorder(player.dice.atributes.value);
-    frontDice.hideBorder(player.dice.atributes.value);
     frontDice.lockDice();
 
     board.setFrontLine(frontDice.atributes.position[0]);
