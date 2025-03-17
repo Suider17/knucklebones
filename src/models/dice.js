@@ -3,6 +3,7 @@ export default function dice(row, column, board = 0) {
     value: 0,
     mods: [],
     status: "",
+    bucket: 0,
     position: [row, column], //[row,column]
     blocked: false,
     scale: 1,

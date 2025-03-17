@@ -1,3 +1,4 @@
+import { GET_DICE_BUCKET } from "../../definitions/diceDefinitions";
 import dice from "../../models/dice";
 import Dice from "../dice/Dice";
 
@@ -13,7 +14,11 @@ export default class Board extends Phaser.GameObjects.Container {
     this.columns = [];
     this.id = id;
   }
-
+  /**
+   * Llena el tablero con los dados
+   * areas interactivas para click
+   * y los agrega al container
+   */
   fillBoard() {
     //creamos la imagen de contenedor
     this.add(this.scene.add.image(0, 0, "diceBox").setOrigin(0, 0));
