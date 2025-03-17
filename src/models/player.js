@@ -1,6 +1,6 @@
-export default function player() {
+export default function player(id = "p1") {
   return {
-    id: "p1",
+    id: id,
     dice: null,
     board: null,
     turn: false,
@@ -9,7 +9,7 @@ export default function player() {
     emptyModSlot: false,
     checkEmptyModSlot: (player) => {
       player.emptyModSlot = player.board.dice.some((d) => {
-        return d.atributes.value !== 0 && d.atributes.mods.length < 2;
+        return d.props.value !== 0 && d.props.mods.length < 2;
       });
     },
   };

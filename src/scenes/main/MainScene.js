@@ -2,8 +2,8 @@ import Phaser from "phaser";
 import Board from "../../gameObject/board/Board";
 import Dice from "../../gameObject/dice/Dice";
 import {
-  loaDiceSprites,
-  loaDiceModsSprites,
+  loadDiceSprites,
+  loadDiceModsSprites,
 } from "../../gameObject/dice/dice.assets";
 import { createDiceAnimation } from "../../gameObject/dice/dice.animator";
 import { setPlayerDiceEvents } from "../../gameObject/dice/dice.events";
@@ -19,8 +19,7 @@ export default class MainScene extends Phaser.Scene {
 
     //Entidades complejas de la partida
     this.P1 = player();
-    this.P2 = player();
-    this.P2.id = "p2";
+    this.P2 = player("p2");
 
     this.props = {
       round: 1, //cada vez que los dos jugadores terminaron sus turnos se suma 1
@@ -40,9 +39,9 @@ export default class MainScene extends Phaser.Scene {
     this.load.image("diceBox", "/assets/backgroudns/DiceBox.png");
 
     //call dice sprite
-    this.sprites.rollingDice = loaDiceSprites(this);
+    this.sprites.rollingDice = loadDiceSprites(this);
     //call dice mods sprite
-    this.sprites.diceMods = loaDiceModsSprites(this);
+    this.sprites.diceMods = loadDiceModsSprites(this);
   }
   create() {
     //======

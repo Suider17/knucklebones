@@ -2,7 +2,7 @@ export function putDiceValueInColumn(scene, player, index) {
   const rollingDice = player.dice;
   const board = player.board;
   const diceOfColumn = board.dice.filter(
-    (dice) => dice.atributes.position[0] === index
+    (dice) => dice.props.position[0] === index
   );
   let frontDice = null;
 
@@ -13,17 +13,17 @@ export function putDiceValueInColumn(scene, player, index) {
   } else {
     frontDice.unlockDice();
 
-    if (frontDice.setValue(rollingDice.atributes.value)) {
+    if (frontDice.setValue(rollingDice.props.value)) {
       frontDice.roll(player, "d_6");
-      frontDice.setValue(frontDice.atributes.value);
+      frontDice.setValue(frontDice.props.value);
     }
     player.checkEmptyModSlot(player);
-    frontDice.hideBorder(player.dice.atributes.value);
+    frontDice.hideBorder(player.dice.props.value);
     frontDice.lockDice();
 
-    board.setFrontLine(frontDice.atributes.position[0]);
+    board.setFrontLine(frontDice.props.position[0]);
 
-    board.calculateCombos(frontDice.atributes.position[0]);
+    board.calculateCombos(frontDice.props.position[0]);
 
     board.disableBoardDiceEvent();
     player.isValueAssigned = true;
@@ -107,16 +107,16 @@ export function availableDiceOrSlot(diceOfColumn, rollingDice) {
     // Verifica que el objeto tenga value en 0 cuando sea menor que 7
     // verifica que el objeto sea menor que 7 pero diferente de 0
     if (
-      (obj.atributes.value === 0 &&
-        (rollingDice.atributes.value < 7 ||
-          [9, 10].includes(rollingDice.atributes.value))) ||
-      (obj.atributes.value < 7 &&
-        obj.atributes.value !== 0 &&
-        obj.atributes.mods.length < 2 &&
-        [7, 8].includes(rollingDice.atributes.value))
+      (obj.props.value === 0 &&
+        (rollingDice.props.value < 7 ||
+          [9, 10].includes(rollingDice.props.value))) ||
+      (obj.props.value < 7 &&
+        obj.props.value !== 0 &&
+        obj.props.mods.length < 2 &&
+        [7, 8].includes(rollingDice.props.value))
     ) {
       return min === null ||
-        obj.atributes.position[1] < min.atributes.position[1]
+        obj.props.position[1] < min.props.position[1]
         ? obj
         : min;
     }
@@ -129,5 +129,5 @@ export function hasAtackMod(player) {
 }
 
 export function hasKamikazeDice(player) {
-  return player.board.dice.some((_d) => _d.atributes.value === 9);
+  return player.board.dice.some((_d) => _d.props.value === 9);
 }

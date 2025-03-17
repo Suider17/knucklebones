@@ -32,10 +32,10 @@ export const DICE_TRIPLE_6 = 22;
 //================
 
 //DICE BUCKETS
-export const NORMAL_DICE_BUCKET = 0;
-export const MOD_DICE_BUCKET = 1;
-export const SPECIAL_DICE_BUCKET = 2;
-export const EMPTY_DICE_BUCKET = 3;
+export const NORMAL_DICE_BUCKET = 1;
+export const MOD_DICE_BUCKET = 2;
+export const SPECIAL_DICE_BUCKET = 3;
+export const EMPTY_DICE_BUCKET = 4;
 //BUCKET ARRAYS
 export const NORMAL_BUCKET_ARRAY = [
   DICE_1,
@@ -55,14 +55,14 @@ export const EMPTY_BUCKET_ARRAY = [DICE_EMPTY];
  * @param {number} dice - el dado del que se extrae el valor a clasificar
  * @returns {number} el valor del bucket al que pertenece este dado
  */
-export function GET_DICE_BUCKET(dice) {
-  if (NORMAL_BUCKET_ARRAY.includes(dice.atributes.value)) {
+export function DICE_BUCKET(dice) {
+  if (NORMAL_BUCKET_ARRAY.includes(dice.props.value)) {
     return NORMAL_DICE_BUCKET;
-  } else if (NORMAL_BUCKET_ARRAY.includes(dice.atributes.value)) {
+  } else if (NORMAL_BUCKET_ARRAY.includes(dice.props.value)) {
     return MOD_DICE_BUCKET;
-  } else if (NORMAL_BUCKET_ARRAY.includes(dice.atributes.value)) {
+  } else if (NORMAL_BUCKET_ARRAY.includes(dice.props.value)) {
     return SPECIAL_DICE_BUCKET;
-  } else if (NORMAL_BUCKET_ARRAY.includes(dice.atributes.value)) {
+  } else if (NORMAL_BUCKET_ARRAY.includes(dice.props.value)) {
     return EMPTY_DICE_BUCKET;
   }
 }

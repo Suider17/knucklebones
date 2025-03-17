@@ -2,23 +2,23 @@ import dice from "../../models/dice";
 import { customRandom } from "./dice.helper";
 
 export default class Dice extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, texture, atributes, board) {
+  constructor(scene, x, y, texture, props, board) {
     super(scene, x, y);
 
-    this.atributes = dice(0, 0, board);
+    this.props = dice(0, 0, board);
     this.mod1 = null;
     this.mod1_border = null;
     this.mod2 = null;
     this.mod2_border = null;
     this.diceSprite = scene.add.sprite(0, 0, texture);
     this.diceSprite_border = null;
-    this.atributes = atributes;
+    this.props = props;
 
-    this.diceSprite.setFrame(this.atributes.value);
+    this.diceSprite.setFrame(this.props.value);
     this.add(this.diceSprite);
 
-    scene.add.existing(this).setScale(this.atributes.scale);
-    if (this.atributes.board == 2) thisDice.angle = 180;
+    scene.add.existing(this).setScale(this.props.scale);
+    if (this.props.board == 2) thisDice.angle = 180;
 
     // Esperar a que la textura esté lista antes de establecer el tamaño
     this.setSize(this.diceSprite.displayWidth, this.diceSprite.displayHeight);
@@ -77,28 +77,28 @@ export default class Dice extends Phaser.GameObjects.Container {
   }
 
   roll(player, diceStyle = "d_11") {
-    this.atributes.value = customRandom(diceStyle);
+    this.props.value = customRandom(diceStyle);
     this.diceSprite.anims.isPlaying && this.diceSprite.anims.stop();
-    this.diceSprite.setFrame(this.atributes.value);
-    this.atributes.blocked = true;
+    this.diceSprite.setFrame(this.props.value);
+    this.props.blocked = true;
     player.isValueAssigned = false;
   }
 
   resetValue() {
-    this.atributes.value = !this.atributes.blocked && 0;
+    this.props.value = !this.props.blocked && 0;
   }
   getValue() {
-    return this.atributes.value;
+    return this.props.value;
   }
   setValue(value) {
     console.log(value);
-    if (!this.atributes.blocked) {
+    if (!this.props.blocked) {
       if ([7, 8].includes(value)) {
         this.setDiceMod(value);
         return false;
       } else if (value <= 6 || value == 9) {
-        this.atributes.value = value;
-        this.diceSprite.setFrame(this.atributes.value);
+        this.props.value = value;
+        this.diceSprite.setFrame(this.props.value);
         return false;
       } else {
         return true;
@@ -106,14 +106,14 @@ export default class Dice extends Phaser.GameObjects.Container {
     }
   }
   unlockDice() {
-    this.atributes.blocked = false;
+    this.props.blocked = false;
   }
 
   reScaleDice(scale) {
     this.scale(scale);
   }
   lockDice() {
-    this.atributes.blocked = true;
+    this.props.blocked = true;
   }
 
   resetDice() {
@@ -124,28 +124,28 @@ export default class Dice extends Phaser.GameObjects.Container {
   }
 
   setDiceMod(value) {
-    if (this.atributes.mods.length < 2) {
-      this.atributes.mods.push(value);
+    if (this.props.mods.length < 2) {
+      this.props.mods.push(value);
       this.setModSprite();
       this.showModSprite();
     }
   }
 
   setModSprite() {
-    this.mod1.setFrame(this.atributes.mods[0] == 8 ? 0 : 1);
-    this.mod2.setFrame(this.atributes.mods[1] == 8 ? 0 : 1);
+    this.mod1.setFrame(this.props.mods[0] == 8 ? 0 : 1);
+    this.mod2.setFrame(this.props.mods[1] == 8 ? 0 : 1);
   }
   showModSprite() {
-    this.atributes.mods[0] && this.mod1.setAlpha(1);
-    this.atributes.mods[1] && this.mod2.setAlpha(1);
+    this.props.mods[0] && this.mod1.setAlpha(1);
+    this.props.mods[1] && this.mod2.setAlpha(1);
   }
 
   showBorder(playerDiceValue) {
     const sprite = this.diceSprite;
     const slotSprite =
-      this.atributes.mods.length === 0
+      this.props.mods.length === 0
         ? this.mod1_border
-        : this.atributes.mods.length === 1
+        : this.props.mods.length === 1
         ? this.mod2_border
         : null;
     if (playerDiceValue < 6 || [9, 10].includes(playerDiceValue)) {

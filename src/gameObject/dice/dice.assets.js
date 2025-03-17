@@ -1,4 +1,4 @@
-export function loaDiceSprites(scene) {
+export function loadDiceSprites(scene) {
   return scene.load.spritesheet(
     "diceFaces",
     "assets/spriteSheets/diceFaces.png",
@@ -8,7 +8,7 @@ export function loaDiceSprites(scene) {
     }
   );
 }
-export function loaDiceModsSprites(scene) {
+export function loadDiceModsSprites(scene) {
   return scene.load.spritesheet(
     "diceMods",
     "assets/spriteSheets/diceMods.png",

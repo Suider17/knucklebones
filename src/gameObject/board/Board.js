@@ -1,4 +1,7 @@
-import { GET_DICE_BUCKET } from "../../definitions/diceDefinitions";
+import {
+  DICE_BUCKET,
+  GET_DICE_BUCKET,
+} from "../../definitions/diceDefinitions";
 import dice from "../../models/dice";
 import Dice from "../dice/Dice";
 
@@ -100,94 +103,16 @@ export default class Board extends Phaser.GameObjects.Container {
     });
   }
 
-  setFrontLine(column) {
+  sortColumn(column) {
     // Filtrar los dados que estén en la columna indicada.
     const diceInColumn = this.dice.filter(
-      (dice) => dice.atributes.position[0] === column
+      (dice) => dice.props.position[0] === column
     );
-    diceInColumn.reduce((min, obj) => {
-      // Verifica que el objeto tenga value en 0 cuando sea menor que 7
-      // verifica que el objeto sea menor que 7 pero diferente de 0
-      if (
-        obj.atributes.value === 0 &&
-        (rollingDice.atributes.value < 7 ||
-          [9, 10].includes(rollingDice.atributes.value))
-      ) {
-        return min === null ||
-          obj.atributes.position[1] < min.atributes.position[1]
-          ? obj
-          : min;
-      }
-      return min; // Si no cumple la condición, mantiene el mínimo actual
-    }, null);
 
-    // if (diceInColumn.some((_d) => _d.mods?.some((mod) => mod === 8))) {
-    //   //si tiene modificador de ataque ordenarlo
-    //   let sorted = false;
-    //   let modedDice = null;
-    //   let count = 0;
+    let diceBucket = 0;
+    diceInColumn.forEach((_d) => (diceBucket = DICE_BUCKET(_d.props.value)));
 
-    //   while (!sorted) {
-    //     if (
-    //       diceInColumn[diceInColumn.length - count - 1].mods?.some((mod) =>
-    //         [7, 8].includes(mod)
-    //       )
-    //     ) {
-    //       modedDice = diceInColumn[diceInColumn.length - count - 1];
-
-    //       //si el de mod está en la ultima posicion
-    //       if ((modedDice.atributes.position[1] = 2)) {
-    //         //si la primera posicion no tiene de ataque
-    //         if (!diceInColumn[0].mods?.some((mod) => mod === 8)) {
-    //           diceInColumn.forEach((dice) => {
-    //             dice.atributes.position[1]++;
-    //           });
-    //         } else if (!diceInColumn[1].mods?.some((mod) => mod === 8)) {
-    //         }
-    //       } else if ((modedDice.atributes.position[1] = 1)) {
-    //       }
-    //     }
-
-    //     sorted = true;
-    //   }
-    // } else if (diceInColumn.some((_d) => _d.atributes.value === 9)) {
-    //   let sorted = false;
-    //   let modedDice = null;
-    //   let count = 0;
-
-    //   while (!sorted) {
-    //     if (
-    //       diceInColumn[diceInColumn.length - count - 1].mods?.some((mod) =>
-    //         [7, 8].includes(mod)
-    //       )
-    //     ) {
-    //       modedDice = diceInColumn[diceInColumn.length - count - 1];
-
-    //       //si el de mod está en la ultima posicion
-    //       if ((modedDice.atributes.position[1] = 2)) {
-    //         //si la primera posicion no tiene de ataque
-    //         if (!diceInColumn[0].mods?.some((mod) => mod === 8)) {
-    //           diceInColumn.forEach((dice) => {
-    //             dice.atributes.position[1]++;
-    //           });
-    //         } else if (!diceInColumn[1].mods?.some((mod) => mod === 8)) {
-    //         }
-    //       } else if ((modedDice.atributes.position[1] = 1)) {
-    //       }
-    //     }
-
-    //     sorted = true;
-    //   }
-    // }
-
-    // // Actualizar la posición (la fila) de cada dado en la columna según su orden.
-    // diceInColumn.forEach((die, index) => {
-    //   // Actualizamos la fila del dado (position[0])
-    //   die.atributes.position[1] = index;
-
-    //   // Opcional: Si manejas posiciones visuales, podrías actualizar 'y' en función de index.
-    //   // Por ejemplo: die.y = baseY + index * cellHeight;
-    // });
+    const bucketPriority = { 1: 3, 2: 1, 3: 2 };
   }
 
   calculateCombos(column) {
@@ -199,9 +124,9 @@ export default class Board extends Phaser.GameObjects.Container {
     // Filtrar los dados en la columna especificada y que tengan valores entre 1 y 6
     const diceOfColumn = this.dice.filter(
       (dice) =>
-        dice.atributes.position[0] === column && // Misma columna
-        dice.atributes.value >= 1 &&
-        dice.atributes.value <= 6 // Valores entre 1 y 6
+        dice.props.position[0] === column && // Misma columna
+        dice.props.value >= 1 &&
+        dice.props.value <= 6 // Valores entre 1 y 6
     );
 
     // Crear un objeto para contar las repeticiones de cada valor
@@ -209,7 +134,7 @@ export default class Board extends Phaser.GameObjects.Container {
 
     // Contar cuántos dados tienen cada valor
     diceOfColumn.forEach((dice) => {
-      const value = dice.atributes.value;
+      const value = dice.props.value;
       if (valueCounts[value]) {
         valueCounts[value].count++; // Incrementar el contador
         valueCounts[value].dice.push(dice); // Añadir el dado al arreglo
@@ -232,7 +157,7 @@ export default class Board extends Phaser.GameObjects.Container {
 
     // Calcular la suma total de los dados en la columna
     const sumOfDice = diceOfColumn.reduce(
-      (acc, dice) => acc + dice.atributes.value,
+      (acc, dice) => acc + dice.props.value,
       0
     );
 
@@ -249,11 +174,11 @@ export default class Board extends Phaser.GameObjects.Container {
     // Retornar el puntaje total, el valor repetido, el multiplicador y los dados repetidos
     if (multiplier === 2) {
       repeatedDice.forEach((d) => {
-        d.diceSprite.setFrame(d.atributes.value + 10);
+        d.diceSprite.setFrame(d.props.value + 10);
       });
     } else if (multiplier === 3) {
       repeatedDice.forEach((d) => {
-        d.diceSprite.setFrame(d.atributes.value + 16);
+        d.diceSprite.setFrame(d.props.value + 16);
       });
     }
   }
