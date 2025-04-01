@@ -1,4 +1,8 @@
-import { availableDiceOrSlot, putDiceValueInColumn } from "./board.helper";
+import {
+  hasEmptySlot,
+  orderAvailableBoardSlot,
+  putDiceValueInColumn,
+} from "./board.helper";
 
 export function setBoardMouseDownEvent(callback, column, scene) {
   column.on("pointerdown", () => {
@@ -15,20 +19,27 @@ export function boardEvents(scene, board, player) {
 
   board.columns.forEach((column, index) => {
     column.on("pointerover", () => {
-      const availablePlace = availableDiceOrSlot(
+      //validar si hay espacio diposible para poner el dado
+      console.log(
+        hasEmptySlot(
+          board.dice.filter((dice) => dice.props.position[0] === index)
+        )
+      );
+      //
+
+      orderAvailableBoardSlot(
         board.dice.filter((dice) => dice.props.position[0] === index),
         player.dice
       );
-      availablePlace && availablePlace.showBorder(player.dice.props.value);
     });
   });
   board.columns.forEach((column, index) => {
     column.on("pointerout", () => {
-      const availablePlace = availableDiceOrSlot(
+      orderAvailableBoardSlot(
         board.dice.filter((dice) => dice.props.position[0] === index),
         player.dice
       );
-      availablePlace && availablePlace.hideBorder(player.dice.props.value);
+      // availablePlace && availablePlace.hideBorder(player.dice.props.value);
     });
   });
 }

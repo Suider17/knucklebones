@@ -32,10 +32,10 @@ export const DICE_TRIPLE_6 = 22;
 //================
 
 //DICE BUCKETS
-export const NORMAL_DICE_BUCKET = 1;
-export const MOD_DICE_BUCKET = 2;
-export const SPECIAL_DICE_BUCKET = 3;
-export const EMPTY_DICE_BUCKET = 4;
+export const SPECIAL_DICE_BUCKET = 1;
+export const NORMAL_DICE_BUCKET = 2;
+export const EMPTY_DICE_BUCKET = 3;
+export const MOD_DICE_BUCKET = 4;
 //BUCKET ARRAYS
 export const NORMAL_BUCKET_ARRAY = [
   DICE_1,
@@ -46,9 +46,16 @@ export const NORMAL_BUCKET_ARRAY = [
   DICE_6,
 ];
 export const MOD_BUCKET_ARRAY = [DICE_SHIELD, DICE_SWORD];
-export const SPECIAL_BUCKET_ARRAY = [DICE_SKULL, DICE_REROLL];
+export const SPECIAL_BUCKET_ARRAY = [DICE_SKULL];
 export const EMPTY_BUCKET_ARRAY = [DICE_EMPTY];
+export const REROLL_BUCKET_ARAY = [DICE_REROLL];
 
+//BUCKET HIERARCHY
+export const BUCKET_HIERARCHY = {
+  1: SPECIAL_DICE_BUCKET,
+  2: NORMAL_DICE_BUCKET,
+  3: EMPTY_DICE_BUCKET,
+};
 /**
  * Devuele el valor INT del bucket
  * al que pertenece el valor de dado ingresado

@@ -1,3 +1,9 @@
+import {
+  BUCKET_HIERARCHY,
+  DICE_BUCKET,
+  DICE_EMPTY,
+  DICE_SKULL,
+} from "../../definitions/diceDefinitions";
 export function putDiceValueInColumn(scene, player, index) {
   const rollingDice = player.dice;
   const board = player.board;
@@ -6,28 +12,28 @@ export function putDiceValueInColumn(scene, player, index) {
   );
   let frontDice = null;
 
-  frontDice = availableDiceOrSlot(diceOfColumn, rollingDice);
+  //frontDice = availableDiceOrSlot(diceOfColumn, rollingDice);
 
   if (frontDice === null) {
     console.log("AQUI NO HAY ESPACIO MI CHAVO");
   } else {
-    frontDice.unlockDice();
+    // frontDice.unlockDice();
 
-    if (frontDice.setValue(rollingDice.props.value)) {
-      frontDice.roll(player, "d_6");
-      frontDice.setValue(frontDice.props.value);
-    }
-    player.checkEmptyModSlot(player);
-    frontDice.hideBorder(player.dice.props.value);
-    frontDice.lockDice();
+    // if (frontDice.setValue(rollingDice.props.value)) {
+    //   frontDice.roll(player, "d_6");
+    //   frontDice.setValue(frontDice.props.value);
+    // }
+    // player.checkEmptyModSlot(player);
+    // frontDice.hideBorder(player.dice.props.value);
+    // frontDice.lockDice();
 
-    board.setFrontLine(frontDice.props.position[0]);
+    // //board.setFrontLine(frontDice.props.position[0]);
 
-    board.calculateCombos(frontDice.props.position[0]);
+    // board.calculateCombos(frontDice.props.position[0]);
 
-    board.disableBoardDiceEvent();
-    player.isValueAssigned = true;
-    rollingDice.resetDice();
+    // board.disableBoardDiceEvent();
+    // player.isValueAssigned = true;
+    // rollingDice.resetDice();
 
     changeTurn(scene);
   }
@@ -92,42 +98,58 @@ export function setUntilDuelCounter(scene) {
     //si hay dado con modificador de ataque o dado kamikaze
     if (
       hasAtackMod(scene.P1) ||
-      hasKamikazeDice(scene.P1) ||
+      hasSkullDice(scene.P1) ||
       hasAtackMod(scene.P2) ||
-      hasKamikazeDice(scene.P2)
+      hasSkullDice(scene.P2)
     ) {
       console.log("hay ataque");
     }
   }
 }
 
-export function availableDiceOrSlot(diceOfColumn, rollingDice) {
-  let dice = diceOfColumn;
-  return dice.reduce((min, obj) => {
-    // Verifica que el objeto tenga value en 0 cuando sea menor que 7
-    // verifica que el objeto sea menor que 7 pero diferente de 0
-    if (
-      (obj.props.value === 0 &&
-        (rollingDice.props.value < 7 ||
-          [9, 10].includes(rollingDice.props.value))) ||
-      (obj.props.value < 7 &&
-        obj.props.value !== 0 &&
-        obj.props.mods.length < 2 &&
-        [7, 8].includes(rollingDice.props.value))
-    ) {
-      return min === null ||
-        obj.props.position[1] < min.props.position[1]
-        ? obj
-        : min;
-    }
-    return min; // Si no cumple la condición, mantiene el mínimo actual
-  }, null);
+export function orderAvailableBoardSlot(diceInColumn, rollingDice) {
+  let dice = diceInColumn;
+  if (dice.includes(DICE_EMPTY)) {
+    dice.forEach(_d, (index) => {
+      _d.props.value == DICE_EMPTY && (dice[index] = rollingDice);
+    });
+  }
+
+  dice.slice().sort((a, b) => {
+    return BUCKET_HIERARCHY[DICE_BUCKET(a)] - BUCKET_HIERARCHY[DICE_BUCKET(b)];
+  });
+  let print = [];
+  dice.forEach((_d) => print.push(_d.props.value));
+  console.log(print);
+
+  // return dice.reduce((min, obj) => {
+  //   // Verifica que el objeto tenga value en 0 cuando sea menor que 7
+  //   // verifica que el objeto sea menor que 7 pero diferente de 0
+  //   if (
+  //     (obj.props.value === 0 &&
+  //       (rollingDice.props.value < 7 ||
+  //         [9, 10].includes(rollingDice.props.value))) ||
+  //     (obj.props.value < 7 &&
+  //       obj.props.value !== 0 &&
+  //       obj.props.mods.length < 2 &&
+  //       [7, 8].includes(rollingDice.props.value))
+  //   ) {
+  //     return min === null || obj.props.position[1] < min.props.position[1]
+  //       ? obj
+  //       : min;
+  //   }
+  //   return min; // Si no cumple la condición, mantiene el mínimo actual
+  // }, null);
 }
 
 export function hasAtackMod(player) {
   return player.board.dice.some((_d) => _d.mods?.some((mod) => mod === 8));
 }
 
-export function hasKamikazeDice(player) {
-  return player.board.dice.some((_d) => _d.props.value === 9);
+export function hasSkullDice(player) {
+  return player.board.dice.some((_d) => _d.props.value === DICE_SKULL);
+}
+
+export function hasEmptySlot(diceInColumn) {
+  return diceInColumn.includes(DICE_EMPTY);
 }

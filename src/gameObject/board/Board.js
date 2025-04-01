@@ -1,7 +1,4 @@
-import {
-  DICE_BUCKET,
-  GET_DICE_BUCKET,
-} from "../../definitions/diceDefinitions";
+import { DICE_BUCKET } from "../../definitions/diceDefinitions";
 import dice from "../../models/dice";
 import Dice from "../dice/Dice";
 
