@@ -58,10 +58,6 @@ export default class MainScene extends Phaser.Scene {
     boardEvents(this, this.P1.board, this.P1);
     this.P1.board.setPosition(500, 520); //<================== update board1 position
 
-    //====
-    //Inicio de turno
-    startPlayerTurn(this.P1);
-
     //==== Player 2 ====//
     //==================
 
@@ -76,6 +72,10 @@ export default class MainScene extends Phaser.Scene {
     //textos de informacion en pantalla
     const infoContainer = this.add.container(30, 30);
 
+    //====
+    //Inicio de turno
+    startPlayerTurn(this.P1);
+    
     //=========
     //Ronda actual
 

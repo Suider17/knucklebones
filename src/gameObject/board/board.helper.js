@@ -107,7 +107,7 @@ export function setUntilDuelCounter(scene) {
   }
 }
 
-export function orderAvailableBoardSlot(diceInColumn, rollingDice) {
+export function sortByDiceBucket(diceInColumn, rollingDice) {
   let dice = diceInColumn;
   if (dice.includes(DICE_EMPTY)) {
     dice.forEach(_d, (index) => {
@@ -150,6 +150,12 @@ export function hasSkullDice(player) {
   return player.board.dice.some((_d) => _d.props.value === DICE_SKULL);
 }
 
-export function hasEmptySlot(diceInColumn) {
-  return diceInColumn.includes(DICE_EMPTY);
+/**
+ * Valida si en la fila de datos hay un espacio
+ * donde se pueda colocar un nuevo dado
+ * @param {Array} diceInColumn
+ * @returns {boolean}
+ */
+export function hasEmptyBoardSlot(diceInColumn) {
+  return diceInColumn.some((_d) => _d.props.value == DICE_EMPTY);
 }

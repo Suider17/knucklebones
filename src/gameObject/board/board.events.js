@@ -1,36 +1,23 @@
 import {
-  hasEmptySlot,
-  orderAvailableBoardSlot,
+  hasEmptyBoardSlot,
+  sortByDiceBucket,
   putDiceValueInColumn,
 } from "./board.helper";
 
-export function setBoardMouseDownEvent(callback, column, scene) {
-  column.on("pointerdown", () => {
-    callback(scene);
-  });
-}
-
 export function boardEvents(scene, board, player) {
   board.columns.forEach((column, index) => {
-    column.on("pointerdown", () => {
-      putDiceValueInColumn(scene, player, index);
-    });
-  });
-
-  board.columns.forEach((column, index) => {
     column.on("pointerover", () => {
-      //validar si hay espacio diposible para poner el dado
-      console.log(
-        hasEmptySlot(
+      //si hay un espacio vacio ordenarlo para colocar el nuevo
+      if (
+        hasEmptyBoardSlot(
           board.dice.filter((dice) => dice.props.position[0] === index)
         )
-      );
-      //
-
-      orderAvailableBoardSlot(
-        board.dice.filter((dice) => dice.props.position[0] === index),
-        player.dice
-      );
+      ) {
+        sortByDiceBucket(
+          board.dice.filter((dice) => dice.props.position[0] === index),
+          player.dice
+        );
+      }
     });
   });
   board.columns.forEach((column, index) => {
@@ -40,6 +27,11 @@ export function boardEvents(scene, board, player) {
         player.dice
       );
       // availablePlace && availablePlace.hideBorder(player.dice.props.value);
+    });
+  });
+  board.columns.forEach((column, index) => {
+    column.on("pointerdown", () => {
+      putDiceValueInColumn(scene, player, index);
     });
   });
 }
