@@ -91,7 +91,6 @@ export default class Dice extends Phaser.GameObjects.Container {
     return this.props.value;
   }
   setValue(value) {
-    console.log(value);
     if (!this.props.blocked) {
       if ([7, 8].includes(value)) {
         this.setDiceMod(value);

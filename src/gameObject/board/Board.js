@@ -1,6 +1,10 @@
-import { DICE_BUCKET } from "../../definitions/diceDefinitions";
 import dice from "../../models/dice";
 import Dice from "../dice/Dice";
+import {
+  BUCKET_HIERARCHY,
+  DICE_BUCKET,
+  DICE_EMPTY,
+} from "../../definitions/diceDefinitions";
 
 export default class Board extends Phaser.GameObjects.Container {
   constructor(scene, x, y, id) {
@@ -100,16 +104,39 @@ export default class Board extends Phaser.GameObjects.Container {
     });
   }
 
-  sortColumn(column) {
-    // Filtrar los dados que estén en la columna indicada.
-    const diceInColumn = this.dice.filter(
-      (dice) => dice.props.position[0] === column
-    );
+  sortColumnByDiceBucket(column) {
+    let dice = this.dice.filter((dice) => dice.props.position[0] === column);
 
-    let diceBucket = 0;
-    diceInColumn.forEach((_d) => (diceBucket = DICE_BUCKET(_d.props.value)));
+    let diceValues = this.dice
+      .filter((dice) => dice.props.position[0] === column)
+      .map((_d) => _d.props.value);
 
-    const bucketPriority = { 1: 3, 2: 1, 3: 2 };
+    diceValues.sort((a, b) => {
+      return (
+        BUCKET_HIERARCHY[DICE_BUCKET(a)] - BUCKET_HIERARCHY[DICE_BUCKET(b)]
+      );
+    });
+    dice.forEach((_d, index) => {
+      _d.props.value = diceValues[index];
+    });
+  }
+
+  updateDiceFrames() {
+    this.dice.forEach((_d) => {
+      _d.diceSprite.setFrame(_d.props.value);
+    });
+  }
+
+  /**
+   * Valida si en la fila de datos hay un espacio
+   * donde se pueda colocar un nuevo dado
+   * @param {Array} diceInColumn
+   * @returns {boolean}
+   */
+  hasEmptyBoardSlot(column) {
+    return this.dice
+      .filter((dice) => dice.props.position[0] === column)
+      .some((_d) => _d.props.value == DICE_EMPTY);
   }
 
   calculateCombos(column) {

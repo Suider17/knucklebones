@@ -1,7 +1,7 @@
 export default function dice(row, column, board = 0) {
   return {
     value: 0,
-    mods: [],
+    mods: [0, 0],
     status: "",
     bucket: 0,
     position: [row, column], //[row,column]

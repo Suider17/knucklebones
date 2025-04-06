@@ -52,9 +52,9 @@ export const REROLL_BUCKET_ARAY = [DICE_REROLL];
 
 //BUCKET HIERARCHY
 export const BUCKET_HIERARCHY = {
-  1: SPECIAL_DICE_BUCKET,
-  2: NORMAL_DICE_BUCKET,
-  3: EMPTY_DICE_BUCKET,
+  [SPECIAL_DICE_BUCKET]: 1, // por ejemplo, especial al final
+  [NORMAL_DICE_BUCKET]: 2, // normal al inicio
+  [EMPTY_DICE_BUCKET]: 3, // vacío en el medio
 };
 /**
  * Devuele el valor INT del bucket
@@ -62,14 +62,14 @@ export const BUCKET_HIERARCHY = {
  * @param {number} dice - el dado del que se extrae el valor a clasificar
  * @returns {number} el valor del bucket al que pertenece este dado
  */
-export function DICE_BUCKET(dice) {
-  if (NORMAL_BUCKET_ARRAY.includes(dice.props.value)) {
+export function DICE_BUCKET(value) {
+  if (NORMAL_BUCKET_ARRAY.includes(value)) {
     return NORMAL_DICE_BUCKET;
-  } else if (NORMAL_BUCKET_ARRAY.includes(dice.props.value)) {
+  } else if (MOD_BUCKET_ARRAY.includes(value)) {
     return MOD_DICE_BUCKET;
-  } else if (NORMAL_BUCKET_ARRAY.includes(dice.props.value)) {
+  } else if (SPECIAL_BUCKET_ARRAY.includes(value)) {
     return SPECIAL_DICE_BUCKET;
-  } else if (NORMAL_BUCKET_ARRAY.includes(dice.props.value)) {
+  } else if (EMPTY_BUCKET_ARRAY.includes(value)) {
     return EMPTY_DICE_BUCKET;
   }
 }

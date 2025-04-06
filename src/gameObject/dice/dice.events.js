@@ -14,7 +14,7 @@ export function setPlayerDiceEvents(player) {
 
   dice.on("pointerdown", () => {
     if (!dice.props.blocked) {
-      dice.roll(player, !player.emptyModSlot ? "d_6" : "d_11");
+      dice.roll(player, "d_11");
       player.board.enableBoardColumnEvent();
     }
   });

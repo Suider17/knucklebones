@@ -75,7 +75,7 @@ export default class MainScene extends Phaser.Scene {
     //====
     //Inicio de turno
     startPlayerTurn(this.P1);
-    
+
     //=========
     //Ronda actual
 
