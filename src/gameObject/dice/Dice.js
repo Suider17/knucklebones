@@ -1,3 +1,4 @@
+import { DICE_SWORD } from "../../definitions/diceDefinitions";
 import dice from "../../models/dice";
 import { customRandom } from "./dice.helper";
 
@@ -27,9 +28,9 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.mod1 = scene.add
       .sprite(-50, 100, "diceMods")
       .setScale(0.3)
-      .setAlpha(0);
+      .setAlpha(1);
 
-    this.mod2 = scene.add.sprite(60, 100, "diceMods").setScale(0.3).setAlpha(0);
+    this.mod2 = scene.add.sprite(60, 100, "diceMods").setScale(0.3).setAlpha(1);
     this.add([this.mod1, this.mod2]);
     //=======
     //=======
@@ -77,6 +78,7 @@ export default class Dice extends Phaser.GameObjects.Container {
   }
 
   roll(player, diceStyle = "d_11") {
+    console.log(diceStyle);
     this.props.value = customRandom(diceStyle);
     this.diceSprite.anims.isPlaying && this.diceSprite.anims.stop();
     this.diceSprite.setFrame(this.props.value);
@@ -123,16 +125,26 @@ export default class Dice extends Phaser.GameObjects.Container {
   }
 
   setDiceMod(value) {
-    if (this.props.mods.length < 2) {
-      this.props.mods.push(value);
-      this.setModSprite();
+    if (this.hasEmptyModSlot()) {
+      this.props.mods.some((mod) => {
+        if (mod === 0) {
+          mod = value;
+          return true;
+        } else {
+          return false;
+        }
+      });
       this.showModSprite();
+      this.setModSprite();
+    } else {
+      console.log("no hay espacios para mod");
     }
   }
 
   setModSprite() {
-    this.mod1.setFrame(this.props.mods[0] == 8 ? 0 : 1);
-    this.mod2.setFrame(this.props.mods[1] == 8 ? 0 : 1);
+    this.mod1.setFrame(this.props.mods[0] === DICE_SWORD ? 0 : 1);
+    this.mod2.setFrame(this.props.mods[1] === DICE_SWORD ? 0 : 1);
+    console.log(this);
   }
   showModSprite() {
     this.props.mods[0] && this.mod1.setAlpha(1);
@@ -160,5 +172,11 @@ export default class Dice extends Phaser.GameObjects.Container {
       this.mod1_border.setAlpha(0);
       this.mod2_border.setAlpha(0);
     }
+  }
+
+  setBucket() {}
+
+  hasEmptyModSlot() {
+    return this.props.mods.some((mod) => mod === 0);
   }
 }

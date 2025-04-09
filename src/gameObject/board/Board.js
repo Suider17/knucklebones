@@ -104,7 +104,7 @@ export default class Board extends Phaser.GameObjects.Container {
     });
   }
 
-  sortColumnByDiceBucket(column) {
+  sortColumn(column) {
     let dice = this.dice.filter((dice) => dice.props.position[0] === column);
 
     let diceValues = this.dice

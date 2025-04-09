@@ -2,6 +2,7 @@
 //DICE DEFINITIONS
 //================
 //NORMAL VALUE FACE
+//frame position in spritesheet
 export const DICE_EMPTY = 0; //dado de valor 0
 export const DICE_1 = 1; //dado de valor 1
 export const DICE_2 = 2; //dado de valor 2
@@ -33,9 +34,10 @@ export const DICE_TRIPLE_6 = 22;
 
 //DICE BUCKETS
 export const SPECIAL_DICE_BUCKET = 1;
-export const NORMAL_DICE_BUCKET = 2;
-export const EMPTY_DICE_BUCKET = 3;
-export const MOD_DICE_BUCKET = 4;
+export const HERO_DICE_BUCKET = 2;
+export const NORMAL_DICE_BUCKET = 3;
+export const EMPTY_DICE_BUCKET = 4;
+export const MOD_DICE_BUCKET = 5;
 //BUCKET ARRAYS
 export const NORMAL_BUCKET_ARRAY = [
   DICE_1,
@@ -52,9 +54,10 @@ export const REROLL_BUCKET_ARAY = [DICE_REROLL];
 
 //BUCKET HIERARCHY
 export const BUCKET_HIERARCHY = {
-  [SPECIAL_DICE_BUCKET]: 1, // por ejemplo, especial al final
-  [NORMAL_DICE_BUCKET]: 2, // normal al inicio
-  [EMPTY_DICE_BUCKET]: 3, // vacío en el medio
+  [SPECIAL_DICE_BUCKET]: 1,
+  [HERO_DICE_BUCKET]: 2,
+  [NORMAL_DICE_BUCKET]: 3,
+  [EMPTY_DICE_BUCKET]: 4,
 };
 /**
  * Devuele el valor INT del bucket
@@ -65,11 +68,11 @@ export const BUCKET_HIERARCHY = {
 export function DICE_BUCKET(value) {
   if (NORMAL_BUCKET_ARRAY.includes(value)) {
     return NORMAL_DICE_BUCKET;
-  } else if (MOD_BUCKET_ARRAY.includes(value)) {
-    return MOD_DICE_BUCKET;
   } else if (SPECIAL_BUCKET_ARRAY.includes(value)) {
     return SPECIAL_DICE_BUCKET;
   } else if (EMPTY_BUCKET_ARRAY.includes(value)) {
     return EMPTY_DICE_BUCKET;
+  } else if (MOD_BUCKET_ARRAY.includes(value)) {
+    return MOD_DICE_BUCKET;
   }
 }

@@ -1,4 +1,10 @@
-import { DICE_EMPTY } from "../../definitions/diceDefinitions";
+import {
+  DICE_BUCKET,
+  DICE_EMPTY,
+  EMPTY_BUCKET_ARRAY,
+  EMPTY_DICE_BUCKET,
+  NORMAL_DICE_BUCKET,
+} from "../../definitions/diceDefinitions";
 export function setPlayerDiceEvents(player) {
   const dice = player.dice;
   dice.on("pointerover", () => {
@@ -13,8 +19,13 @@ export function setPlayerDiceEvents(player) {
   });
 
   dice.on("pointerdown", () => {
+    const diceStyle = player.board.dice.some(
+      (_d) => _d.props.bucket === NORMAL_DICE_BUCKET && _d.hasEmptyModSlot()
+    )
+      ? "d_11"
+      : "d_6";
     if (!dice.props.blocked) {
-      dice.roll(player, "d_11");
+      dice.roll(player, diceStyle);
       player.board.enableBoardColumnEvent();
     }
   });
