@@ -20,19 +20,12 @@ export function boardEvents(scene, board, player) {
       hasDiceSlot = board.hasEmptyBoardSlot(index);
 
       let emptySlotIndex = 0;
-      const diceOfColumn = board.dice.filter(
-        (dice) => dice.props.position[0] === index
-      );
+      const diceOfColumn = board.getDiceInColumn(index);
+      const diceBkArray = structuredClone(board.getDiceInColumn(index));
 
       //guarda el array de los valores de la columna
       //para cuando el mouse se quite todo regrese a su posicion
-      for (let i = 0; i < 3; i++) {
-        //console.log(column);
-        const array = board.dice.filter(
-          (dice) => dice.props.position[0] === index
-        );
-        noSortedColumn.push(array[i].props.value);
-      }
+      diceBkArray.forEach((_d) => noSortedColumn.push(_d));
       //si es un mod y hay espacio donde ponerlo
       if (isMod && hasModSlot) {
         emptySlotIndex = diceOfColumn.findIndex((_d) => _d.hasEmptyModSlot());
@@ -68,12 +61,12 @@ export function boardEvents(scene, board, player) {
   });
   board.columns.forEach((column, index) => {
     column.on("pointerout", () => {
+      console.log(noSortedColumn);
+      console.log(board.getDiceInColumn(index));
       if (noSortedColumn) {
-        board.dice
-          .filter((dice) => dice.props.position[0] === index)
-          .forEach((_d, index) => {
-            _d.props.value = noSortedColumn[index];
-          });
+        board.getDiceInColumn(index).forEach((_d, index) => {
+          _d = noSortedColumn[index];
+        });
         board.updateDiceFrames();
       }
     });

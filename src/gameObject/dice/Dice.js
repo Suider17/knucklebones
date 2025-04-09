@@ -28,9 +28,9 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.mod1 = scene.add
       .sprite(-50, 100, "diceMods")
       .setScale(0.3)
-      .setAlpha(1);
+      .setAlpha(0);
 
-    this.mod2 = scene.add.sprite(60, 100, "diceMods").setScale(0.3).setAlpha(1);
+    this.mod2 = scene.add.sprite(60, 100, "diceMods").setScale(0.3).setAlpha(0);
     this.add([this.mod1, this.mod2]);
     //=======
     //=======
@@ -126,14 +126,7 @@ export default class Dice extends Phaser.GameObjects.Container {
 
   setDiceMod(value) {
     if (this.hasEmptyModSlot()) {
-      this.props.mods.some((mod) => {
-        if (mod === 0) {
-          mod = value;
-          return true;
-        } else {
-          return false;
-        }
-      });
+      this.props.mods[this.props.mods.findIndex((mod) => mod === 0)] = value;
       this.showModSprite();
       this.setModSprite();
     } else {

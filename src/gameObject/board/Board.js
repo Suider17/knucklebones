@@ -206,4 +206,8 @@ export default class Board extends Phaser.GameObjects.Container {
       });
     }
   }
+
+  getDiceInColumn(column) {
+    return this.dice.filter((dice) => dice.props.position[0] === column);
+  }
 }
