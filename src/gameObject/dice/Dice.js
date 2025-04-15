@@ -6,13 +6,15 @@ export default class Dice extends Phaser.GameObjects.Container {
   constructor(scene, x, y, texture, props, board) {
     super(scene, x, y);
 
-    this.props = dice(0, 0, board);
-    this.mod1 = null;
-    this.mod1_border = null;
-    this.mod2 = null;
+    props ? (this.props = props) : (this.props = dice(0, 0, board));
+    this.mod1Sprite = null;
+    this.mod2Sprite = null;
     this.mod2_border = null;
+    this.mod1_border = null;
     this.diceSprite = scene.add.sprite(0, 0, texture);
     this.diceSprite_border = null;
+
+    //optional props
     this.props = props;
 
     this.diceSprite.setFrame(this.props.value);
@@ -25,13 +27,13 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.setSize(this.diceSprite.displayWidth, this.diceSprite.displayHeight);
 
     //==mods
-    this.mod1 = scene.add
+    this.mod1Sprite = scene.add
       .sprite(-50, 100, "diceMods")
       .setScale(0.3)
       .setAlpha(0);
 
-    this.mod2 = scene.add.sprite(60, 100, "diceMods").setScale(0.3).setAlpha(0);
-    this.add([this.mod1, this.mod2]);
+    this.mod2Sprite = scene.add.sprite(60, 100, "diceMods").setScale(0.3).setAlpha(0);
+    this.add([this.mod1Sprite, this.mod2Sprite]);
     //=======
     //=======
     //BORDERS
@@ -46,8 +48,6 @@ export default class Dice extends Phaser.GameObjects.Container {
         this.diceSprite.height
       )
       .setAlpha(0);
-    this.add(this.diceSprite_border);
-    //=====   MOD1
 
     this.mod1_border = this.scene.add.graphics();
     this.mod1_border.lineStyle(4, 0xff0000); // Grosor y color del borde (rojo)
@@ -55,8 +55,8 @@ export default class Dice extends Phaser.GameObjects.Container {
       .strokeRect(
         -230, // Ajuste para centrar
         270,
-        this.mod1.width,
-        this.mod1.height
+        this.mod1Sprite.width,
+        this.mod1Sprite.height
       )
       .setAlpha(0)
       .setScale(0.3);
@@ -69,8 +69,8 @@ export default class Dice extends Phaser.GameObjects.Container {
       .strokeRect(
         140, // Ajuste para centrar
         270,
-        this.mod2.width,
-        this.mod2.height
+        this.mod2Sprite.width,
+        this.mod2Sprite.height
       )
       .setAlpha(0)
       .setScale(0.3);
@@ -135,17 +135,24 @@ export default class Dice extends Phaser.GameObjects.Container {
   }
 
   setModSprite() {
-    this.mod1.setFrame(this.props.mods[0] === DICE_SWORD ? 0 : 1);
-    this.mod2.setFrame(this.props.mods[1] === DICE_SWORD ? 0 : 1);
-    console.log(this);
+    this.mod1Sprite.setFrame(this.props.mods[0] === DICE_SWORD ? 0 : 1);
+    this.mod2Sprite.setFrame(this.props.mods[1] === DICE_SWORD ? 0 : 1);
   }
   showModSprite() {
-    this.props.mods[0] && this.mod1.setAlpha(1);
-    this.props.mods[1] && this.mod2.setAlpha(1);
+    this.props.mods[0] && this.mod1Sprite.setAlpha(1);
+    this.props.mods[1] && this.mod2Sprite.setAlpha(1);
+  }
+  hideModSprite() {
+    !this.props.mods[0] && this.mod1Sprite.setAlpha(0);
+    !this.props.mods[1] && this.mod2Sprite.setAlpha(0);
+  }
+
+  refreshMods() {
+    this.setModSprite();
+    this.hideModSprite();
   }
 
   showBorder(playerDiceValue) {
-    const sprite = this.diceSprite;
     const slotSprite =
       this.props.mods.length === 0
         ? this.mod1_border

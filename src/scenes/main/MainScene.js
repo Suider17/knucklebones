@@ -49,7 +49,7 @@ export default class MainScene extends Phaser.Scene {
     createDiceAnimation(this);
 
     //==== Player 1 ====//
-    //==================
+    //==================//
     this.P1.turn = true;
     this.P1.dice = new Dice(this, 300, 600, "diceFaces", dice(3, 3));
     setPlayerDiceEvents(this.P1);

@@ -121,16 +121,17 @@ export default class Board extends Phaser.GameObjects.Container {
     });
   }
 
-  updateDiceFrames() {
+  refreshDiceSprites() {
     this.dice.forEach((_d) => {
       _d.diceSprite.setFrame(_d.props.value);
+      _d.refreshMods();
     });
   }
 
   /**
    * Valida si en la fila de datos hay un espacio
    * donde se pueda colocar un nuevo dado
-   * @param {Array} diceInColumn
+   * @param {int} column
    * @returns {boolean}
    */
   hasEmptyBoardSlot(column) {

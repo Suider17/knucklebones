@@ -6,26 +6,24 @@ import {
 } from "../../definitions/diceDefinitions";
 
 export function boardEvents(scene, board, player) {
-  let noSortedColumn = [];
+  let diceBkArray = [];
   let isMod = false;
   let hasModSlot = false;
   let hasDiceSlot = false;
 
   board.columns.forEach((column, index) => {
     column.on("pointerover", () => {
-      noSortedColumn = [];
-
+      diceBkArray = [];
       isMod = DICE_BUCKET(player.dice.props.value) === MOD_DICE_BUCKET;
       hasModSlot = board.dice.some((_d) => _d.hasEmptyModSlot());
       hasDiceSlot = board.hasEmptyBoardSlot(index);
 
       let emptySlotIndex = 0;
       const diceOfColumn = board.getDiceInColumn(index);
-      const diceBkArray = structuredClone(board.getDiceInColumn(index));
+      diceBkArray = JSON.parse(
+        JSON.stringify(board.getDiceInColumn(index).map((d) => d.props))
+      );
 
-      //guarda el array de los valores de la columna
-      //para cuando el mouse se quite todo regrese a su posicion
-      diceBkArray.forEach((_d) => noSortedColumn.push(_d));
       //si es un mod y hay espacio donde ponerlo
       if (isMod && hasModSlot) {
         emptySlotIndex = diceOfColumn.findIndex((_d) => _d.hasEmptyModSlot());
@@ -56,25 +54,24 @@ export function boardEvents(scene, board, player) {
         console.log("AQUI NO HAY ESPACIO MU CHAVO");
       }
       board.sortColumn(index, player.dice.props.value);
-      board.updateDiceFrames();
+      board.refreshDiceSprites();
     });
   });
   board.columns.forEach((column, index) => {
     column.on("pointerout", () => {
-      console.log(noSortedColumn);
-      console.log(board.getDiceInColumn(index));
-      if (noSortedColumn) {
+      if (diceBkArray) {
         board.getDiceInColumn(index).forEach((_d, index) => {
-          _d = noSortedColumn[index];
+          _d.props = diceBkArray[index];
+          _d.refreshMods();
         });
-        board.updateDiceFrames();
+        board.refreshDiceSprites();
       }
     });
   });
   board.columns.forEach((column, index) => {
     column.on("pointerdown", () => {
       putDiceValueInColumn(scene, player, index);
-      noSortedColumn = null;
+      diceBkArray = null;
     });
   });
 }
