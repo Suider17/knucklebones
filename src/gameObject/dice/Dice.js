@@ -32,7 +32,10 @@ export default class Dice extends Phaser.GameObjects.Container {
       .setScale(0.3)
       .setAlpha(0);
 
-    this.mod2Sprite = scene.add.sprite(60, 100, "diceMods").setScale(0.3).setAlpha(0);
+    this.mod2Sprite = scene.add
+      .sprite(60, 100, "diceMods")
+      .setScale(0.3)
+      .setAlpha(0);
     this.add([this.mod1Sprite, this.mod2Sprite]);
     //=======
     //=======
@@ -109,14 +112,17 @@ export default class Dice extends Phaser.GameObjects.Container {
   unlockDice() {
     this.props.blocked = false;
   }
-
-  reScaleDice(scale) {
-    this.scale(scale);
-  }
   lockDice() {
     this.props.blocked = true;
   }
 
+  setRelativePosition()
+{
+  const positionX = 70 + i * 130;
+  const positiobn
+  this.props.x=  position;
+  this.position.x= 
+}
   resetDice() {
     this.unlockDice();
     this.resetValue();

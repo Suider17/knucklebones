@@ -53,7 +53,6 @@ export default class Board extends Phaser.GameObjects.Container {
 
     for (let i = 0; i < 3; i++) {
       const x = 70 + i * 130; // Distribución en filas de 3
-      const y = 70 + i * 130; // Distribución en columnas de 3
       //=== columns
       this.columns[i] = this.scene.add
         .zone(x - 55, 10, 115, 380)

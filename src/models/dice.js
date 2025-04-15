@@ -9,6 +9,8 @@ export default function dice(row, column, board = 0) {
     position: [row, column], //[row,column]
     blocked: false,
     scale: 1,
+    x: 0.0,
+    y: 0.0,
     board: board,
   };
 }
