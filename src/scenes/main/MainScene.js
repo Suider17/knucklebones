@@ -54,7 +54,7 @@ export default class MainScene extends Phaser.Scene {
     this.P1.dice = new Dice(this, 300, 600, "diceFaces", dice(3, 3));
     setPlayerDiceEvents(this.P1);
     this.P1.board = new Board(this, 200, 200, 1);
-    this.P1.board.fillBoard();
+    this.P1.board.init();
     boardEvents(this, this.P1.board, this.P1);
     this.P1.board.setPosition(500, 520); //<================== update board1 position
 
@@ -64,9 +64,9 @@ export default class MainScene extends Phaser.Scene {
     this.P2.dice = new Dice(this, 1000, 200, "diceFaces", dice(4, 4));
     setPlayerDiceEvents(this.P2);
     this.P2.board = new Board(this, 200, 200, 2);
-    this.P2.board.fillBoard();
+    this.P2.board.init();
     boardEvents(this, this.P2.board, this.P2);
-    this.P2.board.setPosition(900, 380); //<================== update board1 position
+    this.P2.board.setPosition(900, 400); //<================== update board1 position
     this.P2.board.angle = 180;
 
     //textos de informacion en pantalla

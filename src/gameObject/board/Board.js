@@ -23,58 +23,60 @@ export default class Board extends Phaser.GameObjects.Container {
    * areas interactivas para click
    * y los agrega al container
    */
-  fillBoard() {
+  init() {
     //creamos la imagen de contenedor
     this.add(this.scene.add.image(0, 0, "diceBox").setOrigin(0, 0));
 
-    // Crear 9 instancias de Dice y añadirlas al array
-    for (let i = 0; i < 9; i++) {
-      const x = 70 + (i % 3) * 130; // Distribución en filas de 3
-      const y = 70 + Math.floor(i / 3) * 130; // Distribución en columnas de 3
+    // // Crear 9 instancias de Dice y añadirlas al array
+    // for (let i = 0; i < 9; i++) {
+    //   const x = 70 + (i % 3) * 130; // Distribución en filas de 3
+    //   const y = 70 + Math.floor(i / 3) * 130; // Distribución en columnas de 3
 
-      const atributes = dice(i % 3, Math.floor(i / 3));
-      atributes.scale = 0.6;
-      atributes.blocked = true;
+    //   const atributes = dice(i % 3, Math.floor(i / 3));
+    //   atributes.scale = 0.6;
+    //   atributes.blocked = true;
 
-      // Crear una instancia de Dice
-      const newDice = new Dice(
-        this.scene,
-        x,
-        y,
-        "diceFaces",
-        atributes,
-        this.id
-      );
-      // Añadir el dado al array
-      this.dice.push(newDice);
-      this.add(newDice);
+    //   // Crear una instancia de Dice
+    //   const newDice = new Dice(
+    //     this.scene,
+    //     x,
+    //     y,
+    //     "diceFaces",
+    //     atributes,
+    //     this.id
+    //   );
+    //   // Añadir el dado al array
+    //   this.dice.push(newDice);
+    //   this.add(newDice);
 
-      //add event zone to columns and totals
-      if (i < 3) {
-        //=== columns
-        this.columns[i] = this.scene.add
-          .zone(x - 55, y - 55, 115, 380)
-          .setOrigin(0, 0);
+    //add event zone to columns and totals
 
-        this.add(this.columns[i]);
-        //===== reference column area
-        const zoneReferences = this.scene.add
-          .graphics()
-          .lineStyle(4, 0xffffff)
-          .strokeRect(x - 55, y - 55, 115, 380);
-        this.add(zoneReferences);
-        //===== total
-        this.totals[i] = this.scene.add.text(x, y - 90, 0, {
-          fontSize: "32px",
-          color: "#ffffff",
-        });
+    for (let i = 0; i < 3; i++) {
+      const x = 70 + i * 130; // Distribución en filas de 3
+      const y = 70 + i * 130; // Distribución en columnas de 3
+      //=== columns
+      this.columns[i] = this.scene.add
+        .zone(x - 55, 10, 115, 380)
+        .setOrigin(0, 0);
 
-        if (this.id == 2) {
-          this.totals[i].angle = 180;
-        }
+      this.add(this.columns[i]);
+      //===== reference column area
+      const zoneReferences = this.scene.add
+        .graphics()
+        .lineStyle(4, 0xffffff)
+        .strokeRect(x - 55, 10, 115, 380);
+      this.add(zoneReferences);
+      //===== total
+      this.totals[i] = this.scene.add.text(x, -25, 0, {
+        fontSize: "32px",
+        color: "#ffffff",
+      });
 
-        this.add(this.totals[i]);
+      if (this.id == 2) {
+        this.totals[i].angle = 180;
       }
+
+      this.add(this.totals[i]);
     }
   }
 
