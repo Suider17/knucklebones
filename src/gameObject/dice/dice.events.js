@@ -1,4 +1,6 @@
 import {
+  D11,
+  D6,
   DICE_BUCKET,
   DICE_EMPTY,
   EMPTY_BUCKET_ARRAY,
@@ -19,11 +21,19 @@ export function setPlayerDiceEvents(player) {
   });
 
   dice.on("pointerdown", () => {
-    const diceStyle = player.board.dice.some(
-      (_d) => _d.props.bucket === NORMAL_DICE_BUCKET && _d.hasEmptyModSlot()
-    )
-      ? "d_11"
-      : "d_6";
+    let diceStyle = D6;
+    for (const column of Object.values(player.board.columns)) {
+      if (!column) continue;
+
+      const find = column.some(
+        (_d) => _d.props.bucket === NORMAL_DICE_BUCKET && _d.hasEmptyModSlot()
+      );
+      if (find) {
+        diceStyle = D11;
+        break;
+      }
+    }
+
     if (!dice.props.blocked) {
       dice.roll(player, diceStyle);
       player.board.enableBoardColumnEvent();

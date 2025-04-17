@@ -5,21 +5,25 @@ import {
   DICE_SKULL,
 } from "../../definitions/diceDefinitions";
 export function putDiceValueInColumn(scene, player, index) {
-  const rollingDice = player.dice;
+  const rollingDice = player.dice; // Usamos el dado actual del jugador
   const board = player.board;
 
-  // if (frontDice.setValue(rollingDice.props.value)) {
-  //   frontDice.roll(player, "d_6");
-  //   frontDice.setValue(frontDice.props.value);
-  // }
-  //player.checkEmptyModSlot(player);
+  // Supongo que el "dado de enfrente" no es necesario, ya que el dado actual es el que estamos manipulando
+  // Si necesitas más lógica con dados específicos, deberías ajustarlo aquí.
 
-  //board.calculateCombos(frontDice.props.position[0]);
+  // Calcula las combinaciones en la columna correspondiente
+  board.calculateCombos(index);
 
-  board.disableBoardDiceEvent();
+  // Deshabilita el evento en la columna del tablero (esto dependerá de tu lógica de eventos)
+  board.disableBoardColumnEvent();
+
+  // Marca que se ha asignado un valor al dado
   player.isValueAssigned = true;
+
+  // Reinicia el dado después de asignar su valor
   rollingDice.resetDice();
 
+  // Cambia el turno al siguiente jugador
   changeTurn(scene);
 }
 
@@ -71,9 +75,6 @@ export function setUntilDuelCounter(scene) {
 
     scene.P1.dice.setAlpha(0);
     scene.P2.dice.setAlpha(0);
-
-    scene.P1.board.disableBoardDiceEvent();
-    scene.P2.board.disableBoardDiceEvent();
 
     scene.P1.dice.lockDice();
     scene.P2.dice.lockDice();

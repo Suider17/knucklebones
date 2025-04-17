@@ -1,6 +1,11 @@
 //================
 //DICE DEFINITIONS
 //================
+
+//DICE STYLES
+export const D6 = "d_6";
+export const D11 = "d_11";
+
 //NORMAL VALUE FACE
 //frame position in spritesheet
 export const DICE_EMPTY = 0; //dado de valor 0
@@ -74,5 +79,7 @@ export function DICE_BUCKET(value) {
     return EMPTY_DICE_BUCKET;
   } else if (MOD_BUCKET_ARRAY.includes(value)) {
     return MOD_DICE_BUCKET;
+  } else {
+    throw new ReferenceError("Estas mandando un valor que no tiene Bucket");
   }
 }

@@ -15,7 +15,12 @@ export default class Board extends Phaser.GameObjects.Container {
 
     this.dice = [];
     this.totals = [];
-    this.columns = [];
+    this.columns = {
+      0: [],
+      1: [],
+      2: [],
+    };
+    this.columnsInteractiveZones = [];
     this.id = id;
   }
   /**
@@ -27,38 +32,16 @@ export default class Board extends Phaser.GameObjects.Container {
     //creamos la imagen de contenedor
     this.add(this.scene.add.image(0, 0, "diceBox").setOrigin(0, 0));
 
-    // // Crear 9 instancias de Dice y añadirlas al array
-    // for (let i = 0; i < 9; i++) {
-    //   const x = 70 + (i % 3) * 130; // Distribución en filas de 3
-    //   const y = 70 + Math.floor(i / 3) * 130; // Distribución en columnas de 3
-
-    //   const atributes = dice(i % 3, Math.floor(i / 3));
-    //   atributes.scale = 0.6;
-    //   atributes.blocked = true;
-
-    //   // Crear una instancia de Dice
-    //   const newDice = new Dice(
-    //     this.scene,
-    //     x,
-    //     y,
-    //     "diceFaces",
-    //     atributes,
-    //     this.id
-    //   );
-    //   // Añadir el dado al array
-    //   this.dice.push(newDice);
-    //   this.add(newDice);
-
     //add event zone to columns and totals
 
     for (let i = 0; i < 3; i++) {
       const x = 70 + i * 130; // Distribución en filas de 3
       //=== columns
-      this.columns[i] = this.scene.add
+      this.columnsInteractiveZones[i] = this.scene.add
         .zone(x - 55, 10, 115, 380)
         .setOrigin(0, 0);
 
-      this.add(this.columns[i]);
+      this.add(this.columnsInteractiveZones[i]);
       //===== reference column area
       const zoneReferences = this.scene.add
         .graphics()
@@ -79,53 +62,82 @@ export default class Board extends Phaser.GameObjects.Container {
     }
   }
 
-  enableBoardDiceEvent() {
-    this.dice.forEach((dice) => {
-      dice.setInteractive();
-    });
-  }
-  disableBoardDiceEvent() {
-    this.dice.forEach((dice) => {
-      dice.disableInteractive();
+  addNewDiceInColumn(index, diceValue) {
+    const column = this.columns[index];
+
+    column.length < 3 &&
+      column.push(
+        new Dice(
+          this.scene,
+          0,
+          0,
+          "diceFaces",
+          dice(index, column.length, this.id, 0.7, diceValue, true),
+          this.id
+        )
+      );
+
+    column.forEach((_d) => {
+      this.add(_d);
+      _d.updatePosition();
     });
   }
 
+  // enableBoardDiceEvent() {
+  //   this.dice.forEach((dice) => {
+  //     dice.setInteractive();
+  //   });
+  // }
+  // disableBoardDiceEvent() {
+  //   this.dice.forEach((dice) => {
+  //     dice.disableInteractive();
+  //   });
+  // }
   updateSingleTotal(column, score = 0) {
-    this.totals[column].setText(parseInt(score));
+    if (this.totals[column]) {
+      this.totals[column].setText(parseInt(score));
+    } else {
+      console.error(`Error: No existe un valor para la columna ${column}`);
+    }
   }
 
   enableBoardColumnEvent() {
-    this.columns.forEach((column) => {
+    this.columnsInteractiveZones.forEach((column) => {
       column.setInteractive();
     });
   }
-  disableBoardDiceEvent() {
-    this.columns.forEach((column) => {
+  disableBoardColumnEvent() {
+    this.columnsInteractiveZones.forEach((column) => {
       column.disableInteractive();
     });
   }
 
   sortColumn(column) {
-    let dice = this.dice.filter((dice) => dice.props.position[0] === column);
+    let dice = this.columns[column];
 
-    let diceValues = this.dice
-      .filter((dice) => dice.props.position[0] === column)
-      .map((_d) => _d.props.value);
-
-    diceValues.sort((a, b) => {
+    dice.sort((a, b) => {
       return (
-        BUCKET_HIERARCHY[DICE_BUCKET(a)] - BUCKET_HIERARCHY[DICE_BUCKET(b)]
+        BUCKET_HIERARCHY[DICE_BUCKET(a.props.value)] -
+        BUCKET_HIERARCHY[DICE_BUCKET(b.props.value)]
       );
     });
+
     dice.forEach((_d, index) => {
-      _d.props.value = diceValues[index];
+      _d.updatePosition(column, index);
     });
+
+    this.updateDiceSprites();
   }
 
-  refreshDiceSprites() {
-    this.dice.forEach((_d) => {
-      _d.diceSprite.setFrame(_d.props.value);
-      _d.refreshMods();
+  updateDiceSprites() {
+    //recorrer todos los dados y acutalizar los sprites
+    Object.values(this.columns).forEach((column) => {
+      if (column) {
+        column.forEach((_d) => {
+          _d.diceSprite.setFrame(_d.props.value);
+          //_d.refreshMods();
+        });
+      }
     });
   }
 
@@ -135,81 +147,136 @@ export default class Board extends Phaser.GameObjects.Container {
    * @param {int} column
    * @returns {boolean}
    */
-  hasEmptyBoardSlot(column) {
-    return this.dice
-      .filter((dice) => dice.props.position[0] === column)
-      .some((_d) => _d.props.value == DICE_EMPTY);
+  hasEmptyDiceSlot(index) {
+    const column = this.columns[index];
+
+    if (!column) return true;
+
+    return column.length < 3;
   }
 
-  calculateCombos(column) {
-    let totalScore = 0;
-    let multiplier = 1;
-    let diceValueMultiplier = 1;
-    let repeatedDice = []; // Arreglo para almacenar los dados repetidos
+  calculateCombos() {
+    // Recorre todas las columnas
+    Object.keys(this.columns).forEach((columnIndex) => {
+      let totalScore = 0;
+      let multiplier = 1;
+      let diceValueMultiplier = 1;
+      let repeatedDice = []; // Arreglo para almacenar los dados repetidos
 
-    // Filtrar los dados en la columna especificada y que tengan valores entre 1 y 6
-    const diceOfColumn = this.dice.filter(
-      (dice) =>
-        dice.props.position[0] === column && // Misma columna
-        dice.props.value >= 1 &&
-        dice.props.value <= 6 // Valores entre 1 y 6
-    );
+      const column = this.columns[columnIndex];
 
-    // Crear un objeto para contar las repeticiones de cada valor
-    const valueCounts = {};
+      if (!column || column.length === 0) {
+        this.updateSingleTotal(columnIndex, 0);
+        return;
+      }
 
-    // Contar cuántos dados tienen cada valor
-    diceOfColumn.forEach((dice) => {
-      const value = dice.props.value;
-      if (valueCounts[value]) {
-        valueCounts[value].count++; // Incrementar el contador
-        valueCounts[value].dice.push(dice); // Añadir el dado al arreglo
+      // Filtrar los dados válidos (con valores entre 1 y 6)
+      const validDice = column.filter(
+        (dice) => dice.props.value >= 1 && dice.props.value <= 6
+      );
+
+      // Contador de valores
+      const valueCounts = {};
+
+      // Contar cuántos dados tienen cada valor
+      validDice.forEach((dice) => {
+        const value = dice.props.value;
+        if (valueCounts[value]) {
+          valueCounts[value].count++; // Incrementar el contador
+          valueCounts[value].dice.push(dice); // Añadir el dado al arreglo
+        } else {
+          valueCounts[value] = {
+            count: 1, // Iniciar el contador
+            dice: [dice], // Iniciar el arreglo de dados
+          };
+        }
+      });
+
+      // Buscar el valor que más se repite (si lo hay) y sus datos
+      for (const value in valueCounts) {
+        if (valueCounts[value].count > multiplier) {
+          multiplier = valueCounts[value].count; // Número de repeticiones
+          diceValueMultiplier = parseInt(value); // Valor que se repite
+          repeatedDice = valueCounts[value].dice; // Dados que se repiten
+        }
+      }
+
+      // Calcular la suma total de los dados en la columna
+      const sumOfDice = validDice.reduce(
+        (acc, dice) => acc + dice.props.value,
+        0
+      );
+
+      // Si hay un combo (más de un dado con el mismo valor), aplicar la fórmula
+      if (multiplier > 1) {
+        totalScore = diceValueMultiplier * multiplier * multiplier;
       } else {
-        valueCounts[value] = {
-          count: 1, // Iniciar el contador
-          dice: [dice], // Iniciar el arreglo de dados
-        };
+        // Si no hay repetición, asignamos el totalScore como la suma de los valores de la columna
+        totalScore = sumOfDice;
+      }
+
+      this.updateSingleTotal(columnIndex, totalScore);
+
+      // Cambiar los frames según el combo
+      if (multiplier === 2) {
+        repeatedDice.forEach((d) => {
+          d.diceSprite.setFrame(d.props.value + 10);
+        });
+      } else if (multiplier === 3) {
+        repeatedDice.forEach((d) => {
+          d.diceSprite.setFrame(d.props.value + 16);
+        });
+      } else {
+        // Restaurar frames si no hay combo
+        column.forEach((d) => {
+          d.diceSprite.setFrame(d.props.value);
+        });
       }
     });
-
-    // Buscar el valor que más se repite (si lo hay) y sus datos
-    for (const value in valueCounts) {
-      if (valueCounts[value].count > multiplier) {
-        multiplier = valueCounts[value].count; // Número de repeticiones
-        diceValueMultiplier = parseInt(value); // Valor que se repite
-        repeatedDice = valueCounts[value].dice; // Dados que se repiten
-      }
-    }
-
-    // Calcular la suma total de los dados en la columna
-    const sumOfDice = diceOfColumn.reduce(
-      (acc, dice) => acc + dice.props.value,
-      0
-    );
-
-    // Si hay un combo (más de un dado con el mismo valor), aplicar la fórmula
-    if (multiplier > 1) {
-      totalScore = diceValueMultiplier * multiplier * multiplier;
-    } else {
-      // Si no hay repetición, asignamos el totalScore como la suma de los valores de la columna
-      totalScore = sumOfDice;
-    }
-
-    this.updateSingleTotal(column, totalScore);
-
-    // Retornar el puntaje total, el valor repetido, el multiplicador y los dados repetidos
-    if (multiplier === 2) {
-      repeatedDice.forEach((d) => {
-        d.diceSprite.setFrame(d.props.value + 10);
-      });
-    } else if (multiplier === 3) {
-      repeatedDice.forEach((d) => {
-        d.diceSprite.setFrame(d.props.value + 16);
-      });
-    }
   }
 
-  getDiceInColumn(column) {
-    return this.dice.filter((dice) => dice.props.position[0] === column);
+  /**
+   * @typedef {Object} LastInsertedResult
+   * @property {Dice|null} object
+   * @property {number} index
+   */
+  /**
+   * Valida si en la fila de datos hay un espacio
+   * donde se pueda colocar un nuevo dado. Devuelve el objeto
+   * y la posicion en la columna
+   * @returns {LastInsertedResult}
+   */
+  getLastInsertedDice() {
+    let last;
+    let index;
+
+    for (const column of Object.values(this.columns)) {
+      if (!column) continue;
+
+      const found = column.find((_d) => _d.props.lastInserted);
+      index = column.findIndex((_d) => _d.props.lastInserted);
+      if (found) {
+        last = found;
+        break;
+      }
+    }
+    return { object: last, index: index };
+  }
+
+  getDiceWithEmptyModSlot(columnIndex = null) {
+    if (columnIndex !== null) {
+      const column = this.columns[columnIndex];
+      if (!column) return null;
+      return column.find((_d) => _d.hasEmptyModSlot()) || null;
+    }
+
+    for (const column of Object.values(this.columns)) {
+      if (!column) continue;
+
+      const found = column.find((_d) => _d.hasEmptyModSlot());
+      if (found) return found;
+    }
+
+    return null;
   }
 }

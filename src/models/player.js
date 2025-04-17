@@ -1,6 +1,7 @@
 export default function player(id = "p1") {
   return {
     id: id,
+    life: 100,
     dice: null,
     board: null,
     turn: false,

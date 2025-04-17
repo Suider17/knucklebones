@@ -27,6 +27,7 @@ export default class MainScene extends Phaser.Scene {
       isDuelPhase: false, //si es fase de duelos
       diceValue: 0,
       untilDuelCounter: 3, //cada cuantas rondas se va a generar un duelo
+      actualDiceValue: 0,
     };
     this.sprites = {};
     this.text = {
@@ -45,7 +46,7 @@ export default class MainScene extends Phaser.Scene {
   }
   create() {
     //======
-    //ANimations
+    //Animations
     createDiceAnimation(this);
 
     //==== Player 1 ====//
@@ -123,6 +124,19 @@ export default class MainScene extends Phaser.Scene {
       })
       .setOrigin(0.5)
       .setAlpha(0); // Inicialmente oculto
+
+    const restartButton = this.add
+      .text(1000, 20, "🔄 Reiniciar", {
+        fontSize: "24px",
+        fill: "#ffffff",
+        backgroundColor: "#000000",
+        padding: { x: 10, y: 5 },
+      })
+      .setInteractive()
+      .setScrollFactor(0) // si estás usando cámara que se mueve
+      .on("pointerdown", () => {
+        window.location.reload();
+      });
   }
 
   update() {
@@ -159,9 +173,6 @@ export default class MainScene extends Phaser.Scene {
 
       this.P1.dice.setAlpha(0);
       this.P2.dice.setAlpha(0);
-
-      this.P1.board.disableBoardDiceEvent();
-      this.P2.board.disableBoardDiceEvent();
 
       this.P1.dice.lockDice();
       this.P2.dice.lockDice();

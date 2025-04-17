@@ -1,4 +1,13 @@
-import { DICE_SWORD } from "../../definitions/diceDefinitions";
+import {
+  DICE_BUCKET,
+  DICE_EMPTY,
+  DICE_SWORD,
+  MOD_BUCKET_ARRAY,
+  NORMAL_BUCKET_ARRAY,
+  NORMAL_DICE_BUCKET,
+  SPECIAL_BUCKET_ARRAY,
+  SPECIAL_DICE_BUCKET,
+} from "../../definitions/diceDefinitions";
 import dice from "../../models/dice";
 import { customRandom } from "./dice.helper";
 
@@ -14,14 +23,17 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.diceSprite = scene.add.sprite(0, 0, texture);
     this.diceSprite_border = null;
 
-    //optional props
-    this.props = props;
-
     this.diceSprite.setFrame(this.props.value);
     this.add(this.diceSprite);
 
     scene.add.existing(this).setScale(this.props.scale);
-    if (this.props.board == 2) thisDice.angle = 180;
+    if (this.props.board == 2) {
+      this.angle = 180;
+    }
+
+    this.props.mods.forEach((mod) => {
+      if (this.props.bucket === SPECIAL_DICE_BUCKET) mod.value = 99;
+    });
 
     // Esperar a que la textura esté lista antes de establecer el tamaño
     this.setSize(this.diceSprite.displayWidth, this.diceSprite.displayHeight);
@@ -31,11 +43,19 @@ export default class Dice extends Phaser.GameObjects.Container {
       .sprite(-50, 100, "diceMods")
       .setScale(0.3)
       .setAlpha(0);
+    if (this.props.board == 2) {
+      this.mod1Sprite.angle = 180;
+      this.mod1Sprite.setPosition(-50, -100);
+    }
 
     this.mod2Sprite = scene.add
       .sprite(60, 100, "diceMods")
       .setScale(0.3)
       .setAlpha(0);
+    if (this.props.board == 2) {
+      this.mod2Sprite.angle = 180;
+      this.mod2Sprite.setPosition(60, -100);
+    }
     this.add([this.mod1Sprite, this.mod2Sprite]);
     //=======
     //=======
@@ -81,8 +101,8 @@ export default class Dice extends Phaser.GameObjects.Container {
   }
 
   roll(player, diceStyle = "d_11") {
-    console.log(diceStyle);
     this.props.value = customRandom(diceStyle);
+    this.props.bucket = DICE_BUCKET(this.props.value);
     this.diceSprite.anims.isPlaying && this.diceSprite.anims.stop();
     this.diceSprite.setFrame(this.props.value);
     this.props.blocked = true;
@@ -96,17 +116,20 @@ export default class Dice extends Phaser.GameObjects.Container {
     return this.props.value;
   }
   setValue(value) {
-    if (!this.props.blocked) {
-      if ([7, 8].includes(value)) {
-        this.setDiceMod(value);
-        return false;
-      } else if (value <= 6 || value == 9) {
-        this.props.value = value;
-        this.diceSprite.setFrame(this.props.value);
-        return false;
-      } else {
-        return true;
-      }
+    if (MOD_BUCKET_ARRAY.includes(value)) {
+      this.setNewMod(value);
+      return false;
+    } else if (
+      NORMAL_BUCKET_ARRAY.includes(value) ||
+      SPECIAL_BUCKET_ARRAY.includes(value)
+    ) {
+      this.props.value = value;
+      this.props.bucket = DICE_BUCKET(value);
+      this.diceSprite.setFrame(this.props.value);
+
+      return false;
+    } else {
+      return true;
     }
   }
   unlockDice() {
@@ -116,13 +139,16 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.props.blocked = true;
   }
 
-  setRelativePosition()
-{
-  const positionX = 70 + i * 130;
-  const positiobn
-  this.props.x=  position;
-  this.position.x= 
-}
+  updatePosition(x, y) {
+    if (x !== undefined && y !== undefined) {
+      this.props.position[0] = x;
+      this.props.position[1] = y;
+    }
+
+    const positionX = 70 + this.props.position[0] * 130;
+    const positionY = 70 + this.props.position[1] * 130;
+    this.setPosition(positionX, positionY);
+  }
   resetDice() {
     this.unlockDice();
     this.resetValue();
@@ -130,27 +156,35 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.lockDice();
   }
 
-  setDiceMod(value) {
+  setNewMod(value) {
+    let mods = this.props.mods;
+    if (!value) {
+      throw new ReferenceError("Valor de dado para el MOD no definido");
+    }
+
     if (this.hasEmptyModSlot()) {
-      this.props.mods[this.props.mods.findIndex((mod) => mod === 0)] = value;
+      const emptySlot = mods[mods.findIndex((mod) => mod.value === DICE_EMPTY)];
+      emptySlot.value = value;
+      emptySlot.lastInserted = true;
+      this.props.lastInserted = true;
       this.showModSprite();
       this.setModSprite();
     } else {
-      console.log("no hay espacios para mod");
+      throw new Error("no hay espacios para mod");
     }
   }
 
   setModSprite() {
-    this.mod1Sprite.setFrame(this.props.mods[0] === DICE_SWORD ? 0 : 1);
-    this.mod2Sprite.setFrame(this.props.mods[1] === DICE_SWORD ? 0 : 1);
+    this.mod1Sprite.setFrame(this.props.mods[0].value === DICE_SWORD ? 0 : 1);
+    this.mod2Sprite.setFrame(this.props.mods[1].value === DICE_SWORD ? 0 : 1);
   }
   showModSprite() {
-    this.props.mods[0] && this.mod1Sprite.setAlpha(1);
-    this.props.mods[1] && this.mod2Sprite.setAlpha(1);
+    this.props.mods[0].value !== DICE_EMPTY && this.mod1Sprite.setAlpha(1);
+    this.props.mods[1].value !== DICE_EMPTY && this.mod2Sprite.setAlpha(1);
   }
   hideModSprite() {
-    !this.props.mods[0] && this.mod1Sprite.setAlpha(0);
-    !this.props.mods[1] && this.mod2Sprite.setAlpha(0);
+    this.props.mods[0].value === DICE_EMPTY && this.mod1Sprite.setAlpha(0);
+    this.props.mods[1].value === DICE_EMPTY && this.mod2Sprite.setAlpha(0);
   }
 
   refreshMods() {
@@ -180,9 +214,10 @@ export default class Dice extends Phaser.GameObjects.Container {
     }
   }
 
-  setBucket() {}
-
   hasEmptyModSlot() {
-    return this.props.mods.some((mod) => mod === 0);
+    return (
+      this.props.bucket === NORMAL_DICE_BUCKET &&
+      this.props.mods.some((mod) => mod.value === DICE_EMPTY)
+    );
   }
 }
