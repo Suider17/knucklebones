@@ -44,7 +44,7 @@ export function boardEvents(scene, board, player) {
         if (!isMod) {
           //eliminamos el ultimo dado insertado de la columna
           {
-            lastInserted.object.diceSprite.destroy();
+            lastInserted.object.sprite.destroy();
             board.columns[index].splice(lastInserted.index, 1);
           }
         } else if (
@@ -77,8 +77,8 @@ export function boardEvents(scene, board, player) {
 
       if (!lastInserted.object || lastInserted.index === -1) {
         console.warn("No hay dado válido seleccionado para insertar");
+        return;
       }
-
       lastInserted.object.props.lastInserted = false;
 
       if (!isMod) {

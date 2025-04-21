@@ -5,49 +5,83 @@ import {
   loadDiceSprites,
   loadDiceModsSprites,
 } from "../../gameObject/dice/dice.assets";
-import { createDiceAnimation } from "../../gameObject/dice/dice.animator";
 import { setPlayerDiceEvents } from "../../gameObject/dice/dice.events";
 import { boardEvents } from "../../gameObject/board/board.events";
-import player from "../../models/player";
 import dice from "../../models/dice";
-import { startPlayerTurn } from "../../gameObject/board/board.helper";
-import { setRoundText, setUntilDuelText } from "./mainScene.helper";
+import {
+  createInfoTextPanel,
+  initDuel,
+  setPlayersLifeText,
+  setRoundText,
+  setUntilDuelText,
+  tossCoinForTurn,
+} from "./mainScene.helper";
+import DiceAnimator from "../../gameObject/dice/animations/DiceAnimator";
+import Player from "../../gameObject/player/Player";
+import MainSceneAnimator from "./animations/MainSceneAnimator";
+import { loadTossCoinSprites } from "./main.assets";
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: "MainScene" });
 
-    //Entidades complejas de la partida
-    this.P1 = player();
-    this.P2 = player("p2");
+    //====
+    this.P1 = null;
+    this.P2 = null;
+    //===
 
-    this.props = {
-      round: 1, //cada vez que los dos jugadores terminaron sus turnos se suma 1
-      gameOver: false, //si la partida ya acabó
-      isDuelPhase: false, //si es fase de duelos
-      diceValue: 0,
-      untilDuelCounter: 3, //cada cuantas rondas se va a generar un duelo
-      actualDiceValue: 0,
-    };
-    this.sprites = {};
+    //Props
+    this.round = 1; // Each time both players finish their turns, add 1
+    this.turn = 0; //  Each time one player finish his turns, add 1
+    this.gameOver = false; // Whether the game has ended
+    this.isDuelPhase = false; // Whether it's duel phase
+    this.untilDuelCounter = 2; // How many rounds until next duel
+    //======
+
+    //Assets
+    this.sprites = { tossCoin: null, diceMods: null, diceFaces: null };
     this.text = {
       roundCounter: null,
       untilDuelCounter: null,
-      playerTurn: 1,
     };
+    //=====
+
+    //Inject
+    this.animator = null;
+
+    
+
+
   }
   preload() {
     this.load.image("diceBox", "/assets/backgroudns/DiceBox.png");
 
     //call dice sprite
-    this.sprites.rollingDice = loadDiceSprites(this);
+    this.sprites.diceFaces = loadDiceSprites(this);
     //call dice mods sprite
     this.sprites.diceMods = loadDiceModsSprites(this);
+    //call dice for initial toss coin
+    loadTossCoinSprites(this);
   }
   create() {
     //======
     //Animations
-    createDiceAnimation(this);
+    //Dice
+    const diceAnimations = new DiceAnimator(this);
+    diceAnimations.createDiceAnimation();
+
+    //Inect MainAnimator
+    this.animator = new MainSceneAnimator(this);
+    this.animator.createTossCoinAnim();
+
+    //==== Players ====//
+    //==================
+
+    this.P1 = new Player("p1");
+    this.P2 = new Player("p2");
+    this.players = [this.P1, this.P2];
+
+    createInfoTextPanel(this);
 
     //==== Player 1 ====//
     //==================//
@@ -59,9 +93,6 @@ export default class MainScene extends Phaser.Scene {
     boardEvents(this, this.P1.board, this.P1);
     this.P1.board.setPosition(500, 520); //<================== update board1 position
 
-    //==== Player 2 ====//
-    //==================
-
     this.P2.dice = new Dice(this, 1000, 200, "diceFaces", dice(4, 4));
     setPlayerDiceEvents(this.P2);
     this.P2.board = new Board(this, 200, 200, 2);
@@ -70,50 +101,7 @@ export default class MainScene extends Phaser.Scene {
     this.P2.board.setPosition(900, 400); //<================== update board1 position
     this.P2.board.angle = 180;
 
-    //textos de informacion en pantalla
-    const infoContainer = this.add.container(30, 30);
-
-    //====
-    //Inicio de turno
-    startPlayerTurn(this.P1);
-
-    //=========
-    //Ronda actual
-
-    const rounCountTitle = this.add.text(0, 0, "Ronda actual", {
-      fontSize: "24px",
-      color: "#ffffff",
-    });
-    infoContainer.add(rounCountTitle);
-    this.text.roundCounter = this.add.text(70, 30, this.props.round, {
-      fontSize: "40px",
-      fontFamily: "Roboto",
-      color: "#ffffff",
-      fontStyle: "bold",
-    });
-    infoContainer.add(this.text.roundCounter);
-    //==========
-
-    //======
-    //rondas hasta duelo
-    const untilDuelTitle = this.add.text(0, 100, "Rondas hasta duelo", {
-      fontSize: "24px",
-      color: "#ffffff",
-    });
-    infoContainer.add(untilDuelTitle);
-    this.text.untilDuelCounter = this.add.text(
-      100,
-      130,
-      this.props.untilDuelCounter,
-      {
-        fontSize: "40px",
-        fontFamily: "Roboto",
-        color: "#ffffff",
-        fontStyle: "bold",
-      }
-    );
-    infoContainer.add(this.text.untilDuelCounter);
-    //==========
+    //===============================
 
     this.message = this.add
       .text(this.cameras.main.centerX, this.cameras.main.centerY, "¡GO!", {
@@ -140,8 +128,12 @@ export default class MainScene extends Phaser.Scene {
   }
 
   update() {
+    if (this.turn === 0) {
+      this.animator.tossCoinForTurnAnim();
+    }
+
     //turno del jugador 1
-    if (this.P1.turn) {
+    if (this.P1.turn && !this.isDuelPhase) {
       this.P2.board.setAlpha(0.5);
       this.P2.dice.setAlpha(0.5);
 
@@ -152,7 +144,7 @@ export default class MainScene extends Phaser.Scene {
       }
     }
     //turno del jugador 2
-    if (this.P2.turn) {
+    if (this.P2.turn && !this.isDuelPhase) {
       this.P1.board.setAlpha(0.5);
       this.P1.dice.setAlpha(0.5);
 
@@ -167,15 +159,20 @@ export default class MainScene extends Phaser.Scene {
     setRoundText(this);
     setUntilDuelText(this);
 
-    if (this.props.untilDuelCounter == 0) {
-      this.P1.board.setAlpha(1);
-      this.P2.board.setAlpha(1);
+    //actualiza vida de los jugadores
+    setPlayersLifeText(this);
 
-      this.P1.dice.setAlpha(0);
-      this.P2.dice.setAlpha(0);
+    if (this.untilDuelCounter === 0 && !this.isDuelPhase) {
+      //=================
+      initDuel(this);
+      //=================
 
-      this.P1.dice.lockDice();
-      this.P2.dice.lockDice();
+      // sortColumn(index + backwardCount);
+
+      // Object.values(this.P1.board.columns).forEach(column, index=>{
+
+      // })
+      // this.P2.sortColumn(index);
     }
   }
 }

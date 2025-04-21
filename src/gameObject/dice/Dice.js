@@ -1,4 +1,6 @@
 import {
+  ATACK_BUCKET_ARRAY,
+  D11,
   DICE_BUCKET,
   DICE_EMPTY,
   DICE_SWORD,
@@ -9,6 +11,7 @@ import {
   SPECIAL_DICE_BUCKET,
 } from "../../definitions/diceDefinitions";
 import dice from "../../models/dice";
+import DiceAnimator from "./animations/DiceAnimator";
 import { customRandom } from "./dice.helper";
 
 export default class Dice extends Phaser.GameObjects.Container {
@@ -16,17 +19,23 @@ export default class Dice extends Phaser.GameObjects.Container {
     super(scene, x, y);
 
     props ? (this.props = props) : (this.props = dice(0, 0, board));
+
     this.mod1Sprite = null;
     this.mod2Sprite = null;
-    this.mod2_border = null;
-    this.mod1_border = null;
-    this.diceSprite = scene.add.sprite(0, 0, texture);
-    this.diceSprite_border = null;
+    this.sprite = scene.add.sprite(0, 0, texture);
+    this.animator = new DiceAnimator(scene, this);
 
-    this.diceSprite.setFrame(this.props.value);
-    this.add(this.diceSprite);
+    //
+    this.player = null;
+    this.board = null;
+    this.init();
+  }
 
-    scene.add.existing(this).setScale(this.props.scale);
+  init() {
+    this.sprite.setFrame(this.props.value);
+    this.add(this.sprite);
+
+    this.scene.add.existing(this).setScale(this.props.scale);
     if (this.props.board == 2) {
       this.angle = 180;
     }
@@ -36,10 +45,10 @@ export default class Dice extends Phaser.GameObjects.Container {
     });
 
     // Esperar a que la textura esté lista antes de establecer el tamaño
-    this.setSize(this.diceSprite.displayWidth, this.diceSprite.displayHeight);
+    this.setSize(this.sprite.displayWidth, this.sprite.displayHeight);
 
     //==mods
-    this.mod1Sprite = scene.add
+    this.mod1Sprite = this.scene.add
       .sprite(-50, 100, "diceMods")
       .setScale(0.3)
       .setAlpha(0);
@@ -48,7 +57,7 @@ export default class Dice extends Phaser.GameObjects.Container {
       this.mod1Sprite.setPosition(-50, -100);
     }
 
-    this.mod2Sprite = scene.add
+    this.mod2Sprite = this.scene.add
       .sprite(60, 100, "diceMods")
       .setScale(0.3)
       .setAlpha(0);
@@ -57,56 +66,14 @@ export default class Dice extends Phaser.GameObjects.Container {
       this.mod2Sprite.setPosition(60, -100);
     }
     this.add([this.mod1Sprite, this.mod2Sprite]);
-    //=======
-    //=======
-    //BORDERS
-    //=====   DICE
-    this.diceSprite_border = this.scene.add.graphics();
-    this.diceSprite_border.lineStyle(4, 0xff0000); // Grosor y color del borde (rojo)
-    this.diceSprite_border
-      .strokeRect(
-        this.diceSprite.x - this.diceSprite.width / 2, // Ajuste para centrar
-        this.diceSprite.y - this.diceSprite.height / 2,
-        this.diceSprite.width,
-        this.diceSprite.height
-      )
-      .setAlpha(0);
-
-    this.mod1_border = this.scene.add.graphics();
-    this.mod1_border.lineStyle(4, 0xff0000); // Grosor y color del borde (rojo)
-    this.mod1_border
-      .strokeRect(
-        -230, // Ajuste para centrar
-        270,
-        this.mod1Sprite.width,
-        this.mod1Sprite.height
-      )
-      .setAlpha(0)
-      .setScale(0.3);
-
-    //=====   MOD2
-
-    this.mod2_border = this.scene.add.graphics();
-    this.mod2_border.lineStyle(4, 0xff0000); // Grosor y color del borde (rojo)
-    this.mod2_border
-      .strokeRect(
-        140, // Ajuste para centrar
-        270,
-        this.mod2Sprite.width,
-        this.mod2Sprite.height
-      )
-      .setAlpha(0)
-      .setScale(0.3);
-    this.add([this.mod1_border, this.mod2_border]);
   }
 
-  roll(player, diceStyle = "d_11") {
+  roll(diceStyle = D11) {
     this.props.value = customRandom(diceStyle);
     this.props.bucket = DICE_BUCKET(this.props.value);
-    this.diceSprite.anims.isPlaying && this.diceSprite.anims.stop();
-    this.diceSprite.setFrame(this.props.value);
-    this.props.blocked = true;
-    player.isValueAssigned = false;
+    this.sprite.anims.isPlaying && this.sprite.anims.stop();
+    this.sprite.setFrame(this.props.value);
+    //this.props.blocked = true;
   }
 
   resetValue() {
@@ -125,8 +92,7 @@ export default class Dice extends Phaser.GameObjects.Container {
     ) {
       this.props.value = value;
       this.props.bucket = DICE_BUCKET(value);
-      this.diceSprite.setFrame(this.props.value);
-
+      this.sprite.setFrame(this.props.value);
       return false;
     } else {
       return true;
@@ -152,7 +118,7 @@ export default class Dice extends Phaser.GameObjects.Container {
   resetDice() {
     this.unlockDice();
     this.resetValue();
-    this.diceSprite.setFrame(0);
+    this.sprite.setFrame(0);
     this.lockDice();
   }
 
@@ -192,32 +158,41 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.hideModSprite();
   }
 
-  showBorder(playerDiceValue) {
-    const slotSprite =
-      this.props.mods.length === 0
-        ? this.mod1_border
-        : this.props.mods.length === 1
-        ? this.mod2_border
-        : null;
-    if (playerDiceValue < 6 || [9, 10].includes(playerDiceValue)) {
-      this.diceSprite_border.setAlpha(1);
-    } else if ([7, 8].includes(playerDiceValue) && slotSprite) {
-      slotSprite.setAlpha(1);
-    }
-  }
-  hideBorder(playerDiceValue) {
-    if (playerDiceValue < 6 || [9, 10].includes(playerDiceValue)) {
-      this.diceSprite_border.setAlpha(0);
-    } else if ([7, 8].includes(playerDiceValue)) {
-      this.mod1_border.setAlpha(0);
-      this.mod2_border.setAlpha(0);
-    }
-  }
-
   hasEmptyModSlot() {
     return (
       this.props.bucket === NORMAL_DICE_BUCKET &&
       this.props.mods.some((mod) => mod.value === DICE_EMPTY)
     );
+  }
+
+  canAtack() {
+    if (NORMAL_BUCKET_ARRAY.includes(this.props.value)) {
+      return this.props.mods.some((mod) =>
+        ATACK_BUCKET_ARRAY.includes(mod.value)
+      );
+    }
+    return ATACK_BUCKET_ARRAY.includes(this.props.value);
+  }
+
+  //==========================
+  //========ANIMATIONS========
+
+  async shake({ onStart, onComplete, duration } = {}) {
+    await this.animator.shake({ onStart, onComplete, duration });
+  }
+
+  async charge({ onStart, onComplete, onYoyo, offset } = {}) {
+    await this.animator.charge({ onStart, onComplete, onYoyo, offset });
+  }
+
+  async destroy({ onStart, onComplete } = {}) {
+    await this.animator.destroy({ onStart, onComplete });
+  }
+
+  async highlight({ onStart, onComplete } = {}) {
+    await this.animator.highlight({ onStart, onComplete });
+  }
+  async unHighlight({ onStart, onComplete } = {}) {
+    await this.animator.unHighlight({ onStart, onComplete });
   }
 }

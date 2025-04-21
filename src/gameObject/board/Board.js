@@ -3,8 +3,8 @@ import Dice from "../dice/Dice";
 import {
   BUCKET_HIERARCHY,
   DICE_BUCKET,
-  DICE_EMPTY,
 } from "../../definitions/diceDefinitions";
+import BoardAnimator from "./animations/BoardAnimator";
 
 export default class Board extends Phaser.GameObjects.Container {
   constructor(scene, x, y, id) {
@@ -12,16 +12,20 @@ export default class Board extends Phaser.GameObjects.Container {
 
     //agregar el contenedor a la escena
     scene.add.existing(this);
-
-    this.dice = [];
+    this.id = id;
     this.totals = [];
-    this.columns = {
+   
+    this.columnsInteractiveZones = [];
+
+    this.animator = new BoardAnimator(scene, this);
+
+    //
+    this.player = null
+    this.columns = {//is were dice goes
       0: [],
       1: [],
       2: [],
     };
-    this.columnsInteractiveZones = [];
-    this.id = id;
   }
   /**
    * Llena el tablero con los dados
@@ -30,7 +34,9 @@ export default class Board extends Phaser.GameObjects.Container {
    */
   init() {
     //creamos la imagen de contenedor
-    this.add(this.scene.add.image(0, 0, "diceBox").setOrigin(0, 0));
+    this.sprite = this.add(
+      this.scene.add.image(0, 0, "diceBox").setOrigin(0, 0)
+    );
 
     //add event zone to columns and totals
 
@@ -43,11 +49,11 @@ export default class Board extends Phaser.GameObjects.Container {
 
       this.add(this.columnsInteractiveZones[i]);
       //===== reference column area
-      const zoneReferences = this.scene.add
-        .graphics()
-        .lineStyle(4, 0xffffff)
-        .strokeRect(x - 55, 10, 115, 380);
-      this.add(zoneReferences);
+      // const zoneReferences = this.scene.add
+      //   .graphics()
+      //   .lineStyle(4, 0xffffff)
+      //   .strokeRect(x - 55, 10, 115, 380);
+      // this.add(zoneReferences);
       //===== total
       this.totals[i] = this.scene.add.text(x, -25, 0, {
         fontSize: "32px",
@@ -82,17 +88,6 @@ export default class Board extends Phaser.GameObjects.Container {
       _d.updatePosition();
     });
   }
-
-  // enableBoardDiceEvent() {
-  //   this.dice.forEach((dice) => {
-  //     dice.setInteractive();
-  //   });
-  // }
-  // disableBoardDiceEvent() {
-  //   this.dice.forEach((dice) => {
-  //     dice.disableInteractive();
-  //   });
-  // }
   updateSingleTotal(column, score = 0) {
     if (this.totals[column]) {
       this.totals[column].setText(parseInt(score));
@@ -134,7 +129,7 @@ export default class Board extends Phaser.GameObjects.Container {
     Object.values(this.columns).forEach((column) => {
       if (column) {
         column.forEach((_d) => {
-          _d.diceSprite.setFrame(_d.props.value);
+          _d.sprite.setFrame(_d.props.value);
           //_d.refreshMods();
         });
       }
@@ -220,16 +215,16 @@ export default class Board extends Phaser.GameObjects.Container {
       // Cambiar los frames según el combo
       if (multiplier === 2) {
         repeatedDice.forEach((d) => {
-          d.diceSprite.setFrame(d.props.value + 10);
+          d.sprite.setFrame(d.props.value + 10);
         });
       } else if (multiplier === 3) {
         repeatedDice.forEach((d) => {
-          d.diceSprite.setFrame(d.props.value + 16);
+          d.sprite.setFrame(d.props.value + 16);
         });
       } else {
         // Restaurar frames si no hay combo
         column.forEach((d) => {
-          d.diceSprite.setFrame(d.props.value);
+          d.sprite.setFrame(d.props.value);
         });
       }
     });
@@ -247,7 +242,7 @@ export default class Board extends Phaser.GameObjects.Container {
    * @returns {LastInsertedResult}
    */
   getLastInsertedDice() {
-    let last;
+    let last = null;
     let index;
 
     for (const column of Object.values(this.columns)) {
@@ -278,5 +273,38 @@ export default class Board extends Phaser.GameObjects.Container {
     }
 
     return null;
+  }
+
+  /**
+   * Verifica si existe al menos un dado en alguna columna que pueda atacar.
+   *
+   * Esta función recorre todas las columnas y evalúa si al menos un elemento
+   * en alguna de ellas tiene la capacidad de atacar mediante su método `canAtack()`.
+   *
+   * @returns {boolean} `true` si al menos un dado puede atacar, `false` en caso contrario.
+   */
+  existsAtackDice() {
+    return Object.values(this.columns).some(
+      (column) => column && column.some((_d) => _d.canAtack())
+    );
+  }
+
+  async destroyDice(dice) {
+    if (dice) {
+      this.columns[dice.props.position[0]].splice(dice.props.position[1], 1);
+      await dice.destroy({
+        onComplete: () => {
+          console.log("drestroy");
+          dice.sprite.destroy();
+        },
+      });
+    }
+  }
+
+  //==========================
+  //========ANIMATIONS========
+
+  async shake({ onStart, onComplete, duration } = {}) {
+    await this.animator.shake({ onStart, onComplete, duration });
   }
 }

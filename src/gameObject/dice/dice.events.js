@@ -1,26 +1,24 @@
 import {
   D11,
   D6,
-  DICE_BUCKET,
   DICE_EMPTY,
-  EMPTY_BUCKET_ARRAY,
-  EMPTY_DICE_BUCKET,
+
   NORMAL_DICE_BUCKET,
 } from "../../definitions/diceDefinitions";
 export function setPlayerDiceEvents(player) {
   const dice = player.dice;
   dice.on("pointerover", () => {
-    !dice.props.blocked && dice.diceSprite.play("diceFaces");
+    !dice.props.blocked && dice.sprite.play("diceFaces");
   });
-
+  
   dice.on("pointerout", () => {
     if (!dice.props.blocked) {
-      dice.diceSprite.stop("diceFaces");
-      dice.diceSprite.setFrame(DICE_EMPTY);
+      dice.sprite.stop("diceFaces");
+      dice.sprite.setFrame(DICE_EMPTY);
     }
   });
 
-  dice.on("pointerdown", () => {
+  dice.on("pointerdown", async () => {
     let diceStyle = D6;
     for (const column of Object.values(player.board.columns)) {
       if (!column) continue;
@@ -35,7 +33,14 @@ export function setPlayerDiceEvents(player) {
     }
 
     if (!dice.props.blocked) {
-      dice.roll(player, diceStyle);
+      await dice.shake({
+        onComplete: () => {
+          dice.roll(diceStyle);
+        },
+      });
+
+      player.isValueAssigned = false;
+      player.dice.props.blocked = true;
       player.board.enableBoardColumnEvent();
     }
   });
