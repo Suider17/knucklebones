@@ -6,6 +6,7 @@ export default class DiceAnimator {
   }
 
   //TWEENS
+  //===============
   shake({ onStart, onComplete, duration = 70 }) {
     return new Promise((resolve) => {
       this.scene.tweens.add({
@@ -106,8 +107,10 @@ export default class DiceAnimator {
       });
     });
   }
+  //===============
 
   //ANIMS
+  //===============
   createDiceAnimation() {
     if (!this.scene.anims.exists("diceFaces")) {
       this.scene.anims.create({

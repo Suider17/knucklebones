@@ -3,32 +3,38 @@ import Dice from "../dice/Dice";
 import {
   BUCKET_HIERARCHY,
   DICE_BUCKET,
+  MOD_DICE_BUCKET,
+  NORMAL_BUCKET_ARRAY,
 } from "../../definitions/diceDefinitions";
 import BoardAnimator from "./animations/BoardAnimator";
+import { PLAYER_DICE_ASSIGNED } from "../../definitions/emitNames";
 
 export default class Board extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, id) {
+  constructor(scene, x, y, id, player) {
     super(scene, x, y);
 
     //agregar el contenedor a la escena
     scene.add.existing(this);
     this.id = id;
     this.totals = [];
-   
+
     this.columnsInteractiveZones = [];
 
     this.animator = new BoardAnimator(scene, this);
-
-    //
-    this.player = null
-    this.columns = {//is were dice goes
+    this.columns = {
+      //is were dice goes
       0: [],
       1: [],
       2: [],
     };
+
+    //other classes references
+    this.player = player;
+
+    //state control variables
+    this.eventsEnabled = false;
   }
   /**
-   * Llena el tablero con los dados
    * areas interactivas para click
    * y los agrega al container
    */
@@ -39,34 +45,147 @@ export default class Board extends Phaser.GameObjects.Container {
     );
 
     //add event zone to columns and totals
-
     for (let i = 0; i < 3; i++) {
       const x = 70 + i * 130; // Distribución en filas de 3
       //=== columns
       this.columnsInteractiveZones[i] = this.scene.add
         .zone(x - 55, 10, 115, 380)
-        .setOrigin(0, 0);
+        .setOrigin(0, 0)
+        .setInteractive();
 
       this.add(this.columnsInteractiveZones[i]);
-      //===== reference column area
-      // const zoneReferences = this.scene.add
-      //   .graphics()
-      //   .lineStyle(4, 0xffffff)
-      //   .strokeRect(x - 55, 10, 115, 380);
-      // this.add(zoneReferences);
-      //===== total
+
       this.totals[i] = this.scene.add.text(x, -25, 0, {
         fontSize: "32px",
         color: "#ffffff",
       });
 
       if (this.id == 2) {
+        this.angle = 180;
         this.totals[i].angle = 180;
       }
 
       this.add(this.totals[i]);
     }
+    this.setPointerEvents();
   }
+
+  //==========================
+  //==========EVENTS==========
+  //==========================
+  setPointerEvents() {
+    this.columnsInteractiveZones.forEach((column, index) => {
+      column.on("pointerover", () => this.handlePointerOver(index));
+      column.on("pointerout", () => this.handlePointerOut(index));
+      column.on("pointerdown", () => this.handlePointerDown(index));
+    });
+  }
+
+  handlePointerOver(index) {
+    const diceInColumn = this.columns[index];
+    const player = this.player;
+
+    const isMod = DICE_BUCKET(this.player.dice.value) === MOD_DICE_BUCKET;
+    const hasModSlot = diceInColumn.some((_d) => _d.hasEmptyModSlot());
+    const hasDiceSlot = this.hasEmptyDiceSlot(index);
+
+    if (!isMod && hasDiceSlot) {
+      this.addNewDiceInColumn(index, player.dice.value);
+    } else if (isMod && hasModSlot) {
+      // const diceWithModSlot = this.getDiceWithEmptyModSlot(index);
+      // if (diceWithModSlot) {
+      //   diceWithModSlot.setNewMod(player.dice.value);
+      // }
+    } else if (!hasModSlot && !hasDiceSlot) {
+      console.log("AQUI NO HAY ESPACIO MU CHAVO");
+    }
+
+    this.sortColumn(index);
+  }
+
+  handlePointerOut(index) {
+    const isMod = DICE_BUCKET(this.player.dice.value) === MOD_DICE_BUCKET;
+
+    const lastInserted = this.getLastInsertedDice(); //el ultimo dado insertado
+    const diceInColumn = this.columns[index];
+    if (lastInserted.object && lastInserted.index !== -1) {
+      if (!isMod) {
+        //eliminamos el ultimo dado insertado de la columna
+        {
+          lastInserted.object.sprite.destroy();
+          this.columns[index].splice(lastInserted.index, 1);
+        }
+      } else if (
+        isMod &&
+        diceInColumn.some((_d) => NORMAL_BUCKET_ARRAY.includes(_d.props.value))
+      ) {
+        // const mod = lastInserted.object.mods.find((mod) => mod.lastInserted);
+        // mod.value = DICE_EMPTY;
+        // mod.lastInserted = false;
+        // lastInserted.object.props.lastInserted = false;
+        // lastInserted.object.refreshMods();
+      }
+    }
+
+    this.sortColumn(index);
+  }
+  handlePointerDown(index) {
+    const lastInserted = this.getLastInsertedDice(); // El último dado insertado
+    const hasModSlot = this.columns[index].some((_d) =>
+      NORMAL_BUCKET_ARRAY.includes(_d.props.value)
+    );
+    const isMod = DICE_BUCKET(this.player.dice.value) === MOD_DICE_BUCKET;
+
+    if (!lastInserted.object || lastInserted.index === -1) {
+      console.warn("No hay dado válido seleccionado para insertar");
+      return;
+    }
+    lastInserted.object.props.lastInserted = false;
+
+    if (!isMod) {
+      // Insertar dado normal
+
+      this.calculateCombos(index);
+      this.disableEvents();
+
+      //Emit to player, board has assgined a slot
+      this.emit(PLAYER_DICE_ASSIGNED);
+    } else if (isMod && hasModSlot) {
+      // Insertar dado como mod
+      const mod = lastInserted.object.props.mods.find(
+        (mod) => mod.lastInserted
+      );
+
+      if (mod) {
+        // mod.lastInserted = false;
+        // lastInserted.object.refreshMods();
+        // //putDiceValueInColumn(scene, player, index);
+      } else {
+        console.warn("No se encontró un mod marcado como lastInserted");
+      }
+    } else {
+      console.warn("No existe condición para poner este dado");
+    }
+  }
+
+  enableEvents() {
+    this.columnsInteractiveZones.forEach((column) => {
+      column.setInteractive();
+    });
+    this.eventsEnabled = true;
+    this.setAlpha(1);
+  }
+
+  disableEvents() {
+    this.columnsInteractiveZones.forEach((column) => {
+      column.disableInteractive();
+    });
+    this.eventsEnabled = false;
+    this.setAlpha(0.5);
+  }
+
+  //==========================
+  //==========================
 
   addNewDiceInColumn(index, diceValue) {
     const column = this.columns[index];
@@ -84,6 +203,7 @@ export default class Board extends Phaser.GameObjects.Container {
       );
 
     column.forEach((_d) => {
+      _d.init();
       this.add(_d);
       _d.updatePosition();
     });
@@ -94,17 +214,6 @@ export default class Board extends Phaser.GameObjects.Container {
     } else {
       console.error(`Error: No existe un valor para la columna ${column}`);
     }
-  }
-
-  enableBoardColumnEvent() {
-    this.columnsInteractiveZones.forEach((column) => {
-      column.setInteractive();
-    });
-  }
-  disableBoardColumnEvent() {
-    this.columnsInteractiveZones.forEach((column) => {
-      column.disableInteractive();
-    });
   }
 
   sortColumn(column) {

@@ -1,40 +1,41 @@
 import Phaser from "phaser";
-import Board from "../../gameObject/board/Board";
-import Dice from "../../gameObject/dice/Dice";
 import {
   loadDiceSprites,
   loadDiceModsSprites,
 } from "../../gameObject/dice/dice.assets";
-import { setPlayerDiceEvents } from "../../gameObject/dice/dice.events";
-import { boardEvents } from "../../gameObject/board/board.events";
-import dice from "../../models/dice";
 import {
   createInfoTextPanel,
   initDuel,
   setPlayersLifeText,
   setRoundText,
   setUntilDuelText,
-  tossCoinForTurn,
 } from "./mainScene.helper";
 import DiceAnimator from "../../gameObject/dice/animations/DiceAnimator";
 import Player from "../../gameObject/player/Player";
-import MainSceneAnimator from "./animations/MainSceneAnimator";
 import { loadTossCoinSprites } from "./main.assets";
+import { END_TURN } from "../../definitions/emitNames";
+import { DuelResolver } from "../../gameObject/duel/DuelResolver";
 
 export default class MainScene extends Phaser.Scene {
   constructor() {
     super({ key: "MainScene" });
 
+    //Entities
     //====
     this.P1 = null;
     this.P2 = null;
+    this.players = null;
     //===
+    this.duelResolver = null;
 
-    //Props
-    this.round = 1; // Each time both players finish their turns, add 1
-    this.turn = 0; //  Each time one player finish his turns, add 1
+    //game state control
+    this.roundCounter = 1; // Each time both players finish their turns, add 1
+    this.turnCounter = 0; //  Each time one player finish his turns, add 1
     this.gameOver = false; // Whether the game has ended
+    this.minigamesCounter = 0; // Whether minigame finish add 1
+    this.duelCounter = 0; // Whether start finish add 1
     this.isDuelPhase = false; // Whether it's duel phase
+    this.isMinigamePhase = false; // Whether it's minigame phase
     this.untilDuelCounter = 2; // How many rounds until next duel
     //======
 
@@ -43,15 +44,17 @@ export default class MainScene extends Phaser.Scene {
     this.text = {
       roundCounter: null,
       untilDuelCounter: null,
+      turnCounter: null,
     };
     //=====
 
-    //Inject
+    //animator
     this.animator = null;
 
-    
-
-
+    //======DEBUG PROPS========
+    this.debug = {
+      tossCoinAnim: true,
+    };
   }
   preload() {
     this.load.image("diceBox", "/assets/backgroudns/DiceBox.png");
@@ -61,7 +64,7 @@ export default class MainScene extends Phaser.Scene {
     //call dice mods sprite
     this.sprites.diceMods = loadDiceModsSprites(this);
     //call dice for initial toss coin
-    loadTossCoinSprites(this);
+    this.sprites.coin = loadTossCoinSprites(this);
   }
   create() {
     //======
@@ -70,38 +73,19 @@ export default class MainScene extends Phaser.Scene {
     const diceAnimations = new DiceAnimator(this);
     diceAnimations.createDiceAnimation();
 
-    //Inect MainAnimator
-    this.animator = new MainSceneAnimator(this);
-    this.animator.createTossCoinAnim();
+    //=================
 
     //==== Players ====//
-    //==================
-
-    this.P1 = new Player("p1");
-    this.P2 = new Player("p2");
+    //=================//
+    this.P1 = new Player(this, 1);
+    this.P2 = new Player(this, 2);
     this.players = [this.P1, this.P2];
 
-    createInfoTextPanel(this);
-
-    //==== Player 1 ====//
-    //==================//
-    this.P1.turn = true;
-    this.P1.dice = new Dice(this, 300, 600, "diceFaces", dice(3, 3));
-    setPlayerDiceEvents(this.P1);
-    this.P1.board = new Board(this, 200, 200, 1);
-    this.P1.board.init();
-    boardEvents(this, this.P1.board, this.P1);
-    this.P1.board.setPosition(500, 520); //<================== update board1 position
-
-    this.P2.dice = new Dice(this, 1000, 200, "diceFaces", dice(4, 4));
-    setPlayerDiceEvents(this.P2);
-    this.P2.board = new Board(this, 200, 200, 2);
-    this.P2.board.init();
-    boardEvents(this, this.P2.board, this.P2);
-    this.P2.board.setPosition(900, 400); //<================== update board1 position
-    this.P2.board.angle = 180;
-
-    //===============================
+    this.players.forEach((player) => player.init());
+    //===========
+    //inject duelResolver
+    this.duelResolver = new DuelResolver(this, this.players);
+    this.duelResolver.animator.createTossCoinAnim();
 
     this.message = this.add
       .text(this.cameras.main.centerX, this.cameras.main.centerY, "¡GO!", {
@@ -113,46 +97,29 @@ export default class MainScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setAlpha(0); // Inicialmente oculto
 
-    const restartButton = this.add
-      .text(1000, 20, "🔄 Reiniciar", {
-        fontSize: "24px",
-        fill: "#ffffff",
-        backgroundColor: "#000000",
-        padding: { x: 10, y: 5 },
-      })
-      .setInteractive()
-      .setScrollFactor(0) // si estás usando cámara que se mueve
-      .on("pointerdown", () => {
-        window.location.reload();
-      });
+    createInfoTextPanel(this);
   }
 
   update() {
-    if (this.turn === 0) {
-      this.animator.tossCoinForTurnAnim();
+    if (this.turnCounter === 0) {
+      this.players.forEach((_p) => {
+        _p.disable();
+      });
+
+      this.duelResolver.playerEmitListener();
     }
+    if (!this.debug.tossCoinAnim && this.turnCounter === 0) {
+      //setting game
+      //logica debug para saltar animacion principal
+      this.players[0].turn = true;
+      this.players[0].dice.enable();
 
-    //turno del jugador 1
-    if (this.P1.turn && !this.isDuelPhase) {
-      this.P2.board.setAlpha(0.5);
-      this.P2.dice.setAlpha(0.5);
-
-      this.P1.board.setAlpha(1);
-      this.P1.dice.setAlpha(1);
-      if (this.P1.isValueAssigned) {
-      } else {
-      }
-    }
-    //turno del jugador 2
-    if (this.P2.turn && !this.isDuelPhase) {
-      this.P1.board.setAlpha(0.5);
-      this.P1.dice.setAlpha(0.5);
-
-      this.P2.board.setAlpha(1);
-      this.P2.dice.setAlpha(1);
-      if (this.P2.isValueAssigned) {
-      } else {
-      }
+      //end this if
+      this.turnCounter = 1;
+    } else if (this.turnCounter === 0 && this.debug.tossCoinAnim) {
+      //end this if
+      this.turnCounter = 1;
+      this.duelResolver.tossCoin();
     }
 
     //actualizar titulos

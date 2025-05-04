@@ -12,23 +12,27 @@ export function setPlayersLifeText(scene) {
   scene.text.P2LifeText.setText(scene.P2.life);
 }
 
-export async function tossCoinForTurn(scene) {
-  const playerTurn = Math.floor(Math.random() * 2);
-
-  // 1. Fondo oscuro con efecto de aparición
-
-
-  // // 2. Moneda con animación de aparición
-
-
-  // // Animación de entrada dramática
-
-  // await scene.sprite.tossCoin.play("tossCoin");
-}
+export function drawTurnForTurn(scene) {}
 
 export function createInfoTextPanel(scene) {
   //textos de informacion en pantalla
   const infoContainer = scene.add.container(30, 30);
+  //=========
+  //Turno actual
+
+  const turnCountTitle = scene.add.text(30, 200, "Turno actual", {
+    fontSize: "24px",
+    color: "#ffffff",
+  });
+  infoContainer.add(turnCountTitle);
+  scene.text.turnCounter = scene.add.text(100, 230, scene.turnCounter, {
+    fontSize: "40px",
+    fontFamily: "Roboto",
+    color: "#ffffff",
+    fontStyle: "bold",
+  });
+  infoContainer.add(scene.text.turnCounter);
+  //==========
   //=========
   //Ronda actual
 

@@ -14,20 +14,20 @@ import {
 export function customRandom(d_) {
   const probabilities = {
     d_11: {
-      [DICE_1]: 1000,
-      [DICE_2]: 0,
-      [DICE_3]: 0,
+      [DICE_1]: 10,
+      [DICE_2]: 10,
+      [DICE_3]: 10,
       [DICE_4]: 0,
       [DICE_5]: 0,
       [DICE_6]: 0,
       [DICE_SHIELD]: 0,
       [DICE_SWORD]: 0,
-      [DICE_SKULL]: 1000,
+      [DICE_SKULL]: 10,
       //[DICE_REROLL]: 0,
       //11: 1,
     },
     d_6: {
-      1: 10000,
+      1: 10,
       2: 10,
       3: 10,
       4: 10,

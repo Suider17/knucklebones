@@ -25,10 +25,13 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.sprite = scene.add.sprite(0, 0, texture);
     this.animator = new DiceAnimator(scene, this);
 
+    this.board = board;
+    Object.defineProperty(this, "player", {
+      get() {
+        return this.board?.player || null;
+      },
+    });
     //
-    this.player = null;
-    this.board = null;
-    this.init();
   }
 
   init() {
@@ -115,7 +118,7 @@ export default class Dice extends Phaser.GameObjects.Container {
     const positionY = 70 + this.props.position[1] * 130;
     this.setPosition(positionX, positionY);
   }
-  resetDice() {
+  reset() {
     this.unlockDice();
     this.resetValue();
     this.sprite.setFrame(0);
