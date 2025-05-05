@@ -12,6 +12,6 @@ export const PLAYER_DICE_POSITION = {
 
 //PLAYER DICEHOLDER
 export const PLAYER_DICE_HOLDER_POSITION = {
-  1: { x: 100, y: 400 },
-  2: { x: 2000, y: 150 },
+  1: { x: 180, y: 600 },
+  2: { x: 1000, y: 80 },
 };

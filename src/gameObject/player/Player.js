@@ -68,6 +68,9 @@ export default class Player extends Phaser.Events.EventEmitter {
       this,
       this.id
     );
+
+    this.diceHolder.setPointerEvents();
+    
   }
 
   diceEmitListener() {
