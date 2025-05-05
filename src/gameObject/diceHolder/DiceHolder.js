@@ -2,18 +2,28 @@ export class DiceHolder extends Phaser.GameObjects.Container {
   constructor(scene, x, y, player) {
     super(scene, x, y);
     scene.add.existing(this).setScale(0.5);
-
+    this.player = player;
     this.value = 0;
     this.locked = true;
     this.selected = false;
     this.hover = false;
     this.sprite = null;
-    this.background = scene.add
+    this.background = null;
+    this.border = null;
+  }
+
+  init() {
+    if (this.player.id == 2) {
+      this.angle = 180;
+    }
+
+    this.background = this.scene.add
       .sprite(0, 0, "diceFaces")
       .setAlpha(0.6)
       .setScale(1.2);
 
-    this.border = scene.add.graphics().lineStyle(4, 0xffd700);
+    //borde de efecto hover
+    this.border = this.scene.add.graphics().lineStyle(4, 0xffd700);
     this.border.setAlpha(0);
     this.border.strokeRoundedRect(
       -this.background.displayWidth / 2,
@@ -26,56 +36,69 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     this.add(this.background);
     this.add(this.border);
 
-    if (player.id == 2) {
-      this.angle = 180;
-    }
-
     // Esperar a que la textura esté lista antes de establecer el tamaño
     this.setSize(this.background.displayWidth, this.background.displayHeight);
-    this.setInteractive();
   }
 
   addDice() {}
 
   getDice() {}
 
-  enable() {}
+  enable() {
+    this.setAlpha(1);
+    this.setInteractive();
+    this.background.setAlpha(0.6);
+  }
 
-  disable() {}
+  disable() {
+    this.setAlpha(0.2);
+    this.disableInteractive();
+  }
 
   hoverIn() {
+    console.log("hoverIn");
     this.border.setAlpha(1);
     this.hover = true;
   }
 
   hoverOut() {
+    console.log("hoverOut");
     this.border.setAlpha(0);
     this.hover = false;
   }
 
   select() {
+    console.log("selected");
     this.border.setAlpha(1);
     this.selected = true;
     this.off("pointerout");
+    this.off("pointerover");
   }
 
   unselect() {
+    console.log("UNselected");
     this.border.setAlpha(0);
     this.selected = false;
-    this.setPointerEvents();
+    this.setPointerOutEvent();
+    this.setPointerInEvent();
   }
 
-  //EVENTS
-  setPointerEvents() {
-    this.on("pointerover", () => {
-      console.log("hola");
-      this.hoverIn();
-    });
-
+  setPointerOutEvent() {
     this.on("pointerout", () => {
-      console.log("hola");
       this.hoverOut();
     });
+  }
+
+  setPointerInEvent() {
+    this.on("pointerover", () => {
+      this.hoverIn();
+    });
+  }
+  //EVENTS
+  setPointerEvents() {
+    this.setPointerInEvent();
+
+    this.setPointerOutEvent();
 
     this.on("pointerdown", () => {
       if (this.hover && !this.selected) {

@@ -68,9 +68,8 @@ export default class Player extends Phaser.Events.EventEmitter {
       this,
       this.id
     );
-
+    this.diceHolder.init();
     this.diceHolder.setPointerEvents();
-    
   }
 
   diceEmitListener() {
@@ -105,5 +104,6 @@ export default class Player extends Phaser.Events.EventEmitter {
   disable() {
     this.dice.disable();
     this.board.disableEvents();
+    this.diceHolder.disable();
   }
 }

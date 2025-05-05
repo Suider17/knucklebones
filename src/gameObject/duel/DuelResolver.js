@@ -30,6 +30,7 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     console.log("Inicia Turno: " + player.id);
     player.turn = true;
     player.dice.enable();
+    player.diceHolder.enable();
   }
   endPlayerTurn(player) {
     console.log("Finaliza Turno: " + player.id);
@@ -64,11 +65,9 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     if (this.scene.untilDuelCounter === 0) {
       //desactivar eventos de jugadores.
       //habilitar alpha de los tableros
-      //efectuar secuencia de ataques 
+      //efectuar secuencia de ataques
       //realizar un duelResolverAnimator
       //ejecutar funcion de calculo de daños y nimaciones
-      
-
     } else {
       //no debe iniciar el turno siguiente hasta que termine el duelo
       this.startPlayerTurn(startTurnPlayer);
