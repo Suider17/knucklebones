@@ -1,8 +1,9 @@
 import PlayerDice from "../playerDice/PlayerDice";
 import {
   BOARDS_POSITIONS,
+  PLAYER_DICE_HOLDER_POSITION,
   PLAYER_DICE_POSITION,
-} from "../../definitions/Positions";
+} from "../../definitions/positions";
 import Board from "../board/Board";
 import {
   END_TURN,
@@ -10,6 +11,7 @@ import {
   PLAYER_DICE_ROLLED,
   SET_AS_FIRTS_PLAYER,
 } from "../../definitions/emitNames";
+import { DiceHolder } from "../diceHolder/DiceHolder";
 
 export default class Player extends Phaser.Events.EventEmitter {
   constructor(scene, id) {
@@ -24,6 +26,7 @@ export default class Player extends Phaser.Events.EventEmitter {
     //other classes references
     this.board = null;
     this.dice = null; //rolling dice
+    this.diceHolder = null;
   }
 
   init() {
@@ -54,6 +57,17 @@ export default class Player extends Phaser.Events.EventEmitter {
     );
     this.dice.init();
     this.diceEmitListener();
+
+    //===========================
+    //diceHolder
+    //==========================
+    this.diceHolder = new DiceHolder(
+      this.scene,
+      PLAYER_DICE_HOLDER_POSITION[this.id].x,
+      PLAYER_DICE_HOLDER_POSITION[this.id].y,
+      this,
+      this.id
+    );
   }
 
   diceEmitListener() {

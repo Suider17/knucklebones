@@ -58,13 +58,26 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     if (this.scene.turnCounter % 2 === 0) {
       this.prepareNewRound();
     }
+    //debe terminar el turno antes de iniciar el duelo
     this.endPlayerTurn(playerEndingTurn);
-    this.startPlayerTurn(startTurnPlayer);
+
+    if (this.scene.untilDuelCounter === 0) {
+      //desactivar eventos de jugadores.
+      //habilitar alpha de los tableros
+      //efectuar secuencia de ataques 
+      //realizar un duelResolverAnimator
+      //ejecutar funcion de calculo de daños y nimaciones
+      
+
+    } else {
+      //no debe iniciar el turno siguiente hasta que termine el duelo
+      this.startPlayerTurn(startTurnPlayer);
+    }
   }
 
   prepareNewRound() {
     this.scene.roundCounter += 1;
-    this.scene.untilDuelCounter += 1;
+    this.scene.untilDuelCounter -= 1;
   }
   //   turno del jugador 1
   //   if (this.P1.turn && !this.isDuelPhase) {

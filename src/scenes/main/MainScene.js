@@ -13,7 +13,6 @@ import {
 import DiceAnimator from "../../gameObject/dice/animations/DiceAnimator";
 import Player from "../../gameObject/player/Player";
 import { loadTossCoinSprites } from "./main.assets";
-import { END_TURN } from "../../definitions/emitNames";
 import { DuelResolver } from "../../gameObject/duel/DuelResolver";
 
 export default class MainScene extends Phaser.Scene {
@@ -53,7 +52,7 @@ export default class MainScene extends Phaser.Scene {
 
     //======DEBUG PROPS========
     this.debug = {
-      tossCoinAnim: true,
+      tossCoinAnim: false,
     };
   }
   preload() {
