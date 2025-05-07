@@ -112,7 +112,7 @@ export default class MainScene extends Phaser.Scene {
       //logica debug para saltar animacion principal
       this.players[0].turn = true;
       this.players[0].dice.enable();
-      this.players[0].diceHolder.enable();
+      //this.players[0].diceHolder.enable();
 
       //end this if
       this.turnCounter = 1;

@@ -6,6 +6,7 @@ import {
 } from "../../definitions/positions";
 import Board from "../board/Board";
 import {
+  DICE_HOLDER_CLICLED,
   END_TURN,
   PLAYER_DICE_ASSIGNED,
   PLAYER_DICE_ROLLED,
@@ -70,6 +71,7 @@ export default class Player extends Phaser.Events.EventEmitter {
     );
     this.diceHolder.init();
     this.diceHolder.setPointerEvents();
+    this.diceHolderEmitListener();
   }
 
   diceEmitListener() {
@@ -80,20 +82,23 @@ export default class Player extends Phaser.Events.EventEmitter {
 
       //enable board after roll
       this.board.enableEvents();
+      this.diceHolder.enable();
     });
   }
 
   boardEmitListener() {
     this.board.on(PLAYER_DICE_ASSIGNED, () => {
-      this.diceWasRolledThisTurn = false;
-      this.isValueAssigned = true;
-      this.turn = false;
+      this.endTurn();
+    });
+  }
 
-      //dice actions
-      this.dice.reset();
-      this.dice.disable();
+  diceHolderEmitListener() {
+    this.diceHolder.on(DICE_HOLDER_CLICLED, () => {
+      if (!this.isValueAssigned && this.dice.value !== 0) {
+        this.diceHolder.addDice(this.dice.value);
+      }
 
-      this.emit(END_TURN, this);
+      this.endTurn();
     });
   }
 
@@ -105,5 +110,17 @@ export default class Player extends Phaser.Events.EventEmitter {
     this.dice.disable();
     this.board.disableEvents();
     this.diceHolder.disable();
+  }
+
+  endTurn() {
+    this.diceWasRolledThisTurn = false;
+    this.isValueAssigned = true;
+    this.turn = false;
+
+    //dice actions
+    this.dice.reset();
+    this.dice.disable();
+
+    this.emit(END_TURN, this);
   }
 }

@@ -7,3 +7,6 @@ export const PLAYER_DICE_ASSIGNED = "playerDiceAssigned";
 //PLAYER
 export const END_TURN = 'endTurn';
 export const SET_AS_FIRTS_PLAYER = 'setAsFirstPlayer';
+
+//DICEHOLDER
+export const DICE_HOLDER_CLICLED = 'diceHolderClicked'

@@ -1,3 +1,5 @@
+import { DICE_HOLDER_CLICLED } from "../../definitions/emitNames";
+
 export class DiceHolder extends Phaser.GameObjects.Container {
   constructor(scene, x, y, player) {
     super(scene, x, y);
@@ -38,11 +40,22 @@ export class DiceHolder extends Phaser.GameObjects.Container {
 
     // Esperar a que la textura esté lista antes de establecer el tamaño
     this.setSize(this.background.displayWidth, this.background.displayHeight);
+    if (this.value === 0) this.disable();
   }
 
-  addDice() {}
+  addDice(newValue) {
+    this.value = newValue;
+    this.sprite = this.scene.add
+      .sprite(0, 0, "diceFaces")
+      .setAlpha(1)
+      .setScale(0.8);
+    this.add(this.sprite);
+    this.sprite.setFrame(this.value);
+  }
 
   getDice() {}
+
+  clear() {}
 
   enable() {
     this.setAlpha(1);
@@ -101,11 +114,16 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     this.setPointerOutEvent();
 
     this.on("pointerdown", () => {
-      if (this.hover && !this.selected) {
-        this.select();
-      } else if (this.hover && this.selected) {
-        this.unselect();
+      if (this.value === 0) {
+        if (this.hover && !this.selected) {
+          this.select();
+        } else if (this.hover && this.selected) {
+          this.unselect();
+        }
+      } else {
       }
+
+      this.emit(DICE_HOLDER_CLICLED, this.value);
     });
   }
 }
