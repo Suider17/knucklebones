@@ -1,4 +1,7 @@
-import { DICE_HOLDER_CLICLED } from "../../definitions/emitNames";
+import {
+  DICE_HOLDER_CLICLED,
+  DICE_HOLDER_SELECTED,
+} from "../../definitions/emitNames";
 
 export class DiceHolder extends Phaser.GameObjects.Container {
   constructor(scene, x, y, player) {
@@ -44,6 +47,10 @@ export class DiceHolder extends Phaser.GameObjects.Container {
   }
 
   addDice(newValue) {
+    if (this.value !== 0) {
+      console.log("Slot ya ocupado");
+      return false;
+    }
     this.value = newValue;
     this.sprite = this.scene.add
       .sprite(0, 0, "diceFaces")
@@ -51,6 +58,7 @@ export class DiceHolder extends Phaser.GameObjects.Container {
       .setScale(0.8);
     this.add(this.sprite);
     this.sprite.setFrame(this.value);
+    return true;
   }
 
   getDice() {}
@@ -61,11 +69,15 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     this.setAlpha(1);
     this.setInteractive();
     this.background.setAlpha(0.6);
+    this.locked = false;
   }
 
   disable() {
     this.setAlpha(0.2);
     this.disableInteractive();
+    this.unselect();
+    this.hover = true;
+    this.locked = true;
   }
 
   hoverIn() {
@@ -81,11 +93,16 @@ export class DiceHolder extends Phaser.GameObjects.Container {
   }
 
   select() {
+    if (this.value === 0) {
+      console.log("no se selecciona pero asigna valor");
+      return;
+    }
     console.log("selected");
     this.border.setAlpha(1);
     this.selected = true;
     this.off("pointerout");
     this.off("pointerover");
+    this.emit(DICE_HOLDER_SELECTED, this.value);
   }
 
   unselect() {
@@ -115,12 +132,13 @@ export class DiceHolder extends Phaser.GameObjects.Container {
 
     this.on("pointerdown", () => {
       if (this.value === 0) {
-        if (this.hover && !this.selected) {
-          this.select();
-        } else if (this.hover && this.selected) {
+        if (this.hover && this.selected) {
           this.unselect();
         }
       } else {
+        if (this.hover && !this.selected) {
+          this.select();
+        }
       }
 
       this.emit(DICE_HOLDER_CLICLED, this.value);

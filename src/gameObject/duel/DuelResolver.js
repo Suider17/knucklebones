@@ -30,12 +30,12 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     console.log("Inicia Turno: " + player.id);
     player.turn = true;
     player.dice.enable();
-    player.diceHolder.enable();
   }
   endPlayerTurn(player) {
     console.log("Finaliza Turno: " + player.id);
     player.turn = false;
     player.dice.disable();
+    player.diceHolder.disable();
   }
 
   playerEmitListener() {

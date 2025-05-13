@@ -5,8 +5,9 @@ export const PLAYER_DICE_ROLLED = "playerDiceRolled";
 export const ENABLED_BOARD_EVENTS = "enabledBoardEvents";
 export const PLAYER_DICE_ASSIGNED = "playerDiceAssigned";
 //PLAYER
-export const END_TURN = 'endTurn';
-export const SET_AS_FIRTS_PLAYER = 'setAsFirstPlayer';
+export const END_TURN = "endTurn";
+export const SET_AS_FIRTS_PLAYER = "setAsFirstPlayer";
 
 //DICEHOLDER
-export const DICE_HOLDER_CLICLED = 'diceHolderClicked'
+export const DICE_HOLDER_CLICLED = "diceHolderClicked";
+export const DICE_HOLDER_SELECTED = "diceHolderSelected";

@@ -84,13 +84,20 @@ export default class Board extends Phaser.GameObjects.Container {
   handlePointerOver(index) {
     const diceInColumn = this.columns[index];
     const player = this.player;
+    const diceHolder = player.diceHolder;
+    let newValue = 0;
 
-    const isMod = DICE_BUCKET(this.player.dice.value) === MOD_DICE_BUCKET;
+    newValue =
+      diceHolder.value !== 0 && diceHolder.selected
+        ? diceHolder.value
+        : player.value;
+
+    const isMod = DICE_BUCKET(newValue) === MOD_DICE_BUCKET;
     const hasModSlot = diceInColumn.some((_d) => _d.hasEmptyModSlot());
     const hasDiceSlot = this.hasEmptyDiceSlot(index);
 
     if (!isMod && hasDiceSlot) {
-      this.addNewDiceInColumn(index, player.dice.value);
+      this.addNewDiceInColumn(index, newValue);
     } else if (isMod && hasModSlot) {
       // const diceWithModSlot = this.getDiceWithEmptyModSlot(index);
       // if (diceWithModSlot) {

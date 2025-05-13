@@ -94,11 +94,14 @@ export default class Player extends Phaser.Events.EventEmitter {
 
   diceHolderEmitListener() {
     this.diceHolder.on(DICE_HOLDER_CLICLED, () => {
+      let canChangeTurn = false;
       if (!this.isValueAssigned && this.dice.value !== 0) {
-        this.diceHolder.addDice(this.dice.value);
+        canChangeTurn = this.diceHolder.addDice(this.dice.value);
       }
 
-      this.endTurn();
+      if (canChangeTurn) {
+        this.endTurn();
+      }
     });
   }
 
