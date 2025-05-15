@@ -101,11 +101,12 @@ export default class Player extends Phaser.Events.EventEmitter {
   diceHolderEmitListener() {
     this.diceHolder.on(DICE_HOLDER_CLICKED, () => {
       if (!this.isValueAssigned && this.dice.value !== 0) {
-        this.diceHolder.addDice(this.dice.value);
+        this.diceHolder.addDice(this.dice.value, false);
       }
     });
     this.diceHolder.on(DICE_HOLDER_ADD_DICE, () => {
       this.diceHolder.disable();
+      this.endTurn();
     });
   }
 
@@ -145,6 +146,9 @@ export default class Player extends Phaser.Events.EventEmitter {
     //dice actions
     this.dice.reset();
     this.dice.disable();
+
+    //diceHolder
+    this.diceHolder.disable();
 
     this.emit(PLAYER_END_TURN, this);
   }

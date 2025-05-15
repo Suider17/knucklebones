@@ -2,7 +2,7 @@
 export const DICE_HOLDER_ENABLED = "diceHolderEnabled";
 export const DICE_HOLDER_DISABLED = "diceHolderDisabled";
 export const DICE_HOLDER_SELECTED = "diceHolderSelected";
-export const DICE_HOLDER_UNELECTED = "diceHolderUnselected";
+export const DICE_HOLDER_UNSELECTED = "diceHolderUnselected";
 export const DICE_HOLDER_ADD_DICE = "diceHolderAddDice";
 export const DICE_HOLDER_ADD_TEMPORARY_DICE = "diceHolderAddTemporaryDice";
 export const DICE_HOLDER_REMOVE_TEMPORARY_DICE =

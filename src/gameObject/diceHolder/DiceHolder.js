@@ -8,6 +8,7 @@ import {
   DICE_HOLDER_HOVER_OUT,
   DICE_HOLDER_REMOVE_TEMPORARY_DICE,
   DICE_HOLDER_SELECTED,
+  DICE_HOLDER_UNSELECTED,
 } from "./diceHolder.events";
 
 export class DiceHolder extends Phaser.GameObjects.Container {
@@ -57,18 +58,13 @@ export class DiceHolder extends Phaser.GameObjects.Container {
 
     // Esperar a que la textura esté lista antes de establecer el tamaño
     this.setSize(this.background.displayWidth, this.background.displayHeight);
-    if (this.value === 0) this.disable();
   }
 
-  addDice(newValue) {
-    if (this.value !== 0) {
-      console.log("Slot ya ocupado");
-      return;
-    }
-
+  addDice(newValue, isTemporary = true) {
     this.value = newValue;
     this.sprite.setFrame(this.value);
     this.sprite.setAlpha(1);
+    this.isTemporaryValue = isTemporary;
 
     //para cuando el addDice viene de player
     if (this.isTemporaryValue) {
@@ -104,17 +100,18 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     this.setInteractive();
     this.background.setAlpha(0.6);
     this.locked = false;
-
+    console.log("Enabled");
     this.emit(DICE_HOLDER_ENABLED, this);
   }
 
   disable() {
     this.setAlpha(0.2);
     this.disableInteractive();
-    this.unselect();
+    this.selected = false;
     this.hover = false;
     this.locked = true;
-
+    this.border.setAlpha(0);
+    console.log("Disabled");
     this.emit(DICE_HOLDER_DISABLED, this);
   }
 
@@ -126,8 +123,7 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     this.emit(DICE_HOLDER_HOVER_IN, this);
 
     if (this.value === 0) {
-      this.isTemporaryValue = true;
-      this.addDice(this.player.dice.value);
+      this.addDice(this.player.dice.value, true);
     }
   }
 
@@ -144,6 +140,8 @@ export class DiceHolder extends Phaser.GameObjects.Container {
   }
 
   select() {
+    this.off("pointerout");
+    this.off("pointerover");
     if (this.isTemporaryValue) {
       console.log("no se selecciona pero asigna valor");
       return;
@@ -151,8 +149,7 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     console.log("selected");
     this.border.setAlpha(1);
     this.selected = true;
-    this.off("pointerout");
-    this.off("pointerover");
+
     this.emit(DICE_HOLDER_SELECTED, this.value);
   }
 
@@ -162,6 +159,7 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     this.selected = false;
     this.setPointerOutEvent();
     this.setPointerInEvent();
+    this.emit(DICE_HOLDER_UNSELECTED, this.value);
   }
 
   setPointerOutEvent() {
@@ -171,8 +169,32 @@ export class DiceHolder extends Phaser.GameObjects.Container {
   }
 
   setPointerInEvent() {
-    this.oonm("pointerover", () => {
+    this.on("pointerover", () => {
       this.hoverIn();
+    });
+  }
+
+  setClickEvent() {
+    this.once(DICE_HOLDER_CLICKED, () => {
+      if (this.isTemporaryValue) {
+        return;
+      }
+      if (this.value === 0) {
+        if (this.selected) {
+          this.unselect();
+        }
+      } else {
+        if (!this.selected) {
+          this.select();
+          return;
+        }
+      }
+    });
+  }
+
+  setAddDiceEvent() {
+    this.once(DICE_HOLDER_ADD_DICE, () => {
+      this.disable();
     });
   }
 
@@ -185,19 +207,11 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     this.setPointerOutEvent();
 
     //CLICKED
-    this.on("pointerdown", () => {
-      if (this.value === 0) {
-        if (this.hover && this.selected) {
-          this.unselect();
-        }
-      } else {
-        if (this.hover && !this.selected) {
-          this.select();
-        }
-        if (this.isTemporaryValue) this.isTemporaryValue = false;
-      }
-
+    this.once("pointerdown", () => {
       this.emit(DICE_HOLDER_CLICKED, this.value);
     });
+
+    this.setClickEvent();
+    this.setAddDiceEvent();
   }
 }
