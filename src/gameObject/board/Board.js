@@ -90,7 +90,7 @@ export default class Board extends Phaser.GameObjects.Container {
     newValue =
       diceHolder.value !== 0 && diceHolder.selected
         ? diceHolder.value
-        : player.value;
+        : player.dice.value;
 
     const isMod = DICE_BUCKET(newValue) === MOD_DICE_BUCKET;
     const hasModSlot = diceInColumn.some((_d) => _d.hasEmptyModSlot());

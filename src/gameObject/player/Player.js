@@ -6,13 +6,16 @@ import {
 } from "../../definitions/positions";
 import Board from "../board/Board";
 import {
-  DICE_HOLDER_CLICLED,
-  END_TURN,
+  PLAYER_END_TURN,
   PLAYER_DICE_ASSIGNED,
   PLAYER_DICE_ROLLED,
   SET_AS_FIRTS_PLAYER,
 } from "../../definitions/emitNames";
 import { DiceHolder } from "../diceHolder/DiceHolder";
+import {
+  DICE_HOLDER_ADD_DICE,
+  DICE_HOLDER_CLICKED,
+} from "../diceHolder/diceHolder.events";
 
 export default class Player extends Phaser.Events.EventEmitter {
   constructor(scene, id) {
@@ -82,7 +85,10 @@ export default class Player extends Phaser.Events.EventEmitter {
 
       //enable board after roll
       this.board.enableEvents();
-      this.diceHolder.enable();
+
+      this.diceHolder.value !== 0
+        ? this.diceHolder.disable()
+        : this.diceHolder.enable();
     });
   }
 
@@ -93,15 +99,13 @@ export default class Player extends Phaser.Events.EventEmitter {
   }
 
   diceHolderEmitListener() {
-    this.diceHolder.on(DICE_HOLDER_CLICLED, () => {
-      let canChangeTurn = false;
+    this.diceHolder.on(DICE_HOLDER_CLICKED, () => {
       if (!this.isValueAssigned && this.dice.value !== 0) {
-        canChangeTurn = this.diceHolder.addDice(this.dice.value);
+        this.diceHolder.addDice(this.dice.value);
       }
-
-      if (canChangeTurn) {
-        this.endTurn();
-      }
+    });
+    this.diceHolder.on(DICE_HOLDER_ADD_DICE, () => {
+      this.diceHolder.disable();
     });
   }
 
@@ -115,15 +119,33 @@ export default class Player extends Phaser.Events.EventEmitter {
     this.diceHolder.disable();
   }
 
+  startTurn() {
+    this.turn = true;
+    this.diceWasRolledThisTurn = false;
+    this.isValueAssigned = false;
+
+    //dice actions
+    this.dice.enable();
+
+    //diceHolder actions
+    if (this.diceHolder.value !== 0) {
+      this.diceHolder.disable();
+    } else {
+      this.diceHolder.enable();
+    }
+
+    this.emit(PLAYER_START_TURN, this);
+  }
+
   endTurn() {
+    this.turn = false;
     this.diceWasRolledThisTurn = false;
     this.isValueAssigned = true;
-    this.turn = false;
 
     //dice actions
     this.dice.reset();
     this.dice.disable();
 
-    this.emit(END_TURN, this);
+    this.emit(PLAYER_END_TURN, this);
   }
 }

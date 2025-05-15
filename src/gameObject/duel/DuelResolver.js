@@ -1,4 +1,7 @@
-import { END_TURN, SET_AS_FIRTS_PLAYER } from "../../definitions/emitNames";
+import {
+  PLAYER_END_TURN,
+  SET_AS_FIRTS_PLAYER,
+} from "../../definitions/emitNames";
 import DuelResolverAnimator from "./animations/duelResolverAnimator";
 
 export class DuelResolver extends Phaser.Events.EventEmitter {
@@ -40,7 +43,7 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
 
   playerEmitListener() {
     this.players.forEach((player) => {
-      player.on(END_TURN, (_p) => {
+      player.on(PLAYER_END_TURN, (_p) => {
         this.changeTurn(_p);
       });
 
