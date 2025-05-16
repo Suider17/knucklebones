@@ -1,22 +1,23 @@
 import Phaser from "phaser";
+import MainScene from "./scenes/main/MainScene";
 
-class MainScene extends Phaser.Scene {
-  preload() {
-    this.load.setBaseURL("https://cdn.phaserfiles.com/v385");
-  }
-  create() {}
-}
+const mainScene = new MainScene();
 
 const config = {
-  type: Pasher.AUTO,
-  width: 800,
-  height: 600,
-  scene: {
-    preload: function () {
-      this.preload.iiage("logo", "../public/vite.svg");
-    },
-    create: function () {
-      this.add.image(400, 300, "logo");
+  type: Phaser.CANVAS,
+  width: 1400,
+  height: 950,
+  scene: mainScene,
+  backgroundColor: "#262626",
+  render: {
+    antialias: false, // Desactivar antialiasing si no es necesario
+    pixelArt: true, // Hacer que el juego use píxeles y no suavizados
+  },
+  physics: {
+    default: "arcade",
+    arcade: {
+      gravity: { y: 0 },
+      debug: false,
     },
   },
 };
