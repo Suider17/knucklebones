@@ -7,15 +7,21 @@ import {
 import Board from "../board/Board";
 import {
   PLAYER_END_TURN,
-  PLAYER_DICE_ASSIGNED,
   PLAYER_DICE_ROLLED,
   SET_AS_FIRTS_PLAYER,
+  PLAYER_START_TURN,
 } from "../../definitions/emitNames";
 import { DiceHolder } from "../diceHolder/DiceHolder";
 import {
   DICE_HOLDER_ADD_DICE,
   DICE_HOLDER_CLICKED,
+  DICE_HOLDER_SELECTED,
+  DICE_HOLDER_UNSELECTED,
 } from "../diceHolder/diceHolder.events";
+import {
+  BOARD_HOLDER_VALUE_ASSIGNED,
+  BOARD_PLAYER_DICE_VALUE_ASSIGNED,
+} from "../board/board.events";
 
 export default class Player extends Phaser.Events.EventEmitter {
   constructor(scene, id) {
@@ -86,14 +92,19 @@ export default class Player extends Phaser.Events.EventEmitter {
       //enable board after roll
       this.board.enableEvents();
 
-      this.diceHolder.value !== 0
-        ? this.diceHolder.disable()
-        : this.diceHolder.enable();
+      this.diceHolder.value === 0
+        ? this.diceHolder.enable()
+        : this.diceHolder.disable();
     });
   }
 
   boardEmitListener() {
-    this.board.on(PLAYER_DICE_ASSIGNED, () => {
+    this.board.on(BOARD_PLAYER_DICE_VALUE_ASSIGNED, () => {
+      this.endTurn();
+    });
+
+    this.board.on(BOARD_HOLDER_VALUE_ASSIGNED, () => {
+      this.diceHolder.reset();
       this.endTurn();
     });
   }
@@ -104,9 +115,21 @@ export default class Player extends Phaser.Events.EventEmitter {
         this.diceHolder.addDice(this.dice.value, false);
       }
     });
-    this.diceHolder.on(DICE_HOLDER_ADD_DICE, () => {
+    this.diceHolder.once(DICE_HOLDER_ADD_DICE, () => {
       this.diceHolder.disable();
       this.endTurn();
+    });
+    this.diceHolder.once(DICE_HOLDER_ADD_DICE, () => {
+      this.diceHolder.disable();
+      this.endTurn();
+
+      this.diceHolder.on(DICE_HOLDER_SELECTED, (holder) => {
+        this.board.enableEvents();
+      });
+
+      this.diceHolder.on(DICE_HOLDER_UNSELECTED, (holder) => {
+        this.board.disableEvents();
+      });
     });
   }
 
@@ -129,11 +152,9 @@ export default class Player extends Phaser.Events.EventEmitter {
     this.dice.enable();
 
     //diceHolder actions
-    if (this.diceHolder.value !== 0) {
-      this.diceHolder.disable();
-    } else {
-      this.diceHolder.enable();
-    }
+    this.diceHolder.value === 0
+      ? this.diceHolder.disable()
+      : this.diceHolder.enable();
 
     this.emit(PLAYER_START_TURN, this);
   }
@@ -149,6 +170,7 @@ export default class Player extends Phaser.Events.EventEmitter {
 
     //diceHolder
     this.diceHolder.disable();
+    this.board.disableEvents();
 
     this.emit(PLAYER_END_TURN, this);
   }
