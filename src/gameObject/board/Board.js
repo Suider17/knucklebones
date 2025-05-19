@@ -1,4 +1,3 @@
-import dice from "../../models/dice";
 import Dice from "../dice/Dice";
 import {
   BUCKET_HIERARCHY,
@@ -99,10 +98,13 @@ export default class Board extends Phaser.GameObjects.Container {
     if (!isMod && hasDiceSlot) {
       this.addNewDiceInColumn(index, newValue);
     } else if (isMod && hasModSlot) {
-      // const diceWithModSlot = this.getDiceWithEmptyModSlot(index);
-      // if (diceWithModSlot) {
-      //   diceWithModSlot.setNewMod(player.dice.value);
-      // }
+      const diceWithModSlot = this.getDiceWithEmptyModSlot(index);
+
+      if (!diceWithModSlot) {
+        console.log("no hay donde poner el mod");
+        return;
+      }
+      diceWithModSlot.setNewMod(player.dice.value);
     } else if (!hasModSlot && !hasDiceSlot) {
       console.log("AQUI NO HAY ESPACIO MU CHAVO");
     }
@@ -124,12 +126,12 @@ export default class Board extends Phaser.GameObjects.Container {
         }
       } else if (
         isMod &&
-        diceInColumn.some((_d) => NORMAL_BUCKET_ARRAY.includes(_d.props.value))
+        diceInColumn.some((_d) => NORMAL_BUCKET_ARRAY.includes(_d.value))
       ) {
         // const mod = lastInserted.object.mods.find((mod) => mod.lastInserted);
         // mod.value = DICE_EMPTY;
         // mod.lastInserted = false;
-        // lastInserted.object.props.lastInserted = false;
+        // lastInserted.object.lastInserted = false;
         // lastInserted.object.refreshMods();
       }
     }
@@ -139,7 +141,7 @@ export default class Board extends Phaser.GameObjects.Container {
   handlePointerDown(index) {
     const lastInserted = this.getLastInsertedDice(); // El último dado insertado
     const hasModSlot = this.columns[index].some((_d) =>
-      NORMAL_BUCKET_ARRAY.includes(_d.props.value)
+      NORMAL_BUCKET_ARRAY.includes(_d.value)
     );
     const isMod = DICE_BUCKET(this.player.dice.value) === MOD_DICE_BUCKET;
 
@@ -147,7 +149,7 @@ export default class Board extends Phaser.GameObjects.Container {
       console.warn("No hay dado válido seleccionado para insertar");
       return;
     }
-    lastInserted.object.props.lastInserted = false;
+    lastInserted.object.lastInserted = false;
 
     if (!isMod) {
       // Insertar dado normal
@@ -159,9 +161,7 @@ export default class Board extends Phaser.GameObjects.Container {
       this.emit(PLAYER_DICE_ASSIGNED);
     } else if (isMod && hasModSlot) {
       // Insertar dado como mod
-      const mod = lastInserted.object.props.mods.find(
-        (mod) => mod.lastInserted
-      );
+      const mod = lastInserted.object.mods.find((mod) => mod.lastInserted);
 
       if (mod) {
         // mod.lastInserted = false;
@@ -204,8 +204,10 @@ export default class Board extends Phaser.GameObjects.Container {
           0,
           0,
           "diceFaces",
-          dice(index, column.length, this.id, 0.7, diceValue, true),
-          this.id
+          [index, column.length],
+          this,
+          0.7,
+          true
         )
       );
 
@@ -228,8 +230,8 @@ export default class Board extends Phaser.GameObjects.Container {
 
     dice.sort((a, b) => {
       return (
-        BUCKET_HIERARCHY[DICE_BUCKET(a.props.value)] -
-        BUCKET_HIERARCHY[DICE_BUCKET(b.props.value)]
+        BUCKET_HIERARCHY[DICE_BUCKET(a.value)] -
+        BUCKET_HIERARCHY[DICE_BUCKET(b.value)]
       );
     });
 
@@ -245,7 +247,7 @@ export default class Board extends Phaser.GameObjects.Container {
     Object.values(this.columns).forEach((column) => {
       if (column) {
         column.forEach((_d) => {
-          _d.sprite.setFrame(_d.props.value);
+          _d.sprite.setFrame(_d.value);
           //_d.refreshMods();
         });
       }
@@ -283,7 +285,7 @@ export default class Board extends Phaser.GameObjects.Container {
 
       // Filtrar los dados válidos (con valores entre 1 y 6)
       const validDice = column.filter(
-        (dice) => dice.props.value >= 1 && dice.props.value <= 6
+        (dice) => dice.value >= 1 && dice.value <= 6
       );
 
       // Contador de valores
@@ -291,7 +293,7 @@ export default class Board extends Phaser.GameObjects.Container {
 
       // Contar cuántos dados tienen cada valor
       validDice.forEach((dice) => {
-        const value = dice.props.value;
+        const value = dice.value;
         if (valueCounts[value]) {
           valueCounts[value].count++; // Incrementar el contador
           valueCounts[value].dice.push(dice); // Añadir el dado al arreglo
@@ -313,10 +315,7 @@ export default class Board extends Phaser.GameObjects.Container {
       }
 
       // Calcular la suma total de los dados en la columna
-      const sumOfDice = validDice.reduce(
-        (acc, dice) => acc + dice.props.value,
-        0
-      );
+      const sumOfDice = validDice.reduce((acc, dice) => acc + dice.value, 0);
 
       // Si hay un combo (más de un dado con el mismo valor), aplicar la fórmula
       if (multiplier > 1) {
@@ -331,16 +330,16 @@ export default class Board extends Phaser.GameObjects.Container {
       // Cambiar los frames según el combo
       if (multiplier === 2) {
         repeatedDice.forEach((d) => {
-          d.sprite.setFrame(d.props.value + 10);
+          d.sprite.setFrame(d.value + 10);
         });
       } else if (multiplier === 3) {
         repeatedDice.forEach((d) => {
-          d.sprite.setFrame(d.props.value + 16);
+          d.sprite.setFrame(d.value + 16);
         });
       } else {
         // Restaurar frames si no hay combo
         column.forEach((d) => {
-          d.sprite.setFrame(d.props.value);
+          d.sprite.setFrame(d.value);
         });
       }
     });
@@ -364,8 +363,8 @@ export default class Board extends Phaser.GameObjects.Container {
     for (const column of Object.values(this.columns)) {
       if (!column) continue;
 
-      const found = column.find((_d) => _d.props.lastInserted);
-      index = column.findIndex((_d) => _d.props.lastInserted);
+      const found = column.find((_d) => _d.lastInserted);
+      index = column.findIndex((_d) => _d.lastInserted);
       if (found) {
         last = found;
         break;
@@ -407,7 +406,7 @@ export default class Board extends Phaser.GameObjects.Container {
 
   async destroyDice(dice) {
     if (dice) {
-      this.columns[dice.props.position[0]].splice(dice.props.position[1], 1);
+      this.columns[dice.position[0]].splice(dice.position[1], 1);
       await dice.destroy({
         onComplete: () => {
           console.log("drestroy");

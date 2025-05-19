@@ -15,3 +15,8 @@ export const PLAYER_DICE_HOLDER_POSITION = {
   1: { x: 180, y: 600 },
   2: { x: 1000, y: 80 },
 };
+
+export const DICE_MOD_RELATIVE_POSITION = {
+  1: { x: -50, y: 100 },
+  2: { x: -50, y: -100 },
+};

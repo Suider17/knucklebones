@@ -2,6 +2,10 @@
 //DICE DEFINITIONS
 //================
 
+//DICE SPRITES NAMES
+export const DICE_SPRITE = "diceFaces";
+export const DICE_MOD_SPRITE = "diceMods";
+
 //DICE STYLES
 export const D6 = "d_6";
 export const D11 = "d_11";

@@ -5,11 +5,8 @@ import {
   DICE_SKULL,
 } from "../../definitions/diceDefinitions";
 
-
-
-
 export function setUntilDuelCounter(scene) {
-  scene.props.untilDuelCounter -= 1;
+  scene.untilDuelCounter -= 1;
 }
 
 export function hasAtackMod(player) {
@@ -17,5 +14,5 @@ export function hasAtackMod(player) {
 }
 
 export function hasSkullDice(player) {
-  return player.board.dice.some((_d) => _d.props.value === DICE_SKULL);
+  return player.board.dice.some((_d) => _d.value === DICE_SKULL);
 }

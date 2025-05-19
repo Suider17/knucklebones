@@ -109,8 +109,8 @@ export function createInfoTextPanel(scene) {
 
 export function initDuel(scene) {
   //========= Variables de control de fase de duelo ===============
-  scene.props.untilDuelCounter = 3;
-  scene.props.isDuelPhase = true;
+  scene.untilDuelCounter = 3;
+  scene.isDuelPhase = true;
   //===============================================================
   // Muestra el texto con animación
   scene.message.setAlpha(1).setScale(0); // Lo hacemos visible y tamaño inicial 0
@@ -200,7 +200,7 @@ async function duel(duel, scene) {
     switch (duel.type) {
       case "bothAttack":
         //DOS SKULL
-        if (dice.every((_d) => _d.props.value === DICE_SKULL)) {
+        if (dice.every((_d) => _d.value === DICE_SKULL)) {
           await twoSkullsDuel(dice, scene);
         }
 
@@ -242,8 +242,8 @@ async function twoSkullsDuel(dice, scene) {
       dice.map((_d) => _d.shake({ onComplete: () => _d.roll(D6) }))
     );
 
-    const value1 = dice1.props.value;
-    const value2 = dice2.props.value;
+    const value1 = dice1.value;
+    const value2 = dice2.value;
     if (value1 === value2) {
       // Si son iguales, ambos hacen charge al mismo tiempo
       await Promise.all([
@@ -281,8 +281,8 @@ async function twoSkullsDuel(dice, scene) {
 
       // Luego se destruyen al mismo tiempo
       await Promise.all([
-        boards[dice1.props.board].destroyDice(dice1),
-        boards[dice2.props.board].destroyDice(dice2),
+        boards[dice1.board].destroyDice(dice1),
+        boards[dice2.board].destroyDice(dice2),
       ]);
 
       return resolve();
@@ -294,8 +294,8 @@ async function twoSkullsDuel(dice, scene) {
     losserDice = dice1Wins ? dice2 : dice1;
 
     const diferenceDamage = Phaser.Math.Difference(
-      winnerDice.props.value,
-      losserDice.props.value
+      winnerDice.value,
+      losserDice.value
     );
 
     await winnerDice.charge({
@@ -305,16 +305,16 @@ async function twoSkullsDuel(dice, scene) {
       },
     });
 
-    await boards[losserDice.props.board].destroyDice(losserDice);
+    await boards[losserDice.board].destroyDice(losserDice);
 
     await winnerDice.charge({
       onYoyo: async () => {
-        scene["P" + losserDice.props.board].life -= winnerDice.props.value;
-        await scene["P" + losserDice.props.board].board.shake();
+        scene["P" + losserDice.board].life -= winnerDice.value;
+        await scene["P" + losserDice.board].board.shake();
       },
     });
 
-    await boards[winnerDice.props.board].destroyDice(winnerDice);
+    await boards[winnerDice.board].destroyDice(winnerDice);
 
     resolve();
   });
@@ -326,8 +326,8 @@ async function calculateDamages() {
   if (frontDiceP1?.canAtack() && frontDiceP2?.canAtack()) {
     //=============
     if (
-      frontDiceP1?.props.value === DICE_SKULL &&
-      frontDiceP2?.props.value === DICE_SKULL
+      frontDiceP1?.value === DICE_SKULL &&
+      frontDiceP2?.value === DICE_SKULL
     ) {
       await highlightBattleDice(frontDiceP1, frontDiceP2, scene);
       const resultDice = await twoSkullsDuel(frontDiceP1, frontDiceP2, scene);
@@ -336,16 +336,16 @@ async function calculateDamages() {
 
       //realiza el daño el jugador correspondiente
       if (resultDice) {
-        if (resultDice.props.board === 1) {
-          scene.P2.life -= resultDice.props.value;
-          scene.P1.board.columns[resultDice.props.position[0]].splice(
-            resultDice.props.position[1],
+        if (resultDice.board === 1) {
+          scene.P2.life -= resultDice.value;
+          scene.P1.board.columns[resultDice.position[0]].splice(
+            resultDice.position[1],
             1
           );
         } else {
-          scene.P1.life -= resultDice.props.value;
-          scene.P2.board.columns[resultDice.props.position[0]].splice(
-            resultDice.props.position[1],
+          scene.P1.life -= resultDice.value;
+          scene.P2.board.columns[resultDice.position[0]].splice(
+            resultDice.position[1],
             1
           );
         }
@@ -358,8 +358,8 @@ async function calculateDamages() {
     //============
     //el P1 es skull y el P2 no, pero ambos atacan
     else if (
-      frontDiceP1?.props.value === DICE_SKULL &&
-      frontDiceP2?.props.value !== DICE_SKULL
+      frontDiceP1?.value === DICE_SKULL &&
+      frontDiceP2?.value !== DICE_SKULL
     ) {
       await highlightBattleDice(frontDiceP1, frontDiceP2, scene);
       console.log("el P1 es skull y el P2 no, pero ambos atacan");
@@ -368,8 +368,8 @@ async function calculateDamages() {
     //=============
     //el P2 es skull y el P1 no, pero ambos atacan
     else if (
-      frontDiceP1?.props.value !== DICE_SKULL &&
-      frontDiceP2?.props.value === DICE_SKULL
+      frontDiceP1?.value !== DICE_SKULL &&
+      frontDiceP2?.value === DICE_SKULL
     ) {
       await highlightBattleDice(frontDiceP1, frontDiceP2, scene);
       console.log("el P2 es skull y el P1 no, pero ambos atacan");
@@ -378,8 +378,8 @@ async function calculateDamages() {
     //=============
     //Ninguno es skull, pero ambos atacan
     else if (
-      frontDiceP1?.props.value !== DICE_SKULL &&
-      frontDiceP2?.props.value !== DICE_SKULL
+      frontDiceP1?.value !== DICE_SKULL &&
+      frontDiceP2?.value !== DICE_SKULL
     ) {
       await highlightBattleDice(frontDiceP1, frontDiceP2, scene);
       console.log("Ninguno es skull, pero ambos atacan");
@@ -391,7 +391,7 @@ async function calculateDamages() {
   if (frontDiceP1?.canAtack() && (!frontDiceP2?.canAtack() || !frontDiceP2)) {
     //===============
     //el dado que ataca es skull
-    if (frontDiceP1?.props.value === DICE_SKULL) {
+    if (frontDiceP1?.value === DICE_SKULL) {
       await highlightBattleDice(frontDiceP1, frontDiceP2, scene);
 
       let resultDice = null;
@@ -407,9 +407,9 @@ async function calculateDamages() {
       }
 
       if (resultDice) {
-        scene.P2.life -= resultDice.props.value;
-        scene.P1.board.columns[resultDice.props.position[0]].splice(
-          resultDice.props.position[1],
+        scene.P2.life -= resultDice.value;
+        scene.P1.board.columns[resultDice.position[0]].splice(
+          resultDice.position[1],
           1
         );
       }
@@ -418,7 +418,7 @@ async function calculateDamages() {
     }
     //============
     //el dado que ataca no es skull
-    else if (frontDiceP1?.props.value !== DICE_SKULL) {
+    else if (frontDiceP1?.value !== DICE_SKULL) {
       await highlightBattleDice(frontDiceP1, frontDiceP2, scene);
       console.log("el dado que ataca no es skull");
       await clearBattleDiceHighlight(frontDiceP1, frontDiceP2, scene);
@@ -427,14 +427,14 @@ async function calculateDamages() {
   if ((!frontDiceP1?.canAtack() || !frontDiceP1) && frontDiceP2?.canAtack()) {
     //===============
     //el dado que ataca es skull
-    if (frontDiceP2?.props.value === DICE_SKULL) {
+    if (frontDiceP2?.value === DICE_SKULL) {
       await highlightBattleDice(frontDiceP1, frontDiceP2, scene);
       console.log("el dado que ataca es skull 2 ");
       await clearBattleDiceHighlight(frontDiceP1, frontDiceP2, scene);
     }
     //============
     //el dado que ataca no es skull
-    else if (frontDiceP2?.props.value !== DICE_SKULL) {
+    else if (frontDiceP2?.value !== DICE_SKULL) {
       await highlightBattleDice(frontDiceP1, frontDiceP2, scene);
       console.log("el dado que ataca no es skull 2");
       await clearBattleDiceHighlight(frontDiceP1, frontDiceP2, scene);
