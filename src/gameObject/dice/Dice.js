@@ -41,11 +41,11 @@ export default class Dice extends Phaser.GameObjects.Container {
   }
 
   init() {
-    this.sprite.setFrame(this.props.value);
+    this.sprite.setFrame(this.value);
     this.add(this.sprite);
 
-    this.scene.add.existing(this).setScale(this.props.scale);
-    if (this.props.board == 2) {
+    this.scene.add.existing(this).setScale(this.scale);
+    if (this.board == 2) {
       this.angle = 180;
     }
 
@@ -54,11 +54,11 @@ export default class Dice extends Phaser.GameObjects.Container {
 
     //==mods
 
-    this.props.mods.forEach((mod) => {
-      position = DICE_MOD_RELATIVE_POSITION[this.props.board];
+    this.mods.forEach((mod) => {
+      position = DICE_MOD_RELATIVE_POSITION[this.board];
       mod = new DiceMod(this.scene, position.x, position.y, DICE_MOD_SPRITE);
       mod.init();
-      if (this.props.board == 2) {
+      if (this.board == 2) {
         mod.angle = 180;
       }
     });
@@ -67,18 +67,18 @@ export default class Dice extends Phaser.GameObjects.Container {
   }
 
   roll(diceStyle = D11) {
-    this.props.value = customRandom(diceStyle);
-    this.props.bucket = DICE_BUCKET(this.props.value);
+    this.value = customRandom(diceStyle);
+    this.bucket = DICE_BUCKET(this.value);
     this.sprite.anims.isPlaying && this.sprite.anims.stop();
-    this.sprite.setFrame(this.props.value);
-    //this.props.blocked = true;
+    this.sprite.setFrame(this.value);
+    //this.blocked = true;
   }
 
   resetValue() {
-    this.props.value = !this.props.blocked && 0;
+    this.value = !this.blocked && 0;
   }
   getValue() {
-    return this.props.value;
+    return this.value;
   }
   setValue(value) {
     if (MOD_BUCKET_ARRAY.includes(value)) {
@@ -88,29 +88,29 @@ export default class Dice extends Phaser.GameObjects.Container {
       NORMAL_BUCKET_ARRAY.includes(value) ||
       SPECIAL_BUCKET_ARRAY.includes(value)
     ) {
-      this.props.value = value;
-      this.props.bucket = DICE_BUCKET(value);
-      this.sprite.setFrame(this.props.value);
+      this.value = value;
+      this.bucket = DICE_BUCKET(value);
+      this.sprite.setFrame(this.value);
       return false;
     } else {
       return true;
     }
   }
   unlockDice() {
-    this.props.blocked = false;
+    this.blocked = false;
   }
   lockDice() {
-    this.props.blocked = true;
+    this.blocked = true;
   }
 
   updatePosition(x, y) {
     if (x !== undefined && y !== undefined) {
-      this.props.position[0] = x;
-      this.props.position[1] = y;
+      this.position[0] = x;
+      this.position[1] = y;
     }
 
-    const positionX = 70 + this.props.position[0] * 130;
-    const positionY = 70 + this.props.position[1] * 130;
+    const positionX = 70 + this.position[0] * 130;
+    const positionY = 70 + this.position[1] * 130;
     this.setPosition(positionX, positionY);
   }
   reset() {
@@ -121,7 +121,7 @@ export default class Dice extends Phaser.GameObjects.Container {
   }
 
   setNewMod(value) {
-    const mods = this.props.mods;
+    const mods = this.mods;
     if (!value) {
       throw new ReferenceError("Valor de dado para el MOD no definido");
     }
@@ -131,44 +131,26 @@ export default class Dice extends Phaser.GameObjects.Container {
         (mod) => DICE_BUCKET(mod.value) === EMPTY_DICE_BUCKET
       );
 
-      this.props.lastInserted = true;
+      this.lastInserted = true;
     } else {
       throw new Error("no hay espacios para mod");
     }
   }
 
-  setModSprite() {
-    this.mod1Sprite.setFrame(this.props.mods[0].value === DICE_SWORD ? 0 : 1);
-    this.mod2Sprite.setFrame(this.props.mods[1].value === DICE_SWORD ? 0 : 1);
-  }
-  showModSprite() {
-    this.props.mods[0].value !== DICE_EMPTY && this.mod1Sprite.setAlpha(1);
-    this.props.mods[1].value !== DICE_EMPTY && this.mod2Sprite.setAlpha(1);
-  }
-  hideModSprite() {
-    this.props.mods[0].value === DICE_EMPTY && this.mod1Sprite.setAlpha(0);
-    this.props.mods[1].value === DICE_EMPTY && this.mod2Sprite.setAlpha(0);
-  }
-
-  refreshMods() {
-    this.setModSprite();
-    this.hideModSprite();
-  }
-
   hasEmptyModSlot() {
     return (
-      this.props.bucket === NORMAL_DICE_BUCKET &&
-      this.props.mods.some((mod) => mod.value === DICE_EMPTY)
+      this.bucket === NORMAL_DICE_BUCKET &&
+      this.mods.some((mod) => mod.value === DICE_EMPTY)
     );
   }
 
   canAtack() {
-    if (NORMAL_BUCKET_ARRAY.includes(this.props.value)) {
-      return this.props.mods.some((mod) =>
+    if (NORMAL_BUCKET_ARRAY.includes(this.value)) {
+      return this.mods.some((mod) =>
         ATACK_BUCKET_ARRAY.includes(mod.value)
       );
     }
-    return ATACK_BUCKET_ARRAY.includes(this.props.value);
+    return ATACK_BUCKET_ARRAY.includes(this.value);
   }
 
   //==========================
