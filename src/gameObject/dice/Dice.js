@@ -13,7 +13,7 @@ import {
   SPECIAL_DICE_BUCKET,
 } from "../../definitions/diceDefinitions";
 import { DICE_MOD_RELATIVE_POSITION } from "../../definitions/Positions";
-import DiceMod from "../diceMod/diceMod";
+import DiceMod from "../diceMod/DiceMod";
 import DiceAnimator from "./animations/DiceAnimator";
 import { customRandom } from "./dice.helper";
 
@@ -42,6 +42,7 @@ export default class Dice extends Phaser.GameObjects.Container {
 
   init() {
     this.sprite.setFrame(this.value);
+    this.setScale(0.7);
     this.add(this.sprite);
 
     this.scene.add.existing(this).setScale(this.scale);
@@ -53,17 +54,17 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.setSize(this.sprite.displayWidth, this.sprite.displayHeight);
 
     //==mods
+    console.log(this.mods.length);
 
-    this.mods.forEach((mod) => {
-      position = DICE_MOD_RELATIVE_POSITION[this.board];
+    this.mods.forEach((mod, index) => {
+      const position = DICE_MOD_RELATIVE_POSITION[index + 1];
       mod = new DiceMod(this.scene, position.x, position.y, DICE_MOD_SPRITE);
       mod.init();
       if (this.board == 2) {
         mod.angle = 180;
       }
+      this.add(mod);
     });
-
-    this.add(mods);
   }
 
   roll(diceStyle = D11) {
@@ -146,9 +147,7 @@ export default class Dice extends Phaser.GameObjects.Container {
 
   canAtack() {
     if (NORMAL_BUCKET_ARRAY.includes(this.value)) {
-      return this.mods.some((mod) =>
-        ATACK_BUCKET_ARRAY.includes(mod.value)
-      );
+      return this.mods.some((mod) => ATACK_BUCKET_ARRAY.includes(mod.value));
     }
     return ATACK_BUCKET_ARRAY.includes(this.value);
   }

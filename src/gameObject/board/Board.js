@@ -38,7 +38,7 @@ export default class Board extends Phaser.GameObjects.Container {
    * y los agrega al container
    */
   init() {
-    //creamos la imagen de contenedor
+    //crea la imagen de contenedor
     this.sprite = this.add(
       this.scene.add.image(0, 0, "diceBox").setOrigin(0, 0)
     );
