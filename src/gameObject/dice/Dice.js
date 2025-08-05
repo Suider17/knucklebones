@@ -18,10 +18,10 @@ import DiceAnimator from "./animations/DiceAnimator";
 import { customRandom } from "./dice.helper";
 
 export default class Dice extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, texture, coordinates, board, lastInserted) {
+  constructor(scene, x, y, texture, value, coordinates, board, lastInserted) {
     super(scene, x, y);
 
-    this.value = 0; //value attached to frame
+    this.value = value; //value attached to frame
     this.mods = [null, null];
     this.status = "";
     this.bucket = DICE_BUCKET(this.value); //bucket to sort columns

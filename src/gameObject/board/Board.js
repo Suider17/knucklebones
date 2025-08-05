@@ -213,12 +213,11 @@ export default class Board extends Phaser.GameObjects.Container {
           0,
           0,
           "diceFaces",
-
+          diceValue,
           [index, column.length],
           this,
           0.7,
-          true
-
+          !!lastInserted
         )
       );
 
