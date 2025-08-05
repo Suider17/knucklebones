@@ -233,7 +233,7 @@ p2Attack: () => this.handleAttack(this.dice2, this.dice1),
 }
 
 async handleBothAttack() {
-if (this.dice1.props.value === DICE_SKULL && this.dice2.props.value === DICE_SKULL) {
+if (this.dice1.value === DICE_SKULL && this.dice2.value === DICE_SKULL) {
 return await twoSkullsDuel([this.dice1, this.dice2], this.scene);
 }
 
@@ -245,7 +245,7 @@ async handleAttackAlone(attacker, attackerIndex) {
 const targetPlayer = attackerIndex === 1 ? this.scene.P2 : this.scene.P1;
 await attacker.charge({
 onYoyo: async () => {
-targetPlayer.life -= attacker.props.value;
+targetPlayer.life -= attacker.value;
 await targetPlayer.board.shake();
 },
 });
@@ -256,15 +256,15 @@ await targetPlayer.board.shake();
 
 async handleAttack(attacker, defender) {
 if (!defender) {
-return this.handleAttackAlone(attacker, attacker.props.board);
+return this.handleAttackAlone(attacker, attacker.board);
 }
 
-    if (attacker.props.value > defender.props.value) {
-      const damage = attacker.props.value - defender.props.value;
+    if (attacker.value > defender.value) {
+      const damage = attacker.value - defender.value;
 
       await attacker.charge({ onYoyo: () => defender.shake() });
-      await this.scene[`P${defender.props.board}`].board.destroyDice(defender);
-      this.scene[`P${defender.props.board}`].life -= damage;
+      await this.scene[`P${defender.board}`].board.destroyDice(defender);
+      this.scene[`P${defender.board}`].life -= damage;
     } else {
       await attacker.shake(); // fue bloqueado
     }
@@ -436,7 +436,7 @@ Esto es común en motores como Unity, Godot o Phaser. No tiene problema en JS mi
 
 No generes referencias cíclicas que impidan liberar memoria (esto era un problema antes, pero con los recolectores de basura modernos de JS no es crítico).
 
-No abuses para hacer lógica confusa (por ejemplo: desde Dice modificando Player.board.scene.props.round... eso ya es spaghetti).
+No abuses para hacer lógica confusa (por ejemplo: desde Dice modificando Player.board.scene.round... eso ya es spaghetti).
 
 En tu caso, si Dice y Board deben saber de su Player para hacer cosas como "restar vida" o "llamar a eventos", sí tiene sentido pasar esa referencia.
 
@@ -565,7 +565,7 @@ Buen para objetos complejos que se configuran dinámicamente.
 
 Desventajas:
 
-Acceder a cosas como dice.props.algo.mas.algo se vuelve incómodo.
+Acceder a cosas como dice.algo.mas.algo se vuelve incómodo.
 
 Pierdes autocompletado directo (a menos que tipifiques props si usas TypeScript).
 
@@ -578,7 +578,7 @@ Ventajas:
 
 Más directo al acceder: this.value, this.color.
 
-Código más legible al usar el objeto (dice.value en vez de dice.props.value).
+Código más legible al usar el objeto (dice.value en vez de dice.value).
 
 Desventajas:
 
@@ -605,7 +605,7 @@ Así usás lo mejor de ambos mundos:
 
 👌 props agrupa configuraciones.
 
-🧼 Pero no tenés que hacer this.props.algo.mas todo el tiempo.
+🧼 Pero no tenés que hacer this.algo.mas todo el tiempo.
 
 🧠 En resumen:
 
