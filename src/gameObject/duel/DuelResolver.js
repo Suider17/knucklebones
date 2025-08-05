@@ -2,6 +2,7 @@ import {
   PLAYER_END_TURN,
   SET_AS_FIRTS_PLAYER,
 } from "../../definitions/emitNames";
+import { DICE_HOLDER_SELECTED } from "../diceHolder/diceHolder.events";
 import DuelResolverAnimator from "./animations/duelResolverAnimator";
 
 export class DuelResolver extends Phaser.Events.EventEmitter {
@@ -31,14 +32,11 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
 
   startPlayerTurn(player) {
     console.log("Inicia Turno: " + player.id);
-    player.turn = true;
-    player.dice.enable();
+    player.startTurn();
   }
   endPlayerTurn(player) {
     console.log("Finaliza Turno: " + player.id);
-    player.turn = false;
-    player.dice.disable();
-    player.diceHolder.disable();
+    player.endTurn();
   }
 
   playerEmitListener() {
@@ -53,6 +51,7 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     });
   }
 
+
   changeTurn(playerEndingTurn) {
     const startTurnPlayer = this.players.find(
       (_p) => playerEndingTurn.id !== _p.id
@@ -62,8 +61,6 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     if (this.scene.turnCounter % 2 === 0) {
       this.prepareNewRound();
     }
-    //debe terminar el turno antes de iniciar el duelo
-    this.endPlayerTurn(playerEndingTurn);
 
     if (this.scene.untilDuelCounter === 0) {
       //desactivar eventos de jugadores.
@@ -81,28 +78,4 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     this.scene.roundCounter += 1;
     this.scene.untilDuelCounter -= 1;
   }
-  //   turno del jugador 1
-  //   if (this.P1.turn && !this.isDuelPhase) {
-  //     this.P1.dice.unlock();
-  //     console.log("p1");
-  //     this.P2.board.setAlpha(0.5);
-  //     this.P2.dice.setAlpha(0.5);
-  //     this.P1.board.setAlpha(1);
-  //     this.P1.dice.setAlpha(1);
-  //     if (this.P1.isValueAssigned) {
-  //     } else {
-  //     }
-  //   }
-  //   turno del jugador 2
-  //   if (this.P2.turn && !this.isDuelPhase) {
-  //     this.P2.dice.unlock();
-  //     console.log("p2");
-  //     this.P1.board.setAlpha(0.5);
-  //     this.P1.dice.setAlpha(0.5);
-  //     this.P2.board.setAlpha(1);
-  //     this.P2.dice.setAlpha(1);
-  //     if (this.P2.isValueAssigned) {
-  //     } else {
-  //     }
-  //   }
 }

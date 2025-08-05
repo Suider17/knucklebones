@@ -6,7 +6,10 @@ import {
   NORMAL_BUCKET_ARRAY,
 } from "../../definitions/diceDefinitions";
 import BoardAnimator from "./animations/BoardAnimator";
-import { PLAYER_DICE_ASSIGNED } from "../../definitions/emitNames";
+import {
+  BOARD_PLAYER_DICE_VALUE_ASSIGNED,
+  BOARD_HOLDER_VALUE_ASSIGNED,
+} from "./board.events";
 
 export default class Board extends Phaser.GameObjects.Container {
   constructor(scene, x, y, id, player) {
@@ -84,19 +87,19 @@ export default class Board extends Phaser.GameObjects.Container {
     const diceInColumn = this.columns[index];
     const player = this.player;
     const diceHolder = player.diceHolder;
+
+    const isHolderValue = diceHolder.value !== 0 && diceHolder.selected;
+
     let newValue = 0;
 
-    newValue =
-      diceHolder.value !== 0 && diceHolder.selected
-        ? diceHolder.value
-        : player.dice.value;
+    newValue = isHolderValue ? diceHolder.value : player.dice.value;
 
     const isMod = DICE_BUCKET(newValue) === MOD_DICE_BUCKET;
     const hasModSlot = diceInColumn.some((_d) => _d.hasEmptyModSlot());
     const hasDiceSlot = this.hasEmptyDiceSlot(index);
 
     if (!isMod && hasDiceSlot) {
-      this.addNewDiceInColumn(index, newValue);
+      this.addNewDiceInColumn(index, newValue, true);
     } else if (isMod && hasModSlot) {
       const diceWithModSlot = this.getDiceWithEmptyModSlot(index);
 
@@ -140,6 +143,8 @@ export default class Board extends Phaser.GameObjects.Container {
   }
   handlePointerDown(index) {
     const lastInserted = this.getLastInsertedDice(); // El último dado insertado
+    const diceHolder = this.player.diceHolder;
+    const isHolderValue = diceHolder.value !== 0 && diceHolder.selected;
     const hasModSlot = this.columns[index].some((_d) =>
       NORMAL_BUCKET_ARRAY.includes(_d.value)
     );
@@ -158,7 +163,11 @@ export default class Board extends Phaser.GameObjects.Container {
       this.disableEvents();
 
       //Emit to player, board has assgined a slot
-      this.emit(PLAYER_DICE_ASSIGNED);
+      if (isHolderValue) {
+        this.emit(BOARD_HOLDER_VALUE_ASSIGNED, this);
+      } else {
+        this.emit(BOARD_PLAYER_DICE_VALUE_ASSIGNED, this);
+      }
     } else if (isMod && hasModSlot) {
       // Insertar dado como mod
       const mod = lastInserted.object.mods.find((mod) => mod.lastInserted);
@@ -194,7 +203,7 @@ export default class Board extends Phaser.GameObjects.Container {
   //==========================
   //==========================
 
-  addNewDiceInColumn(index, diceValue) {
+  addNewDiceInColumn(index, diceValue, lastInserted) {
     const column = this.columns[index];
 
     column.length < 3 &&
@@ -204,10 +213,12 @@ export default class Board extends Phaser.GameObjects.Container {
           0,
           0,
           "diceFaces",
+
           [index, column.length],
           this,
           0.7,
           true
+
         )
       );
 
