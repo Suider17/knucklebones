@@ -14,15 +14,15 @@ import {
 export function customRandom(d_) {
   const probabilities = {
     d_11: {
-      [DICE_1]: 10,
-      [DICE_2]: 10,
-      [DICE_3]: 10,
+      [DICE_1]: 1,
+      [DICE_2]: 1,
+      [DICE_3]: 1,
       [DICE_4]: 0,
       [DICE_5]: 0,
       [DICE_6]: 0,
-      [DICE_SHIELD]: 0,
-      [DICE_SWORD]: 0,
-      [DICE_SKULL]: 10,
+      [DICE_SHIELD]: 10,
+      [DICE_SWORD]: 10,
+      [DICE_SKULL]: 1,
       //[DICE_REROLL]: 0,
       //11: 1,
     },

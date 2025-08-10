@@ -85,6 +85,7 @@ export function DICE_BUCKET(value) {
   } else if (MOD_BUCKET_ARRAY.includes(value)) {
     return MOD_DICE_BUCKET;
   } else {
+    console.log(value);
     throw new ReferenceError("Estas mandando un valor que no tiene Bucket");
   }
 }

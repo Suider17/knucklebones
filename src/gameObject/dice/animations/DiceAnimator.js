@@ -29,7 +29,6 @@ export default class DiceAnimator {
 
   destroy({ onStart, onComplete }) {
     return new Promise((resolve) => {
-      console.log(this.dice.scale);
       this.scene.tweens.add({
         targets: this.dice,
         scale: { from: this.dice.scale, to: 0 },

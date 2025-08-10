@@ -100,7 +100,7 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     this.setInteractive();
     this.background.setAlpha(0.6);
     this.locked = false;
-    console.log("Enabled");
+    console.log("holder Enabled");
     this.emit(DICE_HOLDER_ENABLED, this);
   }
 
@@ -111,12 +111,12 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     this.hover = false;
     this.locked = true;
     this.border.setAlpha(0);
-    console.log("Disabled");
+    console.log("holder Disabled");
     this.emit(DICE_HOLDER_DISABLED, this);
   }
 
   hoverIn() {
-    console.log("hoverIn");
+    console.log("holder hoverIn");
     this.border?.setAlpha(1);
     this.hover = true;
 
@@ -128,7 +128,7 @@ export class DiceHolder extends Phaser.GameObjects.Container {
   }
 
   hoverOut() {
-    console.log("hoverOut");
+    console.log("holder hoverOut");
     this.border?.setAlpha(0);
     this.hover = false;
 
@@ -143,7 +143,7 @@ export class DiceHolder extends Phaser.GameObjects.Container {
     this.off("pointerout");
     this.off("pointerover");
 
-    console.log("selected");
+    console.log("holder selected");
     this.border?.setAlpha(1);
     this.selected = true;
 
@@ -151,7 +151,7 @@ export class DiceHolder extends Phaser.GameObjects.Container {
   }
 
   unselect() {
-    console.log("UNselected");
+    console.log("holder UNselected");
     this.border?.setAlpha(0);
     this.selected = false;
     this.setPointerOutEvent();

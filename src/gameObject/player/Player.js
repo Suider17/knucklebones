@@ -118,13 +118,10 @@ export default class Player extends Phaser.Events.EventEmitter {
     this.diceHolder.once(DICE_HOLDER_ADD_DICE, () => {
       this.diceHolder.disable();
       this.endTurn();
-    });
-    this.diceHolder.once(DICE_HOLDER_ADD_DICE, () => {
-      this.diceHolder.disable();
-      this.endTurn();
 
       this.diceHolder.on(DICE_HOLDER_SELECTED, (holder) => {
         this.board.enableEvents();
+        this.dice.disable();
       });
 
       this.diceHolder.on(DICE_HOLDER_UNSELECTED, (holder) => {

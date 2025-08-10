@@ -107,7 +107,7 @@ export default class Board extends Phaser.GameObjects.Container {
         console.log("no hay donde poner el mod");
         return;
       }
-      diceWithModSlot.setNewMod(player.dice.value);
+      diceWithModSlot.insertMod(player.dice.value);
     } else if (!hasModSlot && !hasDiceSlot) {
       console.log("AQUI NO HAY ESPACIO MU CHAVO");
     }
@@ -124,7 +124,7 @@ export default class Board extends Phaser.GameObjects.Container {
       if (!isMod) {
         //eliminamos el ultimo dado insertado de la columna
         {
-          lastInserted.object.sprite.destroy();
+          lastInserted.object.remove();
           this.columns[index].splice(lastInserted.index, 1);
         }
       } else if (
@@ -180,7 +180,7 @@ export default class Board extends Phaser.GameObjects.Container {
         console.warn("No se encontró un mod marcado como lastInserted");
       }
     } else {
-      console.warn("No existe condición para poner este dado");
+      console.warn("No existe espacio para poner este dado");
     }
   }
 

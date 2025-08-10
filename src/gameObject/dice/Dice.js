@@ -54,16 +54,18 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.setSize(this.sprite.displayWidth, this.sprite.displayHeight);
 
     //==mods
-    console.log(this.mods.length);
-
-    this.mods.forEach((mod, index) => {
+    this.mods = this.mods.map((_, index) => {
       const position = DICE_MOD_RELATIVE_POSITION[index + 1];
-      mod = new DiceMod(this.scene, position.x, position.y, DICE_MOD_SPRITE);
+      const mod = new DiceMod(
+        this.scene,
+        position.x,
+        position.y,
+        DICE_MOD_SPRITE
+      );
       mod.init();
-      if (this.board == 2) {
-        mod.angle = 180;
-      }
+      if (this.board == 2) mod.angle = 180;
       this.add(mod);
+      return mod;
     });
   }
 
@@ -83,7 +85,7 @@ export default class Dice extends Phaser.GameObjects.Container {
   }
   setValue(value) {
     if (MOD_BUCKET_ARRAY.includes(value)) {
-      this.setNewMod(value);
+      this.insertMod(value);
       return false;
     } else if (
       NORMAL_BUCKET_ARRAY.includes(value) ||
@@ -104,6 +106,11 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.blocked = true;
   }
 
+  remove() {
+    this.destroy(true);
+    this.emit("diceRemoved", this);
+  }
+
   updatePosition(x, y) {
     if (x !== undefined && y !== undefined) {
       this.position[0] = x;
@@ -121,7 +128,7 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.lockDice();
   }
 
-  setNewMod(value) {
+  insertMod(value) {
     const mods = this.mods;
     if (!value) {
       throw new ReferenceError("Valor de dado para el MOD no definido");
@@ -131,6 +138,9 @@ export default class Dice extends Phaser.GameObjects.Container {
       const emptySlotIndex = mods.findIndex(
         (mod) => DICE_BUCKET(mod.value) === EMPTY_DICE_BUCKET
       );
+
+      this.mods[emptySlotIndex].newValue(value);
+      this.mods[emptySlotIndex].enable();
 
       this.lastInserted = true;
     } else {
@@ -163,7 +173,7 @@ export default class Dice extends Phaser.GameObjects.Container {
     await this.animator.charge({ onStart, onComplete, onYoyo, offset });
   }
 
-  async destroy({ onStart, onComplete } = {}) {
+  async dispose({ onStart, onComplete } = {}) {
     await this.animator.destroy({ onStart, onComplete });
   }
 
