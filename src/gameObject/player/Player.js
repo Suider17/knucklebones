@@ -22,6 +22,7 @@ import {
   BOARD_HOLDER_VALUE_ASSIGNED,
   BOARD_PLAYER_DICE_VALUE_ASSIGNED,
 } from "../board/board.events";
+import { PDICE_ROLL_FINISH } from "../playerDice/playerDice.events";
 
 export default class Player extends Phaser.Events.EventEmitter {
   constructor(scene, id) {
@@ -84,8 +85,7 @@ export default class Player extends Phaser.Events.EventEmitter {
   }
 
   diceEmitListener() {
-    this.dice.on(PLAYER_DICE_ROLLED, (value, diceStyle) => {
-      console.log("dado tirado para jugador");
+    this.dice.on(PDICE_ROLL_FINISH, (value, diceStyle) => {
       this.diceWasRolledThisTurn = true;
       this.isValueAssigned = false;
 

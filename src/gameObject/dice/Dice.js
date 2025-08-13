@@ -138,7 +138,6 @@ export default class Dice extends Phaser.GameObjects.Container {
       const emptySlotIndex = mods.findIndex(
         (mod) => DICE_BUCKET(mod.value) === EMPTY_DICE_BUCKET
       );
-
       this.mods[emptySlotIndex].newValue(value);
       this.mods[emptySlotIndex].enable();
 

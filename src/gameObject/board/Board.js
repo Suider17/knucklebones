@@ -2,6 +2,7 @@ import Dice from "../dice/Dice";
 import {
   BUCKET_HIERARCHY,
   DICE_BUCKET,
+  DICE_EMPTY,
   MOD_DICE_BUCKET,
   NORMAL_BUCKET_ARRAY,
 } from "../../definitions/diceDefinitions";
@@ -131,11 +132,12 @@ export default class Board extends Phaser.GameObjects.Container {
         isMod &&
         diceInColumn.some((_d) => NORMAL_BUCKET_ARRAY.includes(_d.value))
       ) {
-        // const mod = lastInserted.object.mods.find((mod) => mod.lastInserted);
-        // mod.value = DICE_EMPTY;
-        // mod.lastInserted = false;
-        // lastInserted.object.lastInserted = false;
-        // lastInserted.object.refreshMods();
+        console.log(lastInserted.object.mods);
+        const mod = lastInserted.object.mods.find((mod) => mod.lastInserted);
+        mod.value = DICE_EMPTY;
+        mod.lastInserted = false;
+        lastInserted.object.lastInserted = false;
+        //lastInserted.object.refreshMods();
       }
     }
 

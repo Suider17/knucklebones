@@ -21,7 +21,7 @@ export default class DiceMod extends Phaser.GameObjects.Sprite {
 
   newValue(newValue) {
     if (newValue == null) console.log("no se mandó valor al insertar mod");
-    const remap = { DICE_SWORD: 0, DICE_SHIELD: 1 };
+    const remap = { [DICE_SWORD]: 0, [DICE_SHIELD]: 1 };
     this.value = remap[newValue];
     this.setFrame(this.value);
   }
