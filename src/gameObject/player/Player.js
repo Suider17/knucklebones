@@ -20,7 +20,7 @@ import {
 } from "../diceHolder/diceHolder.events";
 import {
   BOARD_HOLDER_VALUE_ASSIGNED,
-  BOARD_PLAYER_DICE_VALUE_ASSIGNED,
+  BOARD_PDICE_VALUE_ASSIGNED,
 } from "../board/board.events";
 import { PDICE_ROLL_FINISH } from "../playerDice/playerDice.events";
 
@@ -41,7 +41,7 @@ export default class Player extends Phaser.Events.EventEmitter {
   }
 
   init() {
-    //se define primero board que playerDice porque playerDice tiene utilliza baord en una funcion
+    //se define primero board que playerDice porque playerDice utilliza baord en una funcion
     //===========================
     //BOARD
     //==========================
@@ -99,7 +99,7 @@ export default class Player extends Phaser.Events.EventEmitter {
   }
 
   boardEmitListener() {
-    this.board.on(BOARD_PLAYER_DICE_VALUE_ASSIGNED, () => {
+    this.board.on(BOARD_PDICE_VALUE_ASSIGNED, () => {
       this.endTurn();
     });
 
@@ -126,6 +126,7 @@ export default class Player extends Phaser.Events.EventEmitter {
 
       this.diceHolder.on(DICE_HOLDER_UNSELECTED, (holder) => {
         this.board.disableEvents();
+        this.dice.enable();
       });
     });
   }

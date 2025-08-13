@@ -12,7 +12,7 @@ import {
   SPECIAL_BUCKET_ARRAY,
   SPECIAL_DICE_BUCKET,
 } from "../../definitions/diceDefinitions";
-import { DICE_MOD_RELATIVE_POSITION } from "../../definitions/Positions";
+import { DICE_MOD_RELATIVE_POSITION } from "../../definitions/positions";
 import DiceMod from "../diceMod/DiceMod";
 import DiceAnimator from "./animations/DiceAnimator";
 import { customRandom } from "./dice.helper";
@@ -138,6 +138,7 @@ export default class Dice extends Phaser.GameObjects.Container {
       const emptySlotIndex = mods.findIndex(
         (mod) => DICE_BUCKET(mod.value) === EMPTY_DICE_BUCKET
       );
+      console.log(mods);
       this.mods[emptySlotIndex].newValue(value);
       this.mods[emptySlotIndex].enable();
 
@@ -145,6 +146,13 @@ export default class Dice extends Phaser.GameObjects.Container {
     } else {
       throw new Error("no hay espacios para mod");
     }
+  }
+
+  disposeMod() {
+    const mod = this.mods.find((mod) => mod.lastInserted);
+    mod.reset();
+    mod.disable();
+    mod.lastInserted = false;
   }
 
   hasEmptyModSlot() {

@@ -8,9 +8,10 @@ import {
 } from "../../definitions/diceDefinitions";
 import BoardAnimator from "./animations/BoardAnimator";
 import {
-  BOARD_PLAYER_DICE_VALUE_ASSIGNED,
   BOARD_HOLDER_VALUE_ASSIGNED,
+  BOARD_PDICE_VALUE_ASSIGNED,
 } from "./board.events";
+import { DICE_HOLDER_VALUE_ASSIGNED } from "../diceHolder/diceHolder.events";
 
 export default class Board extends Phaser.GameObjects.Container {
   constructor(scene, x, y, id, player) {
@@ -91,9 +92,7 @@ export default class Board extends Phaser.GameObjects.Container {
 
     const isHolderValue = diceHolder.value !== 0 && diceHolder.selected;
 
-    let newValue = 0;
-
-    newValue = isHolderValue ? diceHolder.value : player.dice.value;
+    const newValue = isHolderValue ? diceHolder.value : player.dice.value;
 
     const isMod = DICE_BUCKET(newValue) === MOD_DICE_BUCKET;
     const hasModSlot = diceInColumn.some((_d) => _d.hasEmptyModSlot());
@@ -108,18 +107,22 @@ export default class Board extends Phaser.GameObjects.Container {
         console.log("no hay donde poner el mod");
         return;
       }
-      diceWithModSlot.insertMod(player.dice.value);
+
+      diceWithModSlot.insertMod(newValue);
     } else if (!hasModSlot && !hasDiceSlot) {
       console.log("AQUI NO HAY ESPACIO MU CHAVO");
     }
 
+    console.log("over" + this.columns?.[0]?.[0]?.mods?.[0]?.value);
+    console.log("over" + this.columns?.[0]?.[0]?.mods?.[1]?.value);
     this.sortColumn(index);
   }
 
   handlePointerOut(index) {
-    const isMod = DICE_BUCKET(this.player.dice.value) === MOD_DICE_BUCKET;
-
     const lastInserted = this.getLastInsertedDice(); //el ultimo dado insertado
+    //const isHolderValue = diceHolder.value !== 0 && diceHolder.selected;
+    const isMod = lastInserted.object?.mods.find((mod) => mod.lastInserted);
+
     const diceInColumn = this.columns[index];
     if (lastInserted.object && lastInserted.index !== -1) {
       if (!isMod) {
@@ -132,13 +135,15 @@ export default class Board extends Phaser.GameObjects.Container {
         isMod &&
         diceInColumn.some((_d) => NORMAL_BUCKET_ARRAY.includes(_d.value))
       ) {
-        console.log(lastInserted.object.mods);
+        //console.log(lastInserted.object.mods);
         const mod = lastInserted.object.mods.find((mod) => mod.lastInserted);
-        mod.value = DICE_EMPTY;
-        mod.lastInserted = false;
         lastInserted.object.lastInserted = false;
-        //lastInserted.object.refreshMods();
+        lastInserted.object.disposeMod();
       }
+    } else {
+      console.warn(
+        "La columna en la que se inténtó ingresar está vacia o no hay ultimo insertado"
+      );
     }
 
     this.sortColumn(index);
@@ -163,26 +168,25 @@ export default class Board extends Phaser.GameObjects.Container {
 
       this.calculateCombos(index);
       this.disableEvents();
-
-      //Emit to player, board has assgined a slot
-      if (isHolderValue) {
-        this.emit(BOARD_HOLDER_VALUE_ASSIGNED, this);
-      } else {
-        this.emit(BOARD_PLAYER_DICE_VALUE_ASSIGNED, this);
-      }
     } else if (isMod && hasModSlot) {
       // Insertar dado como mod
-      const mod = lastInserted.object.mods.find((mod) => mod.lastInserted);
+      const mod = lastInserted.object?.mods.find((mod) => mod.lastInserted);
 
       if (mod) {
-        // mod.lastInserted = false;
-        // lastInserted.object.refreshMods();
-        // //putDiceValueInColumn(scene, player, index);
+        mod.lastInserted = false;
+        lastInserted.object.lastInserted = false;
       } else {
         console.warn("No se encontró un mod marcado como lastInserted");
       }
     } else {
       console.warn("No existe espacio para poner este dado");
+    }
+
+    //Emit to player, board has assgined a slot
+    if (isHolderValue) {
+      this.emit(BOARD_HOLDER_VALUE_ASSIGNED, this);
+    } else {
+      this.emit(BOARD_PDICE_VALUE_ASSIGNED, this);
     }
   }
 
@@ -207,25 +211,23 @@ export default class Board extends Phaser.GameObjects.Container {
 
   addNewDiceInColumn(index, diceValue, lastInserted) {
     const column = this.columns[index];
+    const newDice = new Dice(
+      this.scene,
+      0,
+      0,
+      "diceFaces",
+      diceValue,
+      [index, column.length],
+      this,
+      0.7,
+      !!lastInserted
+    );
+    newDice.init();
+    this.add(newDice);
 
-    column.length < 3 &&
-      column.push(
-        new Dice(
-          this.scene,
-          0,
-          0,
-          "diceFaces",
-          diceValue,
-          [index, column.length],
-          this,
-          0.7,
-          !!lastInserted
-        )
-      );
+    column.length < 3 && column.push(newDice);
 
     column.forEach((_d) => {
-      _d.init();
-      this.add(_d);
       _d.updatePosition();
     });
   }
@@ -416,17 +418,18 @@ export default class Board extends Phaser.GameObjects.Container {
     );
   }
 
-  async destroyDice(dice) {
-    if (dice) {
-      this.columns[dice.position[0]].splice(dice.position[1], 1);
-      await dice.destroy({
-        onComplete: () => {
-          console.log("drestroy");
-          dice.sprite.destroy();
-        },
-      });
-    }
-  }
+  //DELETE
+  // async destroyDice(dice) {
+  //   if (dice) {
+  //     this.columns[dice.position[0]].splice(dice.position[1], 1);
+  //     await dice.destroy({
+  //       onComplete: () => {
+  //         console.log("drestroy");
+  //         dice.sprite.destroy();
+  //       },
+  //     });
+  //   }
+  // }
 
   //==========================
   //========ANIMATIONS========
