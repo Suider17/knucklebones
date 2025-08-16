@@ -3,7 +3,7 @@ import {
   DICE_SHIELD,
   DICE_SPRITE,
   DICE_SWORD,
-} from "../../definitions/diceDefinitions";
+} from "../../definitions/dice.definit";
 
 export default class DiceMod extends Phaser.GameObjects.Sprite {
   constructor(scene, x, y, texture) {

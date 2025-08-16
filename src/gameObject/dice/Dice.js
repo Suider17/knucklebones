@@ -1,20 +1,23 @@
 import {
   ATACK_BUCKET_ARRAY,
   D11,
+  DICE_ARCHETYPE,
   DICE_BUCKET,
   DICE_EMPTY,
   DICE_MOD_SPRITE,
   DICE_SWORD,
   EMPTY_DICE_BUCKET,
+  GET_ARCHETYPE,
   MOD_BUCKET_ARRAY,
   NORMAL_BUCKET_ARRAY,
   NORMAL_DICE_BUCKET,
   SPECIAL_BUCKET_ARRAY,
   SPECIAL_DICE_BUCKET,
-} from "../../definitions/diceDefinitions";
+} from "../../definitions/dice.definit";
 import { DICE_MOD_RELATIVE_POSITION } from "../../definitions/positions";
 import DiceMod from "../diceMod/DiceMod";
 import DiceAnimator from "./animations/DiceAnimator";
+import { DICE_NEW_ARCHETYPE } from "./dice.events";
 import { customRandom } from "./dice.helper";
 
 export default class Dice extends Phaser.GameObjects.Container {
@@ -23,7 +26,7 @@ export default class Dice extends Phaser.GameObjects.Container {
 
     this.value = value; //value attached to frame
     this.mods = [null, null];
-    this.status = "";
+    this.arquetype = DICE_ARCHETYPE.NONE;
     this.bucket = DICE_BUCKET(this.value); //bucket to sort columns
     this.position = coordinates; //board cartesian coordinates
     this.blocked = false;
@@ -138,13 +141,22 @@ export default class Dice extends Phaser.GameObjects.Container {
       const emptySlotIndex = mods.findIndex(
         (mod) => DICE_BUCKET(mod.value) === EMPTY_DICE_BUCKET
       );
-      console.log(mods);
+
       this.mods[emptySlotIndex].newValue(value);
       this.mods[emptySlotIndex].enable();
 
       this.lastInserted = true;
     } else {
       throw new Error("no hay espacios para mod");
+    }
+
+    const canGetArchetype =
+      mods.findIndex((mod) => DICE_BUCKET(mod.value) === EMPTY_DICE_BUCKET) ===
+      -1;
+    if (canGetArchetype) {
+      this.archetype = GET_ARCHETYPE(this.mods);
+      //evento para cuando puede tener un nuevo arquetipo
+      this.emit(DICE_NEW_ARCHETYPE, this);
     }
   }
 

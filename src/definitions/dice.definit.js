@@ -69,6 +69,15 @@ export const BUCKET_HIERARCHY = {
   [NORMAL_DICE_BUCKET]: 3,
   [EMPTY_DICE_BUCKET]: 4,
 };
+
+export const DICE_ARCHETYPE = {
+  NONE: "none",
+  KNIGHT: "knight",
+  LEFT_KNIGHT: "leftKinght",
+  BERSERKER: "berserker",
+  GUARDIAN: "guardian",
+};
+
 /**
  * Devuele el valor INT del bucket
  * al que pertenece el valor de dado ingresado
@@ -87,5 +96,17 @@ export function DICE_BUCKET(value) {
   } else {
     console.log(value);
     throw new ReferenceError("Estas mandando un valor que no tiene Bucket");
+  }
+}
+
+export function GET_ARCHETYPE(mods) {
+  if (mods[0].value === DICE_SWORD && mods[1].value === DICE_SHIELD) {
+    return DICE_ARCHETYPE.LEFT_KNIGHT;
+  } else if (mods[0].value === DICE_SHIELD && mods[1].value === DICE_SWORD) {
+    return DICE_ARCHETYPE.KNIGHT;
+  } else if (mods[0].value === DICE_SHIELD && mods[1].value === DICE_SHIELD) {
+    return DICE_ARCHETYPE.GUARDIAN;
+  } else if (mods[0].value === DICE_SWORD && mods[1].value === DICE_SWORD) {
+    return DICE_ARCHETYPE.BERSERKER;
   }
 }

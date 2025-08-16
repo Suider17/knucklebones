@@ -1,18 +1,9 @@
 import {
-  ATACK_BUCKET_ARRAY,
   D11,
   D6,
-  DICE_BUCKET,
   DICE_EMPTY,
   DICE_SPRITE,
-  DICE_SWORD,
-  MOD_BUCKET_ARRAY,
-  NORMAL_BUCKET_ARRAY,
-  NORMAL_DICE_BUCKET,
-  SPECIAL_BUCKET_ARRAY,
-  SPECIAL_DICE_BUCKET,
-} from "../../definitions/diceDefinitions";
-import { PLAYER_DICE_ROLLED } from "../../definitions/emitNames";
+} from "../../definitions/dice.definit";
 import { customRandom } from "../dice/dice.helper";
 import { PlayerDiceAnimator } from "./animations/PlayerDiceAnimator";
 import {

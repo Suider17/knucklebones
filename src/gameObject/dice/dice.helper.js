@@ -9,19 +9,19 @@ import {
   DICE_SHIELD,
   DICE_SKULL,
   DICE_SWORD,
-} from "../../definitions/diceDefinitions";
+} from "../../definitions/dice.definit";
 
 export function customRandom(d_) {
   const probabilities = {
     d_11: {
-      [DICE_1]: 0,
-      [DICE_2]: 0,
-      [DICE_3]: 0,
-      [DICE_4]: 0,
-      [DICE_5]: 0,
-      [DICE_6]: 0,
-      [DICE_SHIELD]: 10,
-      [DICE_SWORD]: 6,
+      [DICE_1]: 10,
+      [DICE_2]: 10,
+      [DICE_3]: 10,
+      [DICE_4]: 10,
+      [DICE_5]: 10,
+      [DICE_6]: 10,
+      [DICE_SHIELD]: 2,
+      [DICE_SWORD]: 20,
       [DICE_SKULL]: 0,
       //[DICE_REROLL]: 0,
       //11: 1,

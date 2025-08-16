@@ -33,6 +33,7 @@ export default class Player extends Phaser.Events.EventEmitter {
     this.turn = false;
     this.isValueAssigned = true;
     this.diceWasRolledThisTurn = false;
+    this.isFirstPlayer = false;
 
     //other classes references
     this.board = null;
@@ -132,6 +133,7 @@ export default class Player extends Phaser.Events.EventEmitter {
   }
 
   setAsFirstPlayer() {
+    this.isFirstPlayer = true;
     this.emit(SET_AS_FIRTS_PLAYER, this);
   }
 
@@ -169,7 +171,7 @@ export default class Player extends Phaser.Events.EventEmitter {
     //diceHolder
     this.diceHolder.disable();
     this.board.disableEvents();
-
+    this.scene.turnCounter += 1;
     this.emit(PLAYER_END_TURN, this);
   }
 }

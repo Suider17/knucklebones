@@ -5,13 +5,14 @@ import {
   DICE_EMPTY,
   MOD_DICE_BUCKET,
   NORMAL_BUCKET_ARRAY,
-} from "../../definitions/diceDefinitions";
+} from "../../definitions/dice.definit";
 import BoardAnimator from "./animations/BoardAnimator";
 import {
   BOARD_HOLDER_VALUE_ASSIGNED,
   BOARD_PDICE_VALUE_ASSIGNED,
 } from "./board.events";
 import { DICE_HOLDER_VALUE_ASSIGNED } from "../diceHolder/diceHolder.events";
+import { DICE_NEW_ARCHETYPE } from "../dice/dice.events";
 
 export default class Board extends Phaser.GameObjects.Container {
   constructor(scene, x, y, id, player) {
@@ -112,9 +113,6 @@ export default class Board extends Phaser.GameObjects.Container {
     } else if (!hasModSlot && !hasDiceSlot) {
       console.log("AQUI NO HAY ESPACIO MU CHAVO");
     }
-
-    console.log("over" + this.columns?.[0]?.[0]?.mods?.[0]?.value);
-    console.log("over" + this.columns?.[0]?.[0]?.mods?.[1]?.value);
     this.sortColumn(index);
   }
 
@@ -209,7 +207,7 @@ export default class Board extends Phaser.GameObjects.Container {
   //==========================
   //==========================
 
-  addNewDiceInColumn(index, diceValue, lastInserted) {
+  addNewDiceInColumn(index, diceValue, lastInserted = false) {
     const column = this.columns[index];
     const newDice = new Dice(
       this.scene,
@@ -224,6 +222,7 @@ export default class Board extends Phaser.GameObjects.Container {
     );
     newDice.init();
     this.add(newDice);
+    this.setDiceEventListener(newDice);
 
     column.length < 3 && column.push(newDice);
 
@@ -231,6 +230,13 @@ export default class Board extends Phaser.GameObjects.Container {
       _d.updatePosition();
     });
   }
+
+  setDiceEventListener(dice) {
+    dice.on(DICE_NEW_ARCHETYPE, () => {
+      //console.log("NUEVO ARQUETIPO>: " + dice.archetype);
+    });
+  }
+
   updateSingleTotal(column, score = 0) {
     if (this.totals[column]) {
       this.totals[column].setText(parseInt(score));
@@ -419,17 +425,17 @@ export default class Board extends Phaser.GameObjects.Container {
   }
 
   //DELETE
-  // async destroyDice(dice) {
-  //   if (dice) {
-  //     this.columns[dice.position[0]].splice(dice.position[1], 1);
-  //     await dice.destroy({
-  //       onComplete: () => {
-  //         console.log("drestroy");
-  //         dice.sprite.destroy();
-  //       },
-  //     });
-  //   }
-  // }
+  async destroyDice(dice) {
+    if (dice) {
+      this.columns[dice.position[0]].splice(dice.position[1], 1);
+      await dice.destroy({
+        onComplete: () => {
+          console.log("destroy");
+          dice.destroy();
+        },
+      });
+    }
+  }
 
   //==========================
   //========ANIMATIONS========
