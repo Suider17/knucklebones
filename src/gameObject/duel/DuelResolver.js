@@ -1,12 +1,10 @@
-import { D6, DICE_ARCHETYPE, DICE_SKULL } from "../../definitions/dice.definit";
-import {
-  PLAYER_END_TURN,
-  SET_AS_FIRTS_PLAYER,
-} from "../../definitions/emitNames";
-import { DICE_HOLDER_SELECTED } from "../diceHolder/diceHolder.events";
+import { D6, DICE_ARCHETYPE } from "../dice/dice.definition";
+
+import { PLAYER_TURN_END, PLAYER_FIRST } from "../player/player.events";
+
 import DuelResolverAnimator from "./animations/duelResolverAnimator";
-import { DUEL_TYPE } from "./duel.definition";
-import { DuelSession } from "./DuelSession";
+import { runTimeline } from "./animations/timeLineRunner";
+import { DUEL_STRATEGY } from "./duel.definition";
 
 export class DuelResolver extends Phaser.Events.EventEmitter {
   constructor(scene, players) {
@@ -35,22 +33,16 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
 
   startPlayerTurn(player) {
     console.log("Inicia Turno: " + player.id);
-
     player.startTurn();
-  }
-  endPlayerTurn(player) {
-    console.log("Finaliza Turno: " + player.id);
-
-    player.endTurn();
   }
 
   playerEmitListener() {
     this.players.forEach((player) => {
-      player.on(PLAYER_END_TURN, (_p) => {
+      player.on(PLAYER_TURN_END, (_p) => {
         this.changeTurn(_p);
       });
 
-      player.on(SET_AS_FIRTS_PLAYER, (_p) => {
+      player.on(PLAYER_FIRST, (_p) => {
         this.startPlayerTurn(_p);
       });
     });
@@ -68,18 +60,8 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     }
 
     if (this.scene.untilDuelCounter === 0) {
-      //desactivar eventos de jugadores.
-      this.P1.disable();
-      this.P2.disable();
-      //habilitar alpha de los tableros
-      this.P1.board.setAlpha(1);
-      this.P2.board.setAlpha(1);
-      //efectuar secuencia de ataques
-
-      //realizar un duelResolverAnimator
-      //ejecutar funcion de calculo de daños y nimaciones
+      this.initDuel();
     } else {
-      //no debe iniciar el turno siguiente hasta que termine el duelo
       this.startPlayerTurn(startTurnPlayer);
     }
   }
@@ -94,6 +76,9 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     this.scene.untilDuelCounter = 3;
     this.scene.isDuelPhase = true;
 
+    this.P1.disable();
+    this.P2.disable();
+
     this.P1.board.setAlpha(1);
     this.P2.board.setAlpha(1);
 
@@ -103,9 +88,6 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     this.P1.dice.lock();
     this.P2.dice.lock();
 
-    //=====
-    //Calculo de dados de daño
-    //=====
     const existsAtackDice =
       this.P1.board.existsAtackDice() || this.P2.board.existsAtackDice();
 
@@ -113,10 +95,11 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
       this.duel();
     } else {
       console.log("No hay ataque");
+      //funcion para iniciar el nuevo turno de la siguiente ronda
     }
   }
 
-  getDuelDice() {
+  getDuelConditions() {
     const scene = this.scene;
     for (let index = 0; index < 3; index++) {
       const columnP1 = scene.P1.board.columns[index];
@@ -135,19 +118,9 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
 
       if (!p1CanAttack && !p2CanAttack) continue;
 
-      let duelType = "";
-
-      if (p1CanAttack && p2CanAttack) {
-        duelType = DUEL_TYPE.BOTH_ATTACK;
-      } else if (p1CanAttack && !frontDiceP2) {
-        duelType = DUEL_TYPE.P1_ATTACK_ALONE;
-      } else if (p2CanAttack && !frontDiceP1) {
-        duelType = DUEL_TYPE.P2_ATTACK_ALONE;
-      } else if (p1CanAttack) {
-        duelType = DUEL_TYPE.P1_ATTACK_P2_DEFEND;
-      } else if (p2CanAttack) {
-        duelType = DUEL_TYPE.P2_ATTACK_P1_DEFEND;
-      }
+      let duelType = `${frontDiceP1?.archetype || DICE_ARCHETYPE.NONE}_${
+        frontDiceP2?.archetype || DICE_ARCHETYPE.NONE
+      }`;
 
       return {
         dice: [frontDiceP1, frontDiceP2],
@@ -162,52 +135,52 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
   }
 
   async duel() {
-    const scene = this.scene;
-    const duel = this.getDuelDice();
+    const duel = this.getDuelConditions();
     if (duel) {
-      const diceToDuel = duel.dice.filter(Boolean);
-      await Promise.all(diceToDuel.map((_d) => _d.highlight()));
+      const duelStrategy = DUEL_STRATEGY[duel.type];
+      const animationTimeline = duelStrategy(
+        duel.dice,
+        duel.diceP1,
+        duel.diceP2,
+        duel.columnIndex
+      );
 
-      const duelSession = new DuelSession();
-
-      switch (duel.type) {
-        case DUEL_TYPE.BOTH_ATTACK:
-          //DOS SKULL
-          if (dice.every((_d) => _d.value === DICE_SKULL)) {
-            await this.twoSkullsDuel(dice, scene);
-          }
-          //DOS KNIGHT
-          else if (dice.every((_d) => _d.archetype === DICE_ARCHETYPE.KNIGHT)) {
-            console.log("duelo entre dos knights");
-            await this.twoKnightDuel(dice);
-          }
-
-          //DOS BERSERKER
-          //DOS SWORD
-
-          break;
-        case DUEL_TYPE.P1_ATTACK_ALONE:
-          // p1 ataca sin defensa
-          //validar si es skull <--- desde aqui nueva logica
-          ///ataca directamente al tablero del otro
-
-          break;
-        case "p2AttackAlone":
-          // p2 ataca sin defensa -- aqui tamvien nueva logica
-          //ataca directamente al tablero del otro
-
-          break;
-        case "p1Attack":
-          // p1 ataca y p2 defiende
-          //aqui iria solo la logica de atacar al dado enemigo, bajarle la vida conlo que quede de la diferencia o destrirlo si el skull es mayor
-          break;
-        case "p2Attack":
-          // p2 ataca y p1 defiende
-          //aqui iria solo la logica de atacar al dado enemigo, bajarle la vida o destrirlo si el skull es mayor
-          break;
-      }
-
-      await Promise.all(dice.map((_d) => _d.unHighlight()));
+      await runTimeline(this.scene, animationTimeline);
+      // switch (duel.type) {
+      //   case DUEL_TYPE.BOTH_ATTACK:
+      //     //DOS SKULL
+      //     if (dice.every((_d) => _d.value === DICE_SKULL)) {
+      //       //await this.twoSkullsDuel(dice, scene);
+      //     }
+      //     //DOS KNIGHT
+      //     else if (dice.every((_d) => _d.archetype === DICE_ARCHETYPE.KNIGHT)) {
+      //       console.log("duelo entre dos knights");
+      //       await this.twoKnightDuel(dice);
+      //     }
+      //     //DOS BERSERKER
+      //     //DOS SWORD
+      //     break;
+      //   case DUEL_TYPE.P1_ATTACK_ALONE:
+      //     // p1 ataca sin defensa
+      //     //validar si es skull <--- desde aqui nueva logica
+      //     ///ataca directamente al tablero del otro
+      //     break;
+      //   case "p2AttackAlone":
+      //     // p2 ataca sin defensa -- aqui tamvien nueva logica
+      //     //ataca directamente al tablero del otro
+      //     break;
+      //   case "p1Attack":
+      //     // p1 ataca y p2 defiende
+      //     //aqui iria solo la logica de atacar al dado enemigo, bajarle la vida conlo que quede de la diferencia o destrirlo si el skull es mayor
+      //     break;
+      //   case "p2Attack":
+      //     // p2 ataca y p1 defiende
+      //     //aqui iria solo la logica de atacar al dado enemigo, bajarle la vida o destrirlo si el skull es mayor
+      //     break;
+      // }
+      // const diceToDuel = duel.dice.filter(Boolean);
+      // await Promise.all(diceToDuel.map((_d) => _d.highlight()));
+      // await Promise.all(dice.map((_d) => _d.unHighlight()));
     }
   }
   async twoSkullsDuel(dice, scene) {

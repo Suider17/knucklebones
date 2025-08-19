@@ -5,12 +5,12 @@ import {
   PLAYER_DICE_POSITION,
 } from "../../definitions/positions";
 import Board from "../board/Board";
+
 import {
-  PLAYER_END_TURN,
-  PLAYER_DICE_ROLLED,
-  SET_AS_FIRTS_PLAYER,
-  PLAYER_START_TURN,
-} from "../../definitions/emitNames";
+  PLAYER_TURN_END,
+  PLAYER_TURN_START,
+  PLAYER_FIRST,
+} from "./player.events";
 import { DiceHolder } from "../diceHolder/DiceHolder";
 import {
   DICE_HOLDER_ADD_DICE,
@@ -134,7 +134,7 @@ export default class Player extends Phaser.Events.EventEmitter {
 
   setAsFirstPlayer() {
     this.isFirstPlayer = true;
-    this.emit(SET_AS_FIRTS_PLAYER, this);
+    this.emit(PLAYER_FIRST, this);
   }
 
   disable() {
@@ -156,10 +156,11 @@ export default class Player extends Phaser.Events.EventEmitter {
       ? this.diceHolder.disable()
       : this.diceHolder.enable();
 
-    this.emit(PLAYER_START_TURN, this);
+    this.emit(PLAYER_TURN_START, this);
   }
 
   endTurn() {
+    console.log("Finaliza Turno: " + this.id);
     this.turn = false;
     this.diceWasRolledThisTurn = false;
     this.isValueAssigned = true;
@@ -172,6 +173,6 @@ export default class Player extends Phaser.Events.EventEmitter {
     this.diceHolder.disable();
     this.board.disableEvents();
     this.scene.turnCounter += 1;
-    this.emit(PLAYER_END_TURN, this);
+    this.emit(PLAYER_TURN_END, this);
   }
 }

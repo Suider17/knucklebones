@@ -125,8 +125,8 @@ export default class MainScene extends Phaser.Scene {
 
     // Example descriptions for each debug button
     const descriptions = [
-      "Two knights",
-      "Load custom board/player state 2",
+      "knights_knights",
+      "skull_skull",
       "Load custom board/player state 3",
       "Load custom board/player state 4",
       "Load custom board/player state 5",
@@ -190,15 +190,7 @@ export default class MainScene extends Phaser.Scene {
 
     if (this.untilDuelCounter === 0 && !this.isDuelPhase) {
       //=================
-      this.duelResolver.initDuel();
       //=================
-
-      // sortColumn(index + backwardCount);
-
-      // Object.values(this.P1.board.columns).forEach(column, index=>{
-
-      // })
-      // this.P2.sortColumn(index);
     }
   }
 }

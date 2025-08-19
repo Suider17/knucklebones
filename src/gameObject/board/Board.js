@@ -5,7 +5,7 @@ import {
   DICE_EMPTY,
   MOD_DICE_BUCKET,
   NORMAL_BUCKET_ARRAY,
-} from "../../definitions/dice.definit";
+} from "../dice/dice.definition";
 import BoardAnimator from "./animations/BoardAnimator";
 import {
   BOARD_HOLDER_VALUE_ASSIGNED,

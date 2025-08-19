@@ -9,7 +9,7 @@ import {
   DICE_SHIELD,
   DICE_SKULL,
   DICE_SWORD,
-} from "../../definitions/dice.definit";
+} from "./dice.definition";
 
 export function customRandom(d_) {
   const probabilities = {

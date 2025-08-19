@@ -1,7 +1,18 @@
-export const DUEL_TYPE = Object.freeze({
-  BOTH_ATTACK: "both.attack",
-  P1_ATTACK_P2_DEFEND: "p1.attack:p2.defend",
-  P2_ATTACK_P1_DEFEND: "p2.attack:p1.defend",
-  P1_ATTACK_ALONE: "p1.attack:p2.none",
-  P2_ATTACK_ALONE: "p2.attack:p1.none",
+import { duelKnightVsKnight, duelSkullVsSkull } from "./duelStrategies";
+
+export const DUEL_STRATEGY = Object.freeze({
+  skull_skull: duelSkullVsSkull,
+  knight_knight: duelKnightVsKnight,
+});
+
+export const TIMELINE_STEPTYPE = Object.freeze({
+  PARALLEL: "parallel",
+  SEQUENCE: "sequence",
+  CONTROL: "control",
+  TWEEN: "tween",
+});
+
+export const TIMELINE_CONTROLTYPE = Object.freeze({
+  PAUSE: "pause",
+  RESUME: "resume",
 });

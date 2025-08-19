@@ -3,7 +3,7 @@ import {
   DICE_SHIELD,
   DICE_SKULL,
   DICE_SWORD,
-} from "../definitions/dice.definit";
+} from "../gameObject/dice/dice.definition";
 
 // === DEBUG STATE LOADERS ===
 export function loadDebugState1(scene) {
@@ -22,6 +22,8 @@ export function loadDebugState1(scene) {
   scene.untilDuelCounter = 0;
   scene.roundCounter = 2;
   scene.turnCounter = 2;
+
+  scene.duelResolver.initDuel();
   console.log("Load Debug State 1");
 }
 export function loadDebugState2(scene) {
@@ -35,6 +37,8 @@ export function loadDebugState2(scene) {
   scene.untilDuelCounter = 0;
   scene.roundCounter = 2;
   scene.turnCounter = 2;
+
+  scene.duelResolver.initDuel();
   console.log("Load Debug State 2");
 }
 export function loadDebugState3(scene) {

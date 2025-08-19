@@ -3,7 +3,7 @@ import {
   DICE_SHIELD,
   DICE_SPRITE,
   DICE_SWORD,
-} from "../../definitions/dice.definit";
+} from "../dice/dice.definition";
 
 export default class DiceMod extends Phaser.GameObjects.Sprite {
   constructor(scene, x, y, texture) {
@@ -29,7 +29,9 @@ export default class DiceMod extends Phaser.GameObjects.Sprite {
     this.value = newValue;
     this.lastInserted = true;
     this.setFrame(remap[newValue]); //corregir numeracion para frames de spritesheet de mods porque no coinciden con los valores que le llegan del player dice
-    //se podria hacer una nueva prop que sea el numero de frame y que eso esté separado de el value del dado
+    //se podria hacer una nueva prop que sea el numero de frame y que eso esté separado de el value del
+
+    //this.emit(MOD_ASSIGNED, this);
   }
 
   enable() {

@@ -43,7 +43,7 @@ export const DICE_TRIPLE_6 = 22;
 
 //DICE BUCKETS
 export const SPECIAL_DICE_BUCKET = 1;
-export const HERO_DICE_BUCKET = 2;
+export const ARCHETYPE_DICE_BUCKET = 2;
 export const NORMAL_DICE_BUCKET = 3;
 export const EMPTY_DICE_BUCKET = 4;
 export const MOD_DICE_BUCKET = 5;
@@ -57,15 +57,14 @@ export const NORMAL_BUCKET_ARRAY = [
   DICE_6,
 ];
 export const MOD_BUCKET_ARRAY = [DICE_SHIELD, DICE_SWORD];
-export const SPECIAL_BUCKET_ARRAY = [DICE_SKULL];
+// export const SPECIAL_BUCKET_ARRAY = [DICE_SKULL];
 export const EMPTY_BUCKET_ARRAY = [DICE_EMPTY];
-export const REROLL_BUCKET_ARAY = [DICE_REROLL];
 export const ATACK_BUCKET_ARRAY = [DICE_SWORD, DICE_SKULL];
 
 //BUCKET HIERARCHY
 export const BUCKET_HIERARCHY = {
-  [SPECIAL_DICE_BUCKET]: 1,
-  [HERO_DICE_BUCKET]: 2,
+  //[SPECIAL_DICE_BUCKET]: 1,
+  [ARCHETYPE_DICE_BUCKET]: 1,
   [NORMAL_DICE_BUCKET]: 3,
   [EMPTY_DICE_BUCKET]: 4,
 };
@@ -76,6 +75,9 @@ export const DICE_ARCHETYPE = {
   LEFT_KNIGHT: "leftKinght",
   BERSERKER: "berserker",
   GUARDIAN: "guardian",
+  SWORD: "sword",
+  SHIELD: "shield",
+  SKULL: "skull",
 };
 
 /**
@@ -85,11 +87,15 @@ export const DICE_ARCHETYPE = {
  * @returns {number} el valor del bucket al que pertenece este dado
  */
 export function DICE_BUCKET(value) {
-  if (NORMAL_BUCKET_ARRAY.includes(value)) {
+  if (Object.values(DICE_ARCHETYPE).includes(value)) {
+    return ARCHETYPE_DICE_BUCKET;
+  } else if (NORMAL_BUCKET_ARRAY.includes(value)) {
     return NORMAL_DICE_BUCKET;
-  } else if (SPECIAL_BUCKET_ARRAY.includes(value)) {
-    return SPECIAL_DICE_BUCKET;
-  } else if (EMPTY_BUCKET_ARRAY.includes(value)) {
+  }
+  // else if (SPECIAL_BUCKET_ARRAY.includes(value)) {
+  //   return SPECIAL_DICE_BUCKET;
+  // }
+  else if (EMPTY_BUCKET_ARRAY.includes(value)) {
     return EMPTY_DICE_BUCKET;
   } else if (MOD_BUCKET_ARRAY.includes(value)) {
     return MOD_DICE_BUCKET;
@@ -99,8 +105,20 @@ export function DICE_BUCKET(value) {
   }
 }
 
-export function GET_ARCHETYPE(mods) {
-  if (mods[0].value === DICE_SWORD && mods[1].value === DICE_SHIELD) {
+export function GET_ARCHETYPE(mods = [], value = 0) {
+  if (mods.length === 0 && value === 0) {
+    console.log(mods);
+    console.log(value);
+    throw new ReferenceError("Estas mandando un valor que no tiene archetype");
+  }
+
+  if (value === DICE_SKULL) {
+    return DICE_ARCHETYPE.SKULL;
+  } else if (mods[0].value === DICE_SWORD && mods[1].value == DICE_EMPTY) {
+    return DICE_ARCHETYPE.SWORD;
+  } else if (mods[0].value === DICE_SHIELD && mods[1].value === DICE_EMPTY) {
+    return DICE_ARCHETYPE.SHIELD;
+  } else if (mods[0].value === DICE_SWORD && mods[1].value === DICE_SHIELD) {
     return DICE_ARCHETYPE.LEFT_KNIGHT;
   } else if (mods[0].value === DICE_SHIELD && mods[1].value === DICE_SWORD) {
     return DICE_ARCHETYPE.KNIGHT;
@@ -110,3 +128,9 @@ export function GET_ARCHETYPE(mods) {
     return DICE_ARCHETYPE.BERSERKER;
   }
 }
+
+//ANIMATIONS
+export const DICE_ANIMATIONS = Object.freeze({
+  SHAKE: "shake",
+  CHARGE: "charge",
+});

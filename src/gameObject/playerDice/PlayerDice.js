@@ -1,9 +1,4 @@
-import {
-  D11,
-  D6,
-  DICE_EMPTY,
-  DICE_SPRITE,
-} from "../../definitions/dice.definit";
+import { D11, D6, DICE_EMPTY, DICE_SPRITE } from "../dice/dice.definition";
 import { customRandom } from "../dice/dice.helper";
 import { PlayerDiceAnimator } from "./animations/PlayerDiceAnimator";
 import {

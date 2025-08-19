@@ -1,4 +1,4 @@
-import { D6, DICE_SKULL } from "../../definitions/dice.definit";
+import { D6, DICE_SKULL } from "../../gameObject/dice/dice.definition";
 import Dice from "../../gameObject/dice/Dice";
 
 export function setRoundText(scene) {

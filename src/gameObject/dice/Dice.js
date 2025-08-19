@@ -5,15 +5,14 @@ import {
   DICE_BUCKET,
   DICE_EMPTY,
   DICE_MOD_SPRITE,
+  DICE_SKULL,
   DICE_SWORD,
   EMPTY_DICE_BUCKET,
   GET_ARCHETYPE,
   MOD_BUCKET_ARRAY,
   NORMAL_BUCKET_ARRAY,
   NORMAL_DICE_BUCKET,
-  SPECIAL_BUCKET_ARRAY,
-  SPECIAL_DICE_BUCKET,
-} from "../../definitions/dice.definit";
+} from "./dice.definition";
 import { DICE_MOD_RELATIVE_POSITION } from "../../definitions/positions";
 import DiceMod from "../diceMod/DiceMod";
 import DiceAnimator from "./animations/DiceAnimator";
@@ -27,7 +26,7 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.value = value; //value attached to frame
     this.mods = [null, null];
     this.arquetype = DICE_ARCHETYPE.NONE;
-    this.bucket = DICE_BUCKET(this.value); //bucket to sort columns
+    this.bucket = EMPTY_DICE_BUCKET;
     this.position = coordinates; //board cartesian coordinates
     this.blocked = false;
     this.lastInserted = lastInserted;
@@ -47,6 +46,13 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.sprite.setFrame(this.value);
     this.setScale(0.7);
     this.add(this.sprite);
+
+    if (this.value === DICE_SKULL) {
+      this.archetype = GET_ARCHETYPE([], this.value);
+      this.bucket = DICE_BUCKET(this.archetype); //bucket to sort columns
+    } else {
+      this.bucket = DICE_BUCKET(this.value); //bucket to sort columns
+    }
 
     this.scene.add.existing(this).setScale(this.scale);
     if (this.board == 2) {
@@ -68,15 +74,28 @@ export default class Dice extends Phaser.GameObjects.Container {
       mod.init();
       if (this.board == 2) mod.angle = 180;
       this.add(mod);
+
       return mod;
     });
   }
 
-  roll(diceStyle = D11) {
+  setModEmitListener() {
+    this.on;
+  }
+
+  roll(diceStyle = D11, updateFrame = true) {
     this.value = customRandom(diceStyle);
     this.bucket = DICE_BUCKET(this.value);
+    this.archetype =
+      this.value === DICE_SKULL
+        ? GET_ARCHETYPE([], this.value)
+        : DICE_ARCHETYPE.NONE;
     this.sprite.anims.isPlaying && this.sprite.anims.stop();
-    this.sprite.setFrame(this.value);
+
+    if (updateFrame) {
+      this.sprite.setFrame(this.value);
+    }
+
     //this.blocked = true;
   }
 
@@ -86,22 +105,22 @@ export default class Dice extends Phaser.GameObjects.Container {
   getValue() {
     return this.value;
   }
-  setValue(value) {
-    if (MOD_BUCKET_ARRAY.includes(value)) {
-      this.insertMod(value);
-      return false;
-    } else if (
-      NORMAL_BUCKET_ARRAY.includes(value) ||
-      SPECIAL_BUCKET_ARRAY.includes(value)
-    ) {
-      this.value = value;
-      this.bucket = DICE_BUCKET(value);
-      this.sprite.setFrame(this.value);
-      return false;
-    } else {
-      return true;
-    }
-  }
+  // setValue(value) {
+  //   if (MOD_BUCKET_ARRAY.includes(value)) {
+  //     this.insertMod(value);
+  //     return false;
+  //   } else if (
+  //     NORMAL_BUCKET_ARRAY.includes(value) ||
+  //     SPECIAL_BUCKET_ARRAY.includes(value)
+  //   ) {
+  //     this.value = value;
+  //     this.bucket = DICE_BUCKET(value);
+  //     this.sprite.setFrame(this.value);
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // }
   unlockDice() {
     this.blocked = false;
   }
@@ -155,7 +174,9 @@ export default class Dice extends Phaser.GameObjects.Container {
       -1;
     if (canGetArchetype) {
       this.archetype = GET_ARCHETYPE(this.mods);
+      this.bucket = DICE_BUCKET(this.archetype);
       //evento para cuando puede tener un nuevo arquetipo
+
       this.emit(DICE_NEW_ARCHETYPE, this);
     }
   }
