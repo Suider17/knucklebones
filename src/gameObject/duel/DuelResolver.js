@@ -55,7 +55,6 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     this.currentPlayerId = startTurnPlayer.id;
 
     if (!playerEndingTurn.isFirstPlayer) {
-      console.log(playerEndingTurn);
       this.prepareNewRound();
     }
 
@@ -145,7 +144,7 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
         duel.columnIndex
       );
 
-      await runTimeline(this.scene, animationTimeline);
+      await runTimeline(this.scene, animationTimeline, {});
       // switch (duel.type) {
       //   case DUEL_TYPE.BOTH_ATTACK:
       //     //DOS SKULL

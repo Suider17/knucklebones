@@ -26,58 +26,58 @@ export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
   });
 
   //TIE
-  if (diceP1.value === diceP2.value) {
-    timeline.push({
-      type: TIMELINE_STEPTYPE.PARALLEL,
-      label: "skull_skull_tie_charge",
-      steps: [
-        {
-          type: TIMELINE_STEPTYPE.TWEEN,
-          actor: diceP1,
-          animation: DICE_ANIMATIONS.charge,
-          params: { offset: -70 },
-          onYoyo: [
-            {
-              type: TIMELINE_STEPTYPE.CONTROL,
-              action: TIMELINE_CONTROLTYPE.PAUSE,
-            },
-            {
-              type: TIMELINE_STEPTYPE.TWEEN,
-              actor: diceP1,
-              animation: DICE_ANIMATIONS.shake,
-              params: { duration: 15 },
-            },
-            {
-              type: TIMELINE_STEPTYPE.CONTROL,
-              action: TIMELINE_CONTROLTYPE.RESUME,
-            },
-          ],
-        },
-        {
-          type: TIMELINE_STEPTYPE.TWEEN,
-          actor: diceP2,
-          animation: DICE_ANIMATIONS.charge,
-          params: { offset: -70 },
-          onYoyo: [
-            {
-              type: TIMELINE_STEPTYPE.CONTROL,
-              action: TIMELINE_CONTROLTYPE.PAUSE,
-            },
-            {
-              type: TIMELINE_STEPTYPE.TWEEN,
-              actor: diceP2,
-              animation: DICE_ANIMATIONS.shake,
-              params: { duration: 15 },
-            },
-            {
-              type: TIMELINE_STEPTYPE.CONTROL,
-              action: TIMELINE_CONTROLTYPE.RESUME,
-            },
-          ],
-        },
-      ],
-    });
-  }
+  //if (diceP1.value === diceP2.value) {
+  timeline.push({
+    type: TIMELINE_STEPTYPE.PARALLEL,
+    label: "skull_skull_tie_charge",
+    steps: [
+      {
+        type: TIMELINE_STEPTYPE.TWEEN,
+        actor: diceP1,
+        animation: DICE_ANIMATIONS.CHARGE,
+        params: { offset: -70 },
+        onYoyo: [
+          {
+            type: TIMELINE_STEPTYPE.CONTROL,
+            action: TIMELINE_CONTROLTYPE.PAUSE,
+          },
+          {
+            type: TIMELINE_STEPTYPE.TWEEN,
+            actor: diceP1,
+            animation: DICE_ANIMATIONS.SHAKE,
+            params: { duration: 15 },
+          },
+          {
+            type: TIMELINE_STEPTYPE.CONTROL,
+            action: TIMELINE_CONTROLTYPE.RESUME,
+          },
+        ],
+      },
+      {
+        type: TIMELINE_STEPTYPE.TWEEN,
+        actor: diceP2,
+        animation: DICE_ANIMATIONS.CHARGE,
+        params: { offset: -70 },
+        onYoyo: [
+          {
+            type: TIMELINE_STEPTYPE.CONTROL,
+            action: TIMELINE_CONTROLTYPE.PAUSE,
+          },
+          {
+            type: TIMELINE_STEPTYPE.TWEEN,
+            actor: diceP2,
+            animation: DICE_ANIMATIONS.SHAKE,
+            params: { duration: 15 },
+          },
+          {
+            type: TIMELINE_STEPTYPE.CONTROL,
+            action: TIMELINE_CONTROLTYPE.RESUME,
+          },
+        ],
+      },
+    ],
+  });
+  //}
 
   return timeline;
 
