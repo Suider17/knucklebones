@@ -1,13 +1,26 @@
 import { D6, DICE_ANIMATIONS } from "../dice/dice.definition";
 import { TIMELINE_CONTROLTYPE, TIMELINE_STEPTYPE } from "./duel.definition";
 
+const TimelineCtx = {
+  scene: null,
+  store: {},
+  bus: Phaser.Events.EventEmitter,
+  currentTweenOwner: null,
+  pauseToken: {},
+};
+
 export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
   console.log("esto es skull_skull");
   const timeline = [];
   let winnerDice = null;
   let losserDice = null;
 
-  dice.forEach((_d) => _d.roll(D6, false));
+  dice.forEach((_d) => {
+    _d.roll(D6, false);
+  });
+
+  TimelineCtx.store.dice = dice;
+
   timeline.push({
     type: TIMELINE_STEPTYPE.PARALLEL,
     label: "skull_skull_roll",
@@ -21,6 +34,18 @@ export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
         type: TIMELINE_STEPTYPE.TWEEN,
         actor: diceP2,
         animation: DICE_ANIMATIONS.SHAKE,
+        onComplete: [
+          {
+            type: TIMELINE_STEPTYPE.CONTROL,
+            action: TIMELINE_CONTROLTYPE.LOGIC,
+            fn: (ctx) => {
+              ctx.store.dice.forEach((_d) => {
+                console.log(_d);
+                _d.sprite.setFrame(_d.value);
+              });
+            },
+          },
+        ],
       },
     ],
   });
@@ -69,6 +94,7 @@ export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
             animation: DICE_ANIMATIONS.SHAKE,
             params: { duration: 15 },
           },
+
           {
             type: TIMELINE_STEPTYPE.CONTROL,
             action: TIMELINE_CONTROLTYPE.RESUME,
@@ -79,7 +105,7 @@ export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
   });
   //}
 
-  return timeline;
+  return { timeline: timeline, ctx: TimelineCtx };
 
   return new Promise(async (resolve) => {
     const boards = { 1: scene.P1.board, 2: scene.P2.board };

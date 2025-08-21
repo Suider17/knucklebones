@@ -1,51 +1,51 @@
-import { TIMELINE_STEPTYPE } from "../duel.definition";
+import { TIMELINE_CONTROLTYPE, TIMELINE_STEPTYPE } from "../duel.definition";
 
-export async function runTimeline(scene, timeline) {
-  for (const step of timeline) {
-    await runStep(scene, step);
+export async function runTimeline(scene, timeline, ctx = {}) {
+  for (const node of timeline) {
+    await runNode(scene, node, ctx);
   }
 }
 
-async function runStep(scene, step) {
-  switch (step.type) {
+async function runNode(scene, node, ctx) {
+  switch (node.type) {
     case TIMELINE_STEPTYPE.SEQUENCE:
-      for (const s of step.steps) await runStep(scene, s);
+      for (const _s of node.steps) await runNode(scene, _s, ctx);
       break;
 
     case TIMELINE_STEPTYPE.PARALLEL:
-      await Promise.all(step.steps.map((s) => runStep(scene, s)));
+      await Promise.all(node.steps.map((_s) => runNode(scene, _s, ctx)));
       break;
 
     case TIMELINE_STEPTYPE.TWEEN:
-      await runTweenStep(scene, step);
+      await runTween(scene, node, ctx);
       break;
 
     case TIMELINE_STEPTYPE.CONTROL:
-      await runControlStep(scene, step); // usado solo dentro de hooks
+      await runControlNode(scene, node, ctx); // usado solo dentro de hooks
       break;
   }
 }
 
-async function runTweenStep(scene, step) {
-  const actor = step.actor;
+async function runTween(scene, node, ctx) {
+  const actor = node.actor;
   // Ejecuta tu animación propia. Importante: devuelve Promise que resuelva en onComplete
   // Además, engancha hooks:
-  const tweenPromise = actor[step.animation]({
-    ...(step.params || {}),
+  const tweenPromise = actor[node.animation]({
+    ...(node.params || {}),
     onStart: async () => {
-      if (step.onStart)
-        await runHook(scene, step.onStart, {
+      if (node.onStart)
+        await runHook(scene, node.onStart, {
           ...ctx,
           currentTweenOwner: actor,
         });
     },
     onYoyo: async () => {
-      if (step.onYoyo)
-        await runHook(scene, step.onYoyo, { ...ctx, currentTweenOwner: actor });
+      if (node.onYoyo)
+        await runHook(scene, node.onYoyo, { ...ctx, currentTweenOwner: actor });
     },
     onComplete: async () => {
-      if (step.onComplete)
-        await runHook(scene, step.onComplete, {
+      if (node.onComplete)
+        await runHook(scene, node.onComplete, {
           ...ctx,
           currentTweenOwner: actor,
         });
@@ -55,8 +55,52 @@ async function runTweenStep(scene, step) {
   await tweenPromise; // tu método debe retornar una promesa
 }
 
-async function runHook(scene, hookSteps) {
+async function runHook(scene, hookSteps, ctx) {
   for (const sub of hookSteps) {
-    await runStep(scene, sub, ctx);
+    await runNode(scene, sub, ctx);
+  }
+}
+
+async function runControlNode(scene, node, ctx) {
+  switch (node.action) {
+    case TIMELINE_CONTROLTYPE.PAUSE: {
+      // Creamos un "token" de pausa
+      if (!ctx.pauseToken) {
+        ctx.pauseToken = {};
+      }
+
+      // Si ya hay una pausa activa, ignoramos
+      if (!ctx.pauseToken.promise) {
+        ctx.pauseToken.promise = new Promise((resolve) => {
+          ctx.pauseToken.resolve = resolve;
+        });
+      }
+
+      // Espera hasta que alguien haga RESUME
+      await ctx.pauseToken.promise;
+      return;
+    }
+
+    case TIMELINE_CONTROLTYPE.RESUME: {
+      if (ctx.pauseToken && ctx.pauseToken.resolve) {
+        ctx.pauseToken.resolve(); // liberamos la pausa
+        ctx.pauseToken = null; // limpiamos el token
+      }
+      return;
+    }
+
+    case TIMELINE_CONTROLTYPE.LOGIC: {
+      if (typeof node.fn === "function") {
+        // si devuelve promesa, esperamos; si no, solo ejecuta
+        await node.fn(ctx);
+      } else {
+        console.warn("funcion de hook no pudo ejecutarse", node.fn);
+      }
+      return;
+    }
+
+    default:
+      console.warn("runControlStep: acción desconocida", node.action);
+      return;
   }
 }

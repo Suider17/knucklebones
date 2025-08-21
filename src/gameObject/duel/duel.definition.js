@@ -15,4 +15,5 @@ export const TIMELINE_STEPTYPE = Object.freeze({
 export const TIMELINE_CONTROLTYPE = Object.freeze({
   PAUSE: "pause",
   RESUME: "resume",
+  LOGIC: "logic",
 });

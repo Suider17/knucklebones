@@ -144,7 +144,11 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
         duel.columnIndex
       );
 
-      await runTimeline(this.scene, animationTimeline, {});
+      await runTimeline(
+        this.scene,
+        animationTimeline.timeline,
+        animationTimeline.ctx
+      );
       // switch (duel.type) {
       //   case DUEL_TYPE.BOTH_ATTACK:
       //     //DOS SKULL
