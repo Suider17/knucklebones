@@ -3,9 +3,10 @@ import {
   skull_skull_dispose_both,
   skull_skull_highlight,
   skull_skull_roll,
-  skull_skull_tie,
   skull_skull_unhighlight,
-  skullVsSkullWinner,
+  skullVsSkullCharge,
+  skullVsSkullDuelResult,
+  skullVsSkullOnYoyoChargeWinner,
 } from "./duelScripts/skullVsSkull";
 
 const TimelineCtx = {
@@ -19,8 +20,6 @@ const TimelineCtx = {
 export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
   console.log("esto es skull_skull");
   const timeline = [];
-  let winnerDice = null;
-  let losserDice = null;
 
   timeline.push(skull_skull_highlight(diceP1, diceP2));
 
@@ -34,15 +33,35 @@ export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
 
   //TIE
   if (diceP1.value === diceP2.value) {
-    timeline.push(skull_skull_tie(diceP1, diceP2));
+    timeline.push(
+      skullVsSkullCharge(
+        diceP1,
+        diceP2,
+        skullVsSkullChargeOnYoyo(diceP1),
+        skullVsSkullChargeOnYoyo(diceP2)
+      )
+    );
     timeline.push(skull_skull_unhighlight(diceP1, diceP2));
     timeline.push(skull_skull_dispose_both(diceP1, diceP2));
-  } else if (diceP1.value >= diceP2.value) {
+  } else {
+    // Caso: hay ganador y perdedor
+    const dice1Wins = diceP1.value > diceP2.value;
+    const winnerDice = dice1Wins ? diceP1 : diceP2;
+    const losserDice = dice1Wins ? diceP2 : diceP1;
+
+    const diferenceDamage = Phaser.Math.Difference(
+      winnerDice.value,
+      losserDice.value
+    );
     TimelineCtx.store.duelResultValue = diceP1.value - diceP2.value;
 
-    timeline.push(skullVsSkullWinner(diceP1));
-  } else if (diceP2.value >= diceP1.value) {
-    timeline.push(skullVsSkullWinner(diceP1, diceP2));
+    timeline.push(
+      skullVsSkullCharge(
+        winnerDice,
+        losserDice,
+        skullVsSkullOnYoyoChargeWinner(winnerDice)
+      )
+    );
   }
 
   return { timeline: timeline, ctx: TimelineCtx };
