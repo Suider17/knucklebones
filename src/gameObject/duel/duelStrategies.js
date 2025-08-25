@@ -1,5 +1,12 @@
-import { D6, DICE_ANIMATIONS } from "../dice/dice.definition";
-import { TIMELINE_CONTROLTYPE, TIMELINE_STEPTYPE } from "./duel.definition";
+import { D6 } from "../dice/dice.definition";
+import {
+  skull_skull_dispose_both,
+  skull_skull_highlight,
+  skull_skull_roll,
+  skull_skull_tie,
+  skull_skull_unhighlight,
+  skullVsSkullWinner,
+} from "./duelScripts/skullVsSkull";
 
 const TimelineCtx = {
   scene: null,
@@ -15,95 +22,28 @@ export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
   let winnerDice = null;
   let losserDice = null;
 
+  timeline.push(skull_skull_highlight(diceP1, diceP2));
+
   dice.forEach((_d) => {
     _d.roll(D6, false);
   });
 
   TimelineCtx.store.dice = dice;
 
-  timeline.push({
-    type: TIMELINE_STEPTYPE.PARALLEL,
-    label: "skull_skull_roll",
-    steps: [
-      {
-        type: TIMELINE_STEPTYPE.TWEEN,
-        actor: diceP1,
-        animation: DICE_ANIMATIONS.SHAKE,
-      },
-      {
-        type: TIMELINE_STEPTYPE.TWEEN,
-        actor: diceP2,
-        animation: DICE_ANIMATIONS.SHAKE,
-        onComplete: [
-          {
-            type: TIMELINE_STEPTYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.LOGIC,
-            fn: (ctx) => {
-              ctx.store.dice.forEach((_d) => {
-                console.log(_d);
-                _d.sprite.setFrame(_d.value);
-              });
-            },
-          },
-        ],
-      },
-    ],
-  });
+  timeline.push(skull_skull_roll(diceP1, diceP2));
 
   //TIE
-  //if (diceP1.value === diceP2.value) {
-  timeline.push({
-    type: TIMELINE_STEPTYPE.PARALLEL,
-    label: "skull_skull_tie_charge",
-    steps: [
-      {
-        type: TIMELINE_STEPTYPE.TWEEN,
-        actor: diceP1,
-        animation: DICE_ANIMATIONS.CHARGE,
-        params: { offset: -70 },
-        onYoyo: [
-          {
-            type: TIMELINE_STEPTYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.PAUSE,
-          },
-          {
-            type: TIMELINE_STEPTYPE.TWEEN,
-            actor: diceP1,
-            animation: DICE_ANIMATIONS.SHAKE,
-            params: { duration: 15 },
-          },
-          {
-            type: TIMELINE_STEPTYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.RESUME,
-          },
-        ],
-      },
-      {
-        type: TIMELINE_STEPTYPE.TWEEN,
-        actor: diceP2,
-        animation: DICE_ANIMATIONS.CHARGE,
-        params: { offset: -70 },
-        onYoyo: [
-          {
-            type: TIMELINE_STEPTYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.PAUSE,
-          },
-          {
-            type: TIMELINE_STEPTYPE.TWEEN,
-            actor: diceP2,
-            animation: DICE_ANIMATIONS.SHAKE,
-            params: { duration: 15 },
-          },
+  if (diceP1.value === diceP2.value) {
+    timeline.push(skull_skull_tie(diceP1, diceP2));
+    timeline.push(skull_skull_unhighlight(diceP1, diceP2));
+    timeline.push(skull_skull_dispose_both(diceP1, diceP2));
+  } else if (diceP1.value >= diceP2.value) {
+    TimelineCtx.store.duelResultValue = diceP1.value - diceP2.value;
 
-          {
-            type: TIMELINE_STEPTYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.RESUME,
-          },
-        ],
-      },
-    ],
-  });
-  //}
+    timeline.push(skullVsSkullWinner(diceP1));
+  } else if (diceP2.value >= diceP1.value) {
+    timeline.push(skullVsSkullWinner(diceP1, diceP2));
+  }
 
   return { timeline: timeline, ctx: TimelineCtx };
 

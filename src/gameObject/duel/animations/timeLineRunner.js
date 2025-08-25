@@ -1,4 +1,4 @@
-import { TIMELINE_CONTROLTYPE, TIMELINE_STEPTYPE } from "../duel.definition";
+import { TIMELINE_CONTROLTYPE, TIMELINE_NODETYPE } from "../duel.definition";
 
 export async function runTimeline(scene, timeline, ctx = {}) {
   for (const node of timeline) {
@@ -8,19 +8,19 @@ export async function runTimeline(scene, timeline, ctx = {}) {
 
 async function runNode(scene, node, ctx) {
   switch (node.type) {
-    case TIMELINE_STEPTYPE.SEQUENCE:
+    case TIMELINE_NODETYPE.SEQUENCE:
       for (const _s of node.steps) await runNode(scene, _s, ctx);
       break;
 
-    case TIMELINE_STEPTYPE.PARALLEL:
+    case TIMELINE_NODETYPE.PARALLEL:
       await Promise.all(node.steps.map((_s) => runNode(scene, _s, ctx)));
       break;
 
-    case TIMELINE_STEPTYPE.TWEEN:
+    case TIMELINE_NODETYPE.TWEEN:
       await runTween(scene, node, ctx);
       break;
 
-    case TIMELINE_STEPTYPE.CONTROL:
+    case TIMELINE_NODETYPE.CONTROL:
       await runControlNode(scene, node, ctx); // usado solo dentro de hooks
       break;
   }

@@ -5,7 +5,7 @@ export const DUEL_STRATEGY = Object.freeze({
   knight_knight: duelKnightVsKnight,
 });
 
-export const TIMELINE_STEPTYPE = Object.freeze({
+export const TIMELINE_NODETYPE = Object.freeze({
   PARALLEL: "parallel",
   SEQUENCE: "sequence",
   CONTROL: "control",

@@ -105,22 +105,22 @@ export default class Dice extends Phaser.GameObjects.Container {
   getValue() {
     return this.value;
   }
-  // setValue(value) {
-  //   if (MOD_BUCKET_ARRAY.includes(value)) {
-  //     this.insertMod(value);
-  //     return false;
-  //   } else if (
-  //     NORMAL_BUCKET_ARRAY.includes(value) ||
-  //     SPECIAL_BUCKET_ARRAY.includes(value)
-  //   ) {
-  //     this.value = value;
-  //     this.bucket = DICE_BUCKET(value);
-  //     this.sprite.setFrame(this.value);
-  //     return false;
-  //   } else {
-  //     return true;
-  //   }
-  // }
+  setValue(value) {
+    if (MOD_BUCKET_ARRAY.includes(value)) {
+      this.insertMod(value);
+      return false;
+    } else if (
+      NORMAL_BUCKET_ARRAY.includes(value) ||
+      SPECIAL_BUCKET_ARRAY.includes(value)
+    ) {
+      this.value = value;
+      this.bucket = DICE_BUCKET(value);
+      this.sprite.setFrame(this.value);
+      return false;
+    } else {
+      return true;
+    }
+  }
   unlockDice() {
     this.blocked = false;
   }
