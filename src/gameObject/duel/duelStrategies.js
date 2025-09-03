@@ -1,12 +1,15 @@
 import { D6 } from "../dice/dice.definition";
+import { boardShake } from "./duelScripts/boardScripts";
 import {
   skull_skull_dispose_both,
+  skull_skull_disposeOne,
   skull_skull_highlight,
   skull_skull_roll,
   skull_skull_unhighlight,
-  skullVsSkullCharge,
-  skullVsSkullDuelResult,
+  skullVsSkullChargeAgainstBoard,
+  skullVsSkullChargeOnYoyo,
   skullVsSkullOnYoyoChargeWinner,
+  skullVsSkullTieCharge,
 } from "./duelScripts/skullVsSkull";
 
 const TimelineCtx = {
@@ -34,7 +37,7 @@ export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
   //TIE
   if (diceP1.value === diceP2.value) {
     timeline.push(
-      skullVsSkullCharge(
+      skullVsSkullTieCharge(
         diceP1,
         diceP2,
         skullVsSkullChargeOnYoyo(diceP1),
@@ -49,18 +52,22 @@ export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
     const winnerDice = dice1Wins ? diceP1 : diceP2;
     const losserDice = dice1Wins ? diceP2 : diceP1;
 
-    const diferenceDamage = Phaser.Math.Difference(
+    TimelineCtx.store.duelResultValue = Phaser.Math.Difference(
       winnerDice.value,
       losserDice.value
     );
-    TimelineCtx.store.duelResultValue = diceP1.value - diceP2.value;
 
     timeline.push(
-      skullVsSkullCharge(
+      skullVsSkullTieCharge(
         winnerDice,
         losserDice,
-        skullVsSkullOnYoyoChargeWinner(winnerDice)
+        skullVsSkullOnYoyoChargeWinner(winnerDice, losserDice)
       )
+    );
+    timeline.push(skull_skull_disposeOne(losserDice));
+
+    timeline.push(
+      skullVsSkullChargeAgainstBoard(winnerDice, boardShake(losserDice.board))
     );
   }
 

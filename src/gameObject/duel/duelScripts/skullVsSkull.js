@@ -1,4 +1,4 @@
-import { DICE_ANIMATIONS } from "../../dice/dice.definition";
+import { DICE_ANIMATIONS, DICE_EMPTY } from "../../dice/dice.definition";
 import { TIMELINE_CONTROLTYPE, TIMELINE_NODETYPE } from "../duel.definition";
 
 export function skull_skull_highlight(diceP1, diceP2) {
@@ -50,7 +50,7 @@ export function skull_skull_roll(diceP1, diceP2) {
   };
 }
 
-export function skullVsSkullCharge(
+export function skullVsSkullTieCharge(
   diceP1,
   diceP2,
   onYoyoP1 = [],
@@ -207,15 +207,48 @@ export function skullVsSkullDuelResult(diceP1, diceP2) {
   };
 }
 
-export function skullVsSkullOnYoyoChargeWinner(dice) {
+export function skullVsSkullOnYoyoChargeWinner(winner, losser) {
   return [
     {
       type: TIMELINE_NODETYPE.CONTROL,
       action: TIMELINE_CONTROLTYPE.LOGIC,
       fn: (ctx) => {
-        dice.value = ctx.store.duelResultValue;
-        dice.sprite.setFrame(dice.value);
+        winner.value = ctx.store.duelResultValue;
+        winner.sprite.setFrame(winner.value);
+
+        losser.value = DICE_EMPTY;
+        losser.sprite.setFrame(losser.value);
       },
     },
   ];
+}
+
+export function skull_skull_disposeOne(dice) {
+  return {
+    type: TIMELINE_NODETYPE.SEQUENCE,
+    label: "skull_skull_tie_dispose_one",
+    steps: [
+      {
+        type: TIMELINE_NODETYPE.TWEEN,
+        actor: dice,
+        animation: DICE_ANIMATIONS.DISPOSE,
+      },
+    ],
+  };
+}
+
+export function skullVsSkullChargeAgainstBoard(dice, onYoyo = []) {
+  return {
+    type: TIMELINE_NODETYPE.PARALLEL,
+    label: "skull_skull_charge",
+    steps: [
+      {
+        type: TIMELINE_NODETYPE.TWEEN,
+        actor: dice,
+        animation: DICE_ANIMATIONS.CHARGE,
+        params: { offset: -70 },
+        onYoyo: onYoyo,
+      },
+    ],
+  };
 }
