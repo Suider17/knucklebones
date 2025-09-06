@@ -1,9 +1,12 @@
 import {
+  D6,
   DICE_MOD_SPRITE,
+  DICE_NUMBER_TAG,
   DICE_SHIELD,
   DICE_SPRITE,
   DICE_SWORD,
 } from "../dice/dice.definition";
+import { customRandom } from "../dice/dice.helper";
 
 export default class DiceMod extends Phaser.GameObjects.Sprite {
   constructor(scene, x, y, texture) {
@@ -43,6 +46,12 @@ export default class DiceMod extends Phaser.GameObjects.Sprite {
 
   reset() {
     this.value = 0;
-    this.setFrame(0);
+    this.disable();
+  }
+
+  roll() {
+    this.value = customRandom(D6);
+    this.setTexture(DICE_NUMBER_TAG);
+    this.setFrame(this.value);
   }
 }

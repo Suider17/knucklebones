@@ -138,6 +138,7 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     if (duel) {
       const duelStrategy = DUEL_STRATEGY[duel.type];
       const animationTimeline = duelStrategy(
+        this.scene,
         duel.dice,
         duel.diceP1,
         duel.diceP2,
@@ -149,41 +150,6 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
         animationTimeline.timeline,
         animationTimeline.ctx
       );
-      // switch (duel.type) {
-      //   case DUEL_TYPE.BOTH_ATTACK:
-      //     //DOS SKULL
-      //     if (dice.every((_d) => _d.value === DICE_SKULL)) {
-      //       //await this.twoSkullsDuel(dice, scene);
-      //     }
-      //     //DOS KNIGHT
-      //     else if (dice.every((_d) => _d.archetype === DICE_ARCHETYPE.KNIGHT)) {
-      //       console.log("duelo entre dos knights");
-      //       await this.twoKnightDuel(dice);
-      //     }
-      //     //DOS BERSERKER
-      //     //DOS SWORD
-      //     break;
-      //   case DUEL_TYPE.P1_ATTACK_ALONE:
-      //     // p1 ataca sin defensa
-      //     //validar si es skull <--- desde aqui nueva logica
-      //     ///ataca directamente al tablero del otro
-      //     break;
-      //   case "p2AttackAlone":
-      //     // p2 ataca sin defensa -- aqui tamvien nueva logica
-      //     //ataca directamente al tablero del otro
-      //     break;
-      //   case "p1Attack":
-      //     // p1 ataca y p2 defiende
-      //     //aqui iria solo la logica de atacar al dado enemigo, bajarle la vida conlo que quede de la diferencia o destrirlo si el skull es mayor
-      //     break;
-      //   case "p2Attack":
-      //     // p2 ataca y p1 defiende
-      //     //aqui iria solo la logica de atacar al dado enemigo, bajarle la vida o destrirlo si el skull es mayor
-      //     break;
-      // }
-      // const diceToDuel = duel.dice.filter(Boolean);
-      // await Promise.all(diceToDuel.map((_d) => _d.highlight()));
-      // await Promise.all(dice.map((_d) => _d.unHighlight()));
     }
   }
   async twoSkullsDuel(dice, scene) {

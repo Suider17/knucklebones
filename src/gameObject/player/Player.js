@@ -10,6 +10,7 @@ import {
   PLAYER_TURN_END,
   PLAYER_TURN_START,
   PLAYER_FIRST,
+  PLAYER_REDUCED_LIFE,
 } from "./player.events";
 import { DiceHolder } from "../diceHolder/DiceHolder";
 import {
@@ -19,6 +20,7 @@ import {
   DICE_HOLDER_UNSELECTED,
 } from "../diceHolder/diceHolder.events";
 import {
+  BOARD_HITTED,
   BOARD_HOLDER_VALUE_ASSIGNED,
   BOARD_PDICE_VALUE_ASSIGNED,
 } from "../board/board.events";
@@ -108,6 +110,10 @@ export default class Player extends Phaser.Events.EventEmitter {
       this.diceHolder.reset();
       this.endTurn();
     });
+
+    this.board.on(BOARD_HITTED, (damage) => {
+      this.takeDamage(damage);
+    });
   }
 
   diceHolderEmitListener() {
@@ -174,5 +180,10 @@ export default class Player extends Phaser.Events.EventEmitter {
     this.board.disableEvents();
     this.scene.turnCounter += 1;
     this.emit(PLAYER_TURN_END, this);
+  }
+
+  takeDamage(damage) {
+    this.life -= damage;
+    this.emit(PLAYER_REDUCED_LIFE, this);
   }
 }

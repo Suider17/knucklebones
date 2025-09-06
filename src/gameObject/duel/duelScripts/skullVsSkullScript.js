@@ -1,7 +1,7 @@
 import { DICE_ANIMATIONS, DICE_EMPTY } from "../../dice/dice.definition";
 import { TIMELINE_CONTROLTYPE, TIMELINE_NODETYPE } from "../duel.definition";
 
-export function skull_skull_highlight(diceP1, diceP2) {
+export function skullVsSkullHighlight(diceP1, diceP2) {
   return {
     type: TIMELINE_NODETYPE.PARALLEL,
     label: "skull_skull_highlight",
@@ -20,7 +20,7 @@ export function skull_skull_highlight(diceP1, diceP2) {
   };
 }
 
-export function skull_skull_roll(diceP1, diceP2) {
+export function skullVsLSkullRoll(diceP1, diceP2) {
   return {
     type: TIMELINE_NODETYPE.PARALLEL,
     label: "skull_skull_roll",
@@ -73,10 +73,10 @@ export function skullVsSkullTieCharge(
         animation: DICE_ANIMATIONS.CHARGE,
         params: { offset: -70 },
         onYoyo: [
-          {
-            type: TIMELINE_NODETYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.PAUSE,
-          },
+            {
+              type: TIMELINE_NODETYPE.CONTROL,
+              action: TIMELINE_CONTROLTYPE.PAUSE,
+            },
           {
             type: TIMELINE_NODETYPE.TWEEN,
             actor: diceP2,
@@ -114,7 +114,7 @@ export function skullVsSkullChargeOnYoyo(dice) {
   ];
 }
 
-export function skull_skull_unhighlight(diceP1, diceP2) {
+export function skullVsSkullUnhighlight(diceP1, diceP2) {
   return {
     type: TIMELINE_NODETYPE.PARALLEL,
     label: "skull_skull_tie_unhilight",
@@ -133,7 +133,7 @@ export function skull_skull_unhighlight(diceP1, diceP2) {
   };
 }
 
-export function skull_skull_dispose_both(diceP1, diceP2) {
+export function skullVsSkullDisposeBoth(diceP1, diceP2) {
   return {
     type: TIMELINE_NODETYPE.PARALLEL,
     label: "skull_skull_tie_dispose_both",
@@ -147,6 +147,17 @@ export function skull_skull_dispose_both(diceP1, diceP2) {
         type: TIMELINE_NODETYPE.TWEEN,
         actor: diceP2,
         animation: DICE_ANIMATIONS.DISPOSE,
+        onComplete: [
+          {
+            type: TIMELINE_NODETYPE.CONTROL,
+            action: TIMELINE_CONTROLTYPE.LOGIC,
+            fn: (ctx) => {
+              ctx.store.dice.forEach((_d) => {
+                _d.remove(ctx.store.columnIndex);
+              });
+            },
+          },
+        ],
       },
     ],
   };
@@ -223,7 +234,7 @@ export function skullVsSkullOnYoyoChargeWinner(winner, losser) {
   ];
 }
 
-export function skull_skull_disposeOne(dice) {
+export function skullVsSkullDisposeOne(dice) {
   return {
     type: TIMELINE_NODETYPE.SEQUENCE,
     label: "skull_skull_tie_dispose_one",

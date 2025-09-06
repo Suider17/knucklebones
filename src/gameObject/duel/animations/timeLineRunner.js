@@ -2,6 +2,7 @@ import { TIMELINE_CONTROLTYPE, TIMELINE_NODETYPE } from "../duel.definition";
 
 export async function runTimeline(scene, timeline, ctx = {}) {
   for (const node of timeline) {
+    console.log(node.label);
     await runNode(scene, node, ctx);
   }
 }
@@ -62,36 +63,61 @@ async function runHook(scene, hookSteps, ctx) {
 }
 
 async function runControlNode(scene, node, ctx) {
+  // Helper: devuelve la lista de tweens activos del "dueño" actual o de targets explícitos
+  const resolveTargets = () => {
+    // Permite override explícito: node.targets puede ser 1 objeto o array de objetos/sprites
+    if (node.targets) {
+      const arr = Array.isArray(node.targets) ? node.targets : [node.targets];
+      return arr.flatMap((t) => scene.tweens.getTweensOf(t, true)); // true = onlyActive
+    }
+
+    // Si vienes desde un hook de un tween, pasamos currentTweenOwner en ctx
+    const owner = ctx?.currentTweenOwner;
+    if (owner?.sprite) {
+      // caso típico: owner tiene .sprite
+      return scene.tweens.getTweensOf(owner.sprite, true);
+    }
+    if (owner) {
+      // si el owner es directamente el target del tween
+      return scene.tweens.getTweensOf(owner, true);
+    }
+
+    // Fallback duro (no recomendado): TODOS los tweens
+    return [];
+  };
+
   switch (node.action) {
     case TIMELINE_CONTROLTYPE.PAUSE: {
-      // Creamos un "token" de pausa
-      if (!ctx.pauseToken) {
-        ctx.pauseToken = {};
+      const tweens = resolveTargets();
+
+      // Pausa solo los tweens relevantes; si no hay, puedes decidir pausar todos
+      if (tweens.length === 0) {
+        // Opcional/fallback:
+        // scene.tweens.pauseAll();
+        // return;
+      } else {
+        tweens.forEach((t) => t.pause());
       }
 
-      // Si ya hay una pausa activa, ignoramos
-      if (!ctx.pauseToken.promise) {
-        ctx.pauseToken.promise = new Promise((resolve) => {
-          ctx.pauseToken.resolve = resolve;
-        });
-      }
-
-      // Espera hasta que alguien haga RESUME
-      await ctx.pauseToken.promise;
+      // IMPORTANTE: NO bloquear aquí. Deja que el hook siga
+      // para que pueda correr el mini-SHAKE y luego el RESUME.
       return;
     }
 
     case TIMELINE_CONTROLTYPE.RESUME: {
-      if (ctx.pauseToken && ctx.pauseToken.resolve) {
-        ctx.pauseToken.resolve(); // liberamos la pausa
-        ctx.pauseToken = null; // limpiamos el token
+      const tweens = resolveTargets();
+
+      if (tweens.length === 0) {
+        // Opcional/fallback:
+        // scene.tweens.resumeAll();
+      } else {
+        tweens.forEach((t) => t.resume());
       }
       return;
     }
 
     case TIMELINE_CONTROLTYPE.LOGIC: {
       if (typeof node.fn === "function") {
-        // si devuelve promesa, esperamos; si no, solo ejecuta
         await node.fn(ctx);
       } else {
         console.warn("funcion de hook no pudo ejecutarse", node.fn);
@@ -100,7 +126,7 @@ async function runControlNode(scene, node, ctx) {
     }
 
     default:
-      console.warn("runControlStep: acción desconocida", node.action);
+      console.warn("runControlNode: acción desconocida", node.action);
       return;
   }
 }

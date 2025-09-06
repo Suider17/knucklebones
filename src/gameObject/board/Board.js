@@ -8,6 +8,7 @@ import {
 } from "../dice/dice.definition";
 import BoardAnimator from "./animations/BoardAnimator";
 import {
+  BOARD_HITTED,
   BOARD_HOLDER_VALUE_ASSIGNED,
   BOARD_PDICE_VALUE_ASSIGNED,
 } from "./board.events";
@@ -435,6 +436,10 @@ export default class Board extends Phaser.GameObjects.Container {
         },
       });
     }
+  }
+
+  hited(damage) {
+    this.emit(BOARD_HITTED, damage);
   }
 
   //==========================

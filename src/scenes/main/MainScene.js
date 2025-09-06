@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import {
   loadDiceSprites,
   loadDiceModsSprites,
+  loadNumberTags,
 } from "../../gameObject/dice/dice.assets";
 import {
   createInfoTextPanel,
@@ -68,6 +69,8 @@ export default class MainScene extends Phaser.Scene {
     this.sprites.diceMods = loadDiceModsSprites(this);
     //call dice for initial toss coin
     this.sprites.coin = loadTossCoinSprites(this);
+    //
+    this.sprites.numberTags = loadNumberTags(this);
   }
   create() {
     //======

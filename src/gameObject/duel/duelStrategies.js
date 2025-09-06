@@ -1,16 +1,20 @@
 import { D6 } from "../dice/dice.definition";
-import { boardShake } from "./duelScripts/boardScripts";
+import { boardDamageTaken, boardShake } from "./duelScripts/boardScripts";
 import {
-  skull_skull_dispose_both,
-  skull_skull_disposeOne,
-  skull_skull_highlight,
-  skull_skull_roll,
-  skull_skull_unhighlight,
+  knightVsKnightFirstAtack,
+  knightVsKnightHighlight,
+} from "./duelScripts/knightVsKnight";
+import {
+  skullVsSkullDisposeBoth,
+  skullVsSkullDisposeOne,
+  skullVsSkullHighlight,
+  skullVsLSkullRoll,
+  skullVsSkullUnhighlight,
   skullVsSkullChargeAgainstBoard,
   skullVsSkullChargeOnYoyo,
   skullVsSkullOnYoyoChargeWinner,
   skullVsSkullTieCharge,
-} from "./duelScripts/skullVsSkull";
+} from "./duelScripts/skullVsSkullScript";
 
 const TimelineCtx = {
   scene: null,
@@ -20,19 +24,20 @@ const TimelineCtx = {
   pauseToken: {},
 };
 
-export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
+export function duelSkullVsSkull(scene, dice, diceP1, diceP2, columnIndex) {
   console.log("esto es skull_skull");
+  TimelineCtx.scene = scene;
+  TimelineCtx.store.columnIndex = columnIndex;
   const timeline = [];
 
-  timeline.push(skull_skull_highlight(diceP1, diceP2));
+  timeline.push(skullVsSkullHighlight(diceP1, diceP2));
 
   dice.forEach((_d) => {
     _d.roll(D6, false);
   });
-
   TimelineCtx.store.dice = dice;
 
-  timeline.push(skull_skull_roll(diceP1, diceP2));
+  timeline.push(skullVsLSkullRoll(diceP1, diceP2));
 
   //TIE
   if (diceP1.value === diceP2.value) {
@@ -44,8 +49,8 @@ export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
         skullVsSkullChargeOnYoyo(diceP2)
       )
     );
-    timeline.push(skull_skull_unhighlight(diceP1, diceP2));
-    timeline.push(skull_skull_dispose_both(diceP1, diceP2));
+    timeline.push(skullVsSkullUnhighlight(diceP1, diceP2));
+    timeline.push(skullVsSkullDisposeBoth(diceP1, diceP2));
   } else {
     // Caso: hay ganador y perdedor
     const dice1Wins = diceP1.value > diceP2.value;
@@ -64,96 +69,36 @@ export function duelSkullVsSkull(dice, diceP1, diceP2, columnIndex) {
         skullVsSkullOnYoyoChargeWinner(winnerDice, losserDice)
       )
     );
-    timeline.push(skull_skull_disposeOne(losserDice));
+    timeline.push(skullVsSkullDisposeOne(losserDice));
 
     timeline.push(
-      skullVsSkullChargeAgainstBoard(winnerDice, boardShake(losserDice.board))
+      skullVsSkullChargeAgainstBoard(
+        winnerDice,
+        boardShake(losserDice.board, boardDamageTaken(losserDice.board))
+      )
     );
+
+    timeline.push(skullVsSkullDisposeBoth(winnerDice, losserDice));
   }
+  return { timeline: timeline, ctx: TimelineCtx };
+}
+export function duelKnightVsKnight(scene, dice, diceP1, diceP2, columnIndex) {
+  console.log("esto es knight_knight");
+  TimelineCtx.scene = scene;
+  TimelineCtx.store.columnIndex = columnIndex;
+  const timeline = [];
+
+  timeline.push(knightVsKnightHighlight(diceP1, diceP2));
+
+  const turn = Math.floor(Math.random() * 2);
+  let atacker = dice[turn];
+  let defender = Object.values(dice).find((item) => item !== atacker) || null;
+
+  TimelineCtx.store.firstAtacker = atacker;
+  TimelineCtx.store.firstDefender = defender;
+
+  timeline.push(knightVsKnightFirstAtack(atacker, defender));
 
   return { timeline: timeline, ctx: TimelineCtx };
-
-  return new Promise(async (resolve) => {
-    const boards = { 1: scene.P1.board, 2: scene.P2.board };
-    const [dice1, dice2] = dice;
-
-    const value1 = dice1.value;
-    const value2 = dice2.value;
-
-    // Caso: empate
-    if (value1 === value2) {
-      await Promise.all([
-        dice1.charge({
-          offset: -70,
-          onYoyo: async () => {
-            const tweens = scene.tweens.getTweensOf(dice1);
-            if (tweens.length > 0) {
-              const currentTween = tweens[0];
-              currentTween.pause();
-              await dice1.shake({ duration: 15 });
-              currentTween.resume();
-            }
-          },
-        }),
-        dice2.charge({
-          offset: -70,
-          onYoyo: async () => {
-            const tweens = scene.tweens.getTweensOf(dice2);
-            if (tweens.length > 0) {
-              const currentTween = tweens[0];
-              currentTween.pause();
-              await dice2.shake({ duration: 15 });
-              currentTween.resume();
-            }
-          },
-        }),
-      ]);
-
-      // Destruir ambos
-      await Promise.all([
-        boards[dice1.board].destroyDice(dice1),
-        boards[dice2.board].destroyDice(dice2),
-      ]);
-
-      return resolve();
-    }
-
-    // Caso: hay ganador y perdedor
-    const dice1Wins = value1 > value2;
-    winnerDice = dice1Wins ? dice1 : dice2;
-    losserDice = dice1Wins ? dice2 : dice1;
-
-    const diferenceDamage = Phaser.Math.Difference(
-      winnerDice.value,
-      losserDice.value
-    );
-
-    // Ganador carga contra perdedor
-    await winnerDice.charge({
-      onYoyo: async () => {
-        winnerDice.setValue(diferenceDamage);
-        await losserDice.shake();
-      },
-    });
-
-    // El perdedor se destruye
-    await boards[losserDice.board.id].destroyDice(losserDice);
-
-    // Ganador ataca tablero enemigo
-    await winnerDice.charge({
-      onYoyo: async () => {
-        scene["P" + losserDice.board.id].life -= winnerDice.value;
-        await scene["P" + losserDice.board.id].board.shake();
-      },
-    });
-
-    // El ganador se destruye
-    await boards[winnerDice.board.id].destroyDice(winnerDice);
-
-    resolve();
-  });
 }
-export function duelKnightVsKnight(diceP1, diceP2, columnIndex) {
-  console.log("esto es knight_knight");
-}
-export function berserker_berserker() {}
+export function duelBerserkerVsBerserker() {}

@@ -2,3 +2,4 @@
 export const BOARD_ENABLED_EVENTS = "enabledBoardEvents";
 export const BOARD_HOLDER_VALUE_ASSIGNED = "boardHolderValueAssigned";
 export const BOARD_PDICE_VALUE_ASSIGNED = "boardPlayerDiceValueAssigned";
+export const BOARD_HITTED = "board:hitted";

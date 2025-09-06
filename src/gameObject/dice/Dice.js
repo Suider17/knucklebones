@@ -16,7 +16,7 @@ import {
 import { DICE_MOD_RELATIVE_POSITION } from "../../definitions/positions";
 import DiceMod from "../diceMod/DiceMod";
 import DiceAnimator from "./animations/DiceAnimator";
-import { DICE_NEW_ARCHETYPE } from "./dice.events";
+import { DICE_NEW_ARCHETYPE, DICE_REMOVED } from "./dice.events";
 import { customRandom } from "./dice.helper";
 
 export default class Dice extends Phaser.GameObjects.Container {
@@ -55,7 +55,7 @@ export default class Dice extends Phaser.GameObjects.Container {
     }
 
     this.scene.add.existing(this).setScale(this.scale);
-    if (this.board == 2) {
+    if (this.board.id == 2) {
       this.angle = 180;
     }
 
@@ -128,9 +128,16 @@ export default class Dice extends Phaser.GameObjects.Container {
     this.blocked = true;
   }
 
-  remove() {
+  remove(column) {
     this.destroy(true);
-    this.emit("diceRemoved", this);
+    const columnIndex = this.board.id === 1 ? column : 2 - column * 2;
+    const columnSelected = this.board.columns[columnIndex];
+    const index = columnSelected.indexOf(this);
+
+    if (index !== -1) {
+      columnSelected.splice(index, 1);
+    }
+    this.emit(DICE_REMOVED, this);
   }
 
   updatePosition(x, y) {
@@ -181,10 +188,15 @@ export default class Dice extends Phaser.GameObjects.Container {
     }
   }
 
-  disposeMod() {
-    const mod = this.mods.find((mod) => mod.lastInserted);
+  disposeMod(disposeLastInserted = true, ) {
+    let mod;
+    if (disposeLastInserted) {
+      mod = this.mods.find((mod) => mod.lastInserted);
+    }else{
+
+    }
+
     mod.reset();
-    mod.disable();
     mod.lastInserted = false;
   }
 

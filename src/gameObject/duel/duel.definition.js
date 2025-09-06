@@ -1,8 +1,13 @@
-import { duelKnightVsKnight, duelSkullVsSkull } from "./duelStrategies";
+import {
+  duelKnightVsKnight,
+  duelSkullVsSkull,
+  duelBerserkerVsBerserker,
+} from "./duelStrategies";
 
 export const DUEL_STRATEGY = Object.freeze({
   skull_skull: duelSkullVsSkull,
   knight_knight: duelKnightVsKnight,
+  berserker_berserker: duelBerserkerVsBerserker,
 });
 
 export const TIMELINE_NODETYPE = Object.freeze({

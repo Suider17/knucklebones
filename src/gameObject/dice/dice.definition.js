@@ -5,6 +5,7 @@
 //DICE SPRITES NAMES
 export const DICE_SPRITE = "diceFaces";
 export const DICE_MOD_SPRITE = "diceMods";
+export const DICE_NUMBER_TAG = "diceNumberTags";
 
 //DICE STYLES
 export const D6 = "d_6";
