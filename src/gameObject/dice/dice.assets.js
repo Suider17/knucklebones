@@ -24,7 +24,7 @@ export function loadDiceModsSprites(scene) {
 export function loadNumberTags(scene) {
   return scene.load.spritesheet(
     DICE_NUMBER_TAG,
-    "assets/spriteSheets/numberTags.png",
+    "assets/spriteSheets/diceNumberTags.png",
     {
       frameWidth: 128,
       frameHeight: 128,

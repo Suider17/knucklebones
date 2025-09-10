@@ -1,4 +1,4 @@
-import { DICE_ANIMATIONS } from "../../dice/dice.definition";
+import { DICE_ANIMATIONS, DICE_SWORD } from "../../dice/dice.definition";
 import { TIMELINE_CONTROLTYPE, TIMELINE_NODETYPE } from "../duel.definition";
 
 export function knightVsKnightHighlight(diceP1, diceP2) {
@@ -39,10 +39,8 @@ export function knightVsKnightFirstAtack(atacker, defender) {
             action: TIMELINE_CONTROLTYPE.LOGIC,
             fn: (ctx) => {
               const mod = ctx.store.firstAtacker.mods.find((mod) => {
-                console.log(mod);
-                return mod.value === 7;
+                return mod.value === DICE_SWORD;
               });
-              console.log(ctx.store.firstAtacker.mods);
               mod.roll();
             },
           },
