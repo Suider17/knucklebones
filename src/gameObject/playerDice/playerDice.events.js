@@ -38,7 +38,7 @@ export const PDICE_ANIM_SPAWN = "playerDice:anim:spawn"; // aparecer en escena
 
 // Animaciones de resaltado y estados
 export const PDICE_ANIM_HIGHLIGHT = "playerDice:anim:highlight"; // resaltar (hover)
-export const PDICE_ANIM_UNHIGHLIGHT = "playerDice:anim:unHighlight"; // quitar resaltado
+export const PDICE_ANIM_UNHIGHLIGHT = "playerDice:anim:unhighlight"; // quitar resaltado
 export const PDICE_ANIM_GLOW = "playerDice:anim:glow"; // resplandor especial
 
 // Animaciones de dados

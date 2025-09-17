@@ -136,5 +136,5 @@ export const DICE_ANIMATIONS = Object.freeze({
   CHARGE: "charge",
   HIGHLIGHT: "highlight",
   DISPOSE: "dispose",
-  UNHIGHLIGHT: "unHighlight",
+  UNHIGHLIGHT: "unhighlight",
 });

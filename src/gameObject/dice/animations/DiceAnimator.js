@@ -5,107 +5,111 @@ export default class DiceAnimator {
     this.dice = sprite;
   }
 
-  //TWEENS
+  //TWEENS CONFIGS
   //===============
-  shake({ onStart, onComplete, duration = 70 }) {
+  shakeConfig({
+    duration = 70,
+    x = this.dice.x + 15,
+    y = this.dice.y - 15,
+    repeat = 2,
+    onStart,
+    onYoyo,
+    onComplete,
+  } = {}) {
+    return {
+      targets: this.dice,
+      x: this.dice.x + 15,
+      y: this.dice.y - 15,
+      yoyo: true,
+      repeat,
+      duration,
+      onStart,
+      onYoyo,
+      onComplete,
+    };
+  }
+
+  chargeConfig({
+    duration = 300,
+    delay = 200,
+    offset = -100,
+    onStart,
+    onYoyo,
+    onComplete,
+  } = {}) {
+    return {
+      targets: this.dice,
+      y: this.dice.y + offset,
+      ease: "Back.easeInOut",
+      yoyo: true,
+      duration,
+      offset,
+      delay,
+      duration,
+      onStart,
+      onYoyo,
+      onComplete,
+    };
+  }
+
+  disposeConfig({
+    scale = { from: this.dice.scale, to: 0 },
+    duration = 600,
+    onStart,
+    onComplete,
+  } = {}) {
+    return {
+      targets: this.dice,
+      scale,
+      ease: "Back.easeIn",
+      duration,
+      onStart,
+      onComplete,
+    };
+  }
+
+  highlightConfig({ offset = 0.15, duration = 900, onStart, onComplete } = {}) {
+    return {
+      targets: this.dice,
+      scale: { from: this.dice.scale, to: this.dice.scale + offset },
+      ease: "Back.easeOut",
+      duration,
+      onStart,
+      onComplete,
+    };
+  }
+
+  unhighlightConfig({
+    offset = 0.15,
+    duration = 900,
+    onStart,
+    onComplete,
+  } = {}) {
+    return {
+      targets: this.dice,
+      scale: { from: this.dice.scale, to: this.dice.scale - offset },
+      ease: "Back.easeOut",
+      duration,
+      onStart,
+      onComplete,
+    };
+  }
+  //RUN TWEENS
+  //===============
+
+  runTween(opts = {}, tween = "tween") {
     return new Promise((resolve) => {
-      this.scene.tweens.add({
-        targets: this.dice,
-        x: this.dice.x + 15,
-        y: this.dice.y - 15,
-        yoyo: true,
-        repeat: 2,
-        duration: duration,
-        onStart: () => {
-          if (onStart) onStart();
-        },
+      const config = this[`${tween}Config`]({
+        ...opts,
         onComplete: () => {
-          if (onComplete) onComplete();
+          opts.onComplete?.();
           resolve();
         },
       });
+      this.scene.tweens.add(config);
     });
   }
 
-  destroy({ onStart, onComplete }) {
-    return new Promise((resolve) => {
-      this.scene.tweens.add({
-        targets: this.dice,
-        scale: { from: this.dice.scale, to: 0 },
-        duration: 600,
-        ease: "Back.easeIn",
-        onStart: () => {
-          if (onStart) onStart();
-        },
-        onComplete: () => {
-          if (onComplete) onComplete();
-          resolve();
-        },
-      });
-    });
-  }
-
-  highlight({ onStart, onComplete, offset = 0.15 }) {
-    return new Promise((resolve) => {
-      this.scene.tweens.add({
-        targets: this.dice,
-        scale: { from: this.dice.scale, to: this.dice.scale + offset },
-        duration: 900,
-        ease: "Back.easeOut",
-        onStart: () => {
-          if (onStart) onStart();
-        },
-        onComplete: () => {
-          if (onComplete) onComplete();
-          resolve();
-        },
-      });
-    });
-  }
-
-  unHighlight({ onStart, onComplete, offset = 0.15 }) {
-    return new Promise((resolve) => {
-      this.scene.tweens.add({
-        targets: this.dice,
-        scale: { from: this.dice.scale, to: this.dice.scale - offset },
-        duration: 900,
-        ease: "Back.easeOut",
-        onStart: () => {
-          if (onStart) onStart();
-        },
-        onComplete: () => {
-          if (onComplete) onComplete();
-          resolve();
-        },
-      });
-    });
-  }
-
-  charge({ onStart, onComplete, onYoyo, offset = -100 } = {}) {
-    return new Promise((resolve) => {
-      console.log("ejecutando funcion de embestida");
-      this.scene.tweens.add({
-        targets: this.dice,
-        y: this.dice.y + offset,
-        ease: "Back.easeInOut",
-        yoyo: true,
-        duration: 300,
-        delay: 200,
-
-        onStart: () => {
-          if (onStart) onStart();
-        },
-
-        onYoyo: () => {
-          if (onYoyo) onYoyo();
-        },
-        onComplete: () => {
-          if (onComplete) onComplete();
-          resolve();
-        },
-      });
-    });
-  }
   //===============
 
   //ANIMS

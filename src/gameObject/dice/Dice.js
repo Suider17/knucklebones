@@ -1,6 +1,7 @@
 import {
   ATACK_BUCKET_ARRAY,
   D11,
+  DICE_ANIMATIONS,
   DICE_ARCHETYPE,
   DICE_BUCKET,
   DICE_EMPTY,
@@ -188,12 +189,11 @@ export default class Dice extends Phaser.GameObjects.Container {
     }
   }
 
-  disposeMod(disposeLastInserted = true, ) {
+  disposeMod(disposeLastInserted = true) {
     let mod;
     if (disposeLastInserted) {
       mod = this.mods.find((mod) => mod.lastInserted);
-    }else{
-
+    } else {
     }
 
     mod.reset();
@@ -218,21 +218,36 @@ export default class Dice extends Phaser.GameObjects.Container {
   //========ANIMATIONS========
 
   async shake({ onStart, onComplete, duration } = {}) {
-    await this.animator.shake({ onStart, onComplete, duration });
+    await this.animator.runTween(
+      { onStart, onComplete, duration },
+      DICE_ANIMATIONS.SHAKE
+    );
   }
 
   async charge({ onStart, onComplete, onYoyo, offset } = {}) {
-    await this.animator.charge({ onStart, onComplete, onYoyo, offset });
+    await this.animator.runTween(
+      { onStart, onComplete, onYoyo, offset },
+      DICE_ANIMATIONS.CHARGE
+    );
   }
 
   async dispose({ onStart, onComplete } = {}) {
-    await this.animator.destroy({ onStart, onComplete });
+    await this.animator.runTween(
+      { onStart, onComplete },
+      DICE_ANIMATIONS.DISPOSE
+    );
   }
 
   async highlight({ onStart, onComplete } = {}) {
-    await this.animator.highlight({ onStart, onComplete });
+    await this.animator.runTween(
+      { onStart, onComplete },
+      DICE_ANIMATIONS.HIGHLIGHT
+    );
   }
-  async unHighlight({ onStart, onComplete } = {}) {
-    await this.animator.unHighlight({ onStart, onComplete });
+  async unhighlight({ onStart, onComplete } = {}) {
+    await this.animator.runTween(
+      { onStart, onComplete },
+      DICE_ANIMATIONS.UNHIGHLIGHT
+    );
   }
 }
