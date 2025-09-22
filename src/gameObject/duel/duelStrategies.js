@@ -13,6 +13,7 @@ import {
   skullVsSkullChargeAgainstBoard,
   skullVsSkullTieCharge,
   skullVsLSkullChargeOut,
+  skullVsSkullUnhighlight,
 } from "./duelScripts/skullVsSkullScript";
 
 const TimelineCtx = {
@@ -117,6 +118,9 @@ export function duelSkullVsSkull(scene, dice, diceP1, diceP2, columnIndex) {
       );
       nodesB.push(
         ...skullVsSkullDisposeOne(TimelineCtx.store.loser, TimelineCtx, true)
+      );
+      nodesB.push(
+        ...skullVsSkullUnhighlight(TimelineCtx.store.winner.animator)
       );
     }
 

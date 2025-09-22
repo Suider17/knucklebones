@@ -156,6 +156,14 @@ export function skullVsSkullChargeAgainstBoard(dice) {
     },
   ];
 }
+export function skullVsSkullUnhighlight(dice) {
+  return [
+    {
+      from: 900,
+      tween: dice.unhighlightConfig(),
+    },
+  ];
+}
 export function skullVsLSkullChargeOut(dice, ctx) {
   return [
     {
