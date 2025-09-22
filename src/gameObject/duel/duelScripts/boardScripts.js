@@ -1,30 +1,15 @@
 import { TIMELINE_CONTROLTYPE, TIMELINE_NODETYPE } from "../duel.definition";
 import { DICE_ANIMATIONS } from "../../dice/dice.definition";
 
-export function boardShake(board, onStart = []) {
+export function boardShake(board, ctx) {
   return [
     {
-      type: TIMELINE_NODETYPE.PARALLEL,
-      label: "board_shake",
-      steps: [
-        {
-          type: TIMELINE_NODETYPE.TWEEN,
-          actor: board,
-          animation: DICE_ANIMATIONS.SHAKE,
-          params: { offset: -70 },
-          onStart: onStart,
-        },
-      ],
+      from: 100,
+      tween: board.animator.shakeConfig(),
     },
-  ];
-}
-
-export function boardDamageTaken(board) {
-  return [
     {
-      type: TIMELINE_NODETYPE.CONTROL,
-      action: TIMELINE_CONTROLTYPE.LOGIC,
-      fn: (ctx) => {
+      from: 0,
+      run: () => {
         board.hited(ctx.store.duelResultValue);
       },
     },

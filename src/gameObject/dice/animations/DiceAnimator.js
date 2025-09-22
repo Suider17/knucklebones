@@ -8,9 +8,9 @@ export default class DiceAnimator {
   //TWEENS CONFIGS
   //===============
   shakeConfig({
-    duration = 70,
-    x = this.dice.x + 15,
-    y = this.dice.y - 15,
+    duration = 60,
+    x = "+=10",
+    y = "-=10",
     repeat = 2,
     onStart,
     onYoyo,
@@ -18,8 +18,8 @@ export default class DiceAnimator {
   } = {}) {
     return {
       targets: this.dice,
-      x: this.dice.x + 15,
-      y: this.dice.y - 15,
+      x: x,
+      y: y,
       yoyo: true,
       repeat,
       duration,
@@ -29,22 +29,44 @@ export default class DiceAnimator {
     };
   }
 
-  chargeConfig({
+  chargeInConfig({ duration = 150, delta = 70, onStart, onComplete } = {}) {
+    return {
+      targets: this.dice,
+      y: `-=${delta}`,
+      ease: "Back.easeInOut",
+
+      duration,
+      onStart,
+      onComplete,
+    };
+  }
+
+  chargeOutConfig({ duration = 150, delta = 70, onStart, onComplete } = {}) {
+    return {
+      targets: this.dice,
+      y: `+=${delta}`,
+      ease: "Back.easeInOut",
+
+      duration,
+      onStart,
+      onComplete,
+    };
+  }
+
+  chargeFullConfig({
     duration = 300,
-    delay = 200,
-    offset = -100,
+
+    delta = -100,
     onStart,
     onYoyo,
     onComplete,
   } = {}) {
     return {
       targets: this.dice,
-      y: this.dice.y + offset,
+      y: this.dice.y + delta,
       ease: "Back.easeInOut",
       yoyo: true,
-      duration,
-      offset,
-      delay,
+
       duration,
       onStart,
       onYoyo,
@@ -52,15 +74,10 @@ export default class DiceAnimator {
     };
   }
 
-  disposeConfig({
-    scale = { from: this.dice.scale, to: 0 },
-    duration = 600,
-    onStart,
-    onComplete,
-  } = {}) {
+  disposeConfig({ duration = 400, onStart, onComplete } = {}) {
     return {
       targets: this.dice,
-      scale,
+      scale: { from: this.dice.scale, to: 0 },
       ease: "Back.easeIn",
       duration,
       onStart,
@@ -68,10 +85,10 @@ export default class DiceAnimator {
     };
   }
 
-  highlightConfig({ offset = 0.15, duration = 900, onStart, onComplete } = {}) {
+  highlightConfig({ delta = 0.15, duration = 500, onStart, onComplete } = {}) {
     return {
       targets: this.dice,
-      scale: { from: this.dice.scale, to: this.dice.scale + offset },
+      scale: { from: this.dice.scale, to: this.dice.scale + delta },
       ease: "Back.easeOut",
       duration,
       onStart,
@@ -80,14 +97,14 @@ export default class DiceAnimator {
   }
 
   unhighlightConfig({
-    offset = 0.15,
-    duration = 900,
+    delta = 0.15,
+    duration = 500,
     onStart,
     onComplete,
   } = {}) {
     return {
       targets: this.dice,
-      scale: { from: this.dice.scale, to: this.dice.scale - offset },
+      scale: { from: this.dice.scale, to: this.dice.scale - delta },
       ease: "Back.easeOut",
       duration,
       onStart,

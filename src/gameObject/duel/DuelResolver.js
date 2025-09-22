@@ -133,115 +133,20 @@ export class DuelResolver extends Phaser.Events.EventEmitter {
     return null;
   }
 
-  async duel() {
+  duel() {
     const duel = this.getDuelConditions();
     if (duel) {
       const duelStrategy = DUEL_STRATEGY[duel.type];
-      const animationTimeline = duelStrategy(
+      duelStrategy(
         this.scene,
         duel.dice,
         duel.diceP1,
         duel.diceP2,
         duel.columnIndex
       );
-
-      await runTimeline(
-        this.scene,
-        animationTimeline.timeline,
-        animationTimeline.ctx
-      );
+      //console.log(animationTimeline.systems.tweens.tweens);
     }
   }
-  async twoSkullsDuel(dice, scene) {
-    return new Promise(async (resolve) => {
-      const boards = { 1: scene.P1.board, 2: scene.P2.board };
-      const [dice1, dice2] = dice;
-
-      let winnerDice = null;
-      let losserDice = null;
-
-      // Animación inicial de shake + roll
-      await Promise.all(
-        dice.map((_d) => _d.shake({ onComplete: () => _d.roll(D6) }))
-      );
-
-      const value1 = dice1.value;
-      const value2 = dice2.value;
-
-      // Caso: empate
-      if (value1 === value2) {
-        await Promise.all([
-          dice1.charge({
-            offset: -70,
-            onYoyo: async () => {
-              const tweens = scene.tweens.getTweensOf(dice1);
-              if (tweens.length > 0) {
-                const currentTween = tweens[0];
-                currentTween.pause();
-                await dice1.shake({ duration: 15 });
-                currentTween.resume();
-              }
-            },
-          }),
-          dice2.charge({
-            offset: -70,
-            onYoyo: async () => {
-              const tweens = scene.tweens.getTweensOf(dice2);
-              if (tweens.length > 0) {
-                const currentTween = tweens[0];
-                currentTween.pause();
-                await dice2.shake({ duration: 15 });
-                currentTween.resume();
-              }
-            },
-          }),
-        ]);
-
-        // Destruir ambos
-        await Promise.all([
-          boards[dice1.board].destroyDice(dice1),
-          boards[dice2.board].destroyDice(dice2),
-        ]);
-
-        return resolve();
-      }
-
-      // Caso: hay ganador y perdedor
-      const dice1Wins = value1 > value2;
-      winnerDice = dice1Wins ? dice1 : dice2;
-      losserDice = dice1Wins ? dice2 : dice1;
-
-      const diferenceDamage = Phaser.Math.Difference(
-        winnerDice.value,
-        losserDice.value
-      );
-
-      // Ganador carga contra perdedor
-      await winnerDice.charge({
-        onYoyo: async () => {
-          winnerDice.setValue(diferenceDamage);
-          await losserDice.shake();
-        },
-      });
-
-      // El perdedor se destruye
-      await boards[losserDice.board.id].destroyDice(losserDice);
-
-      // Ganador ataca tablero enemigo
-      await winnerDice.charge({
-        onYoyo: async () => {
-          scene["P" + losserDice.board.id].life -= winnerDice.value;
-          await scene["P" + losserDice.board.id].board.shake();
-        },
-      });
-
-      // El ganador se destruye
-      await boards[winnerDice.board.id].destroyDice(winnerDice);
-
-      resolve();
-    });
-  }
-
   // Dentro de la clase DuelResolver
   async twoKnightDuel(dice) {
     const scene = this.scene;

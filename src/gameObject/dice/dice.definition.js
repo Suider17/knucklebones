@@ -133,7 +133,9 @@ export function GET_ARCHETYPE(mods = [], value = 0) {
 //ANIMATIONS
 export const DICE_ANIMATIONS = Object.freeze({
   SHAKE: "shake",
-  CHARGE: "charge",
+  CHARGE_FULL: "chargeFull",
+  CHARGE_IN: "chargeIn",
+  CHARGE_OUT: "chargeOut",
   HIGHLIGHT: "highlight",
   DISPOSE: "dispose",
   UNHIGHLIGHT: "unhighlight",

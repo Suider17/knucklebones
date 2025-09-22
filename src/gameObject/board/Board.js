@@ -439,6 +439,7 @@ export default class Board extends Phaser.GameObjects.Container {
   }
 
   hited(damage) {
+    console.log(damage);
     this.emit(BOARD_HITTED, damage);
   }
 

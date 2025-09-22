@@ -1,5 +1,5 @@
 import { D6 } from "../dice/dice.definition";
-import { boardDamageTaken, boardShake } from "./duelScripts/boardScripts";
+import { boardShake } from "./duelScripts/boardScripts";
 import {
   knightVsKnightFirstAtack,
   knightVsKnightHighlight,
@@ -9,11 +9,10 @@ import {
   skullVsSkullDisposeOne,
   skullVsSkullHighlight,
   skullVsLSkullRoll,
-  skullVsSkullUnhighlight,
+  skullVsSkullDuelDispose,
   skullVsSkullChargeAgainstBoard,
-  skullVsSkullChargeOnYoyo,
-  skullVsSkullOnYoyoChargeWinner,
   skullVsSkullTieCharge,
+  skullVsLSkullChargeOut,
 } from "./duelScripts/skullVsSkullScript";
 
 const TimelineCtx = {
@@ -28,60 +27,114 @@ export function duelSkullVsSkull(scene, dice, diceP1, diceP2, columnIndex) {
   console.log("esto es skull_skull");
   TimelineCtx.scene = scene;
   TimelineCtx.store.columnIndex = columnIndex;
-  const timeline = [];
 
-  timeline.push(skullVsSkullHighlight(diceP1, diceP2));
+  // Si había un timeline anterior, límpialo
+  if (scene.duelTimeline) {
+    scene.duelTimeline.destroy();
+    scene.duelTimeline = null;
+  }
 
-  dice.forEach((_d) => {
-    _d.roll(D6, false);
-  });
-  TimelineCtx.store.dice = dice;
+  // Helpers de lógica
+  const roll = () => {
+    dice.forEach((_d) => _d.roll(D6, false));
+  };
 
-  timeline.push(skullVsLSkullRoll(diceP1, diceP2));
+  const updateSprites = () => {
+    dice.forEach((_d) => _d.sprite.setFrame(_d.value));
+  };
 
-  //TIE
-  if (diceP1.value === diceP2.value) {
-    timeline.push(
-      skullVsSkullTieCharge(
-        diceP1,
-        diceP2,
-        skullVsSkullChargeOnYoyo(diceP1),
-        skullVsSkullChargeOnYoyo(diceP2)
-      )
-    );
-    timeline.push(skullVsSkullUnhighlight(diceP1, diceP2));
-    timeline.push(skullVsSkullDisposeBoth(diceP1, diceP2));
-  } else {
-    // Caso: hay ganador y perdedor
+  const substract = () => Phaser.Math.Difference(diceP1.value, diceP2.value);
+
+  const getResult = () => {
     const dice1Wins = diceP1.value > diceP2.value;
     const winnerDice = dice1Wins ? diceP1 : diceP2;
-    const losserDice = dice1Wins ? diceP2 : diceP1;
+    const loserDice = dice1Wins ? diceP2 : diceP1;
+    return { winner: winnerDice, loser: loserDice };
+  };
 
-    TimelineCtx.store.duelResultValue = Phaser.Math.Difference(
-      winnerDice.value,
-      losserDice.value
-    );
-
-    timeline.push(
-      skullVsSkullTieCharge(
-        winnerDice,
-        losserDice,
-        skullVsSkullOnYoyoChargeWinner(winnerDice, losserDice)
+  // ====== PHASE A
+  function playPhaseA() {
+    const nodesA = [];
+    nodesA.push(...skullVsSkullHighlight(diceP1.animator, diceP2.animator));
+    nodesA.push(
+      ...skullVsLSkullRoll(
+        diceP1.animator,
+        diceP2.animator,
+        500,
+        roll,
+        updateSprites
       )
     );
-    timeline.push(skullVsSkullDisposeOne(losserDice));
-
-    timeline.push(
-      skullVsSkullChargeAgainstBoard(
-        winnerDice,
-        boardShake(losserDice.board, boardDamageTaken(losserDice.board))
+    nodesA.push(
+      ...skullVsSkullTieCharge(
+        diceP1.animator,
+        diceP2.animator,
+        substract,
+        updateSprites,
+        getResult,
+        TimelineCtx
       )
     );
 
-    timeline.push(skullVsSkullDisposeBoth(winnerDice, losserDice));
+    const tl = scene.add.timeline(nodesA); // Time Timeline vacío
+    //addNodesToTimeTimeline(tl, nodesA); // Le “inyectas” los eventos
+
+    tl.once("complete", () => {
+      // Al terminar A ⇒ comienza B
+      //tl.destroy();
+      playPhaseB();
+    });
+
+    scene.duelTimeline = tl; // Guarda ref por si necesitas abortar
+    tl.play();
   }
-  return { timeline: timeline, ctx: TimelineCtx };
+
+  // ====== PHASE B
+  function playPhaseB() {
+    const nodesB = [];
+    TimelineCtx.store.dice = dice;
+    if (TimelineCtx.store.value1 === TimelineCtx.store.value2) {
+      nodesB.push(
+        ...skullVsSkullDisposeBoth(
+          TimelineCtx.store.winner.animator,
+          TimelineCtx.store.loser.animator,
+          TimelineCtx
+        )
+      );
+    } else {
+      nodesB.push(
+        ...skullVsSkullDisposeOne(TimelineCtx.store.loser, TimelineCtx)
+      );
+      nodesB.push(
+        ...skullVsSkullChargeAgainstBoard(TimelineCtx.store.winner.animator)
+      );
+      nodesB.push(...boardShake(TimelineCtx.store.loser.board, TimelineCtx));
+      nodesB.push(
+        ...skullVsLSkullChargeOut(
+          TimelineCtx.store.winner.animator,
+          TimelineCtx
+        )
+      );
+      nodesB.push(
+        ...skullVsSkullDisposeOne(TimelineCtx.store.loser, TimelineCtx, true)
+      );
+    }
+
+    const tl = scene.add.timeline(nodesB);
+
+    console.log(nodesB);
+
+    tl.once("complete", () => {
+      //tl.destroy();
+      //scene.duelTimeline = null;
+    });
+    scene.duelTimeline = tl;
+    tl.play();
+  }
+
+  playPhaseA();
 }
+
 export function duelKnightVsKnight(scene, dice, diceP1, diceP2, columnIndex) {
   console.log("esto es knight_knight");
   TimelineCtx.scene = scene;

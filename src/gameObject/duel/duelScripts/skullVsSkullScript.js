@@ -1,265 +1,172 @@
 import { DICE_ANIMATIONS, DICE_EMPTY } from "../../dice/dice.definition";
 import { TIMELINE_CONTROLTYPE, TIMELINE_NODETYPE } from "../duel.definition";
 
-export function skullVsSkullHighlight(diceP1, diceP2) {
-  return {
-    type: TIMELINE_NODETYPE.PARALLEL,
-    label: "skull_skull_highlight",
-    steps: [
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP1,
-        animation: DICE_ANIMATIONS.HIGHLIGHT,
-      },
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP2,
-        animation: DICE_ANIMATIONS.HIGHLIGHT,
-      },
-    ],
-  };
+export function skullVsSkullHighlight(animP1, animP2, delay1 = 0, delay2 = 0) {
+  return [
+    { at: delay1, tween: animP1.highlightConfig() },
+    { at: delay2, tween: animP2.highlightConfig() },
+  ];
 }
 
-export function skullVsLSkullRoll(diceP1, diceP2) {
-  return {
-    type: TIMELINE_NODETYPE.PARALLEL,
-    label: "skull_skull_roll",
-    steps: [
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP1,
-        animation: DICE_ANIMATIONS.SHAKE,
-      },
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP2,
-        animation: DICE_ANIMATIONS.SHAKE,
-        onComplete: [
-          {
-            type: TIMELINE_NODETYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.LOGIC,
-            fn: (ctx) => {
-              ctx.store.dice.forEach((_d) => {
-                _d.sprite.setFrame(_d.value);
-              });
-            },
-          },
-        ],
-      },
-    ],
-  };
+export function skullVsLSkullRoll(
+  animP1,
+  animP2,
+  delay = 500,
+  roll,
+  updateSprites
+) {
+  return [
+    {
+      at: delay,
+      tween: animP1.shakeConfig(),
+    },
+    {
+      at: delay,
+      tween: animP2.shakeConfig(),
+    },
+    {
+      from: 0,
+      run: roll,
+    },
+    {
+      from: 450,
+      run: updateSprites,
+    },
+  ];
 }
 
 export function skullVsSkullTieCharge(
-  diceP1,
-  diceP2,
-  onYoyoP1 = [],
-  onYoyoP2 = []
+  animP1,
+  animP2,
+  substract,
+  updateSprites,
+  getResult,
+  ctx = {},
+  delay = 1000
 ) {
-  return {
-    type: TIMELINE_NODETYPE.PARALLEL,
-    label: "skull_skull_tie_charge",
-    steps: [
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP1,
-        animation: DICE_ANIMATIONS.CHARGE,
-        params: { offset: -70 },
-        onYoyo: onYoyoP1,
-      },
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP2,
-        animation: DICE_ANIMATIONS.CHARGE,
-        params: { offset: -70 },
-        onYoyo: [
-            {
-              type: TIMELINE_NODETYPE.CONTROL,
-              action: TIMELINE_CONTROLTYPE.PAUSE,
-            },
-          {
-            type: TIMELINE_NODETYPE.TWEEN,
-            actor: diceP2,
-            animation: DICE_ANIMATIONS.SHAKE,
-            params: { duration: 15 },
-          },
-
-          {
-            type: TIMELINE_NODETYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.RESUME,
-          },
-        ],
-      },
-      {},
-    ],
-  };
-}
-
-export function skullVsSkullChargeOnYoyo(dice) {
   return [
     {
-      type: TIMELINE_NODETYPE.CONTROL,
-      action: TIMELINE_CONTROLTYPE.PAUSE,
+      at: delay,
+      tween: animP1.chargeInConfig(),
     },
     {
-      type: TIMELINE_NODETYPE.TWEEN,
-      actor: dice,
-      animation: DICE_ANIMATIONS.SHAKE,
-      params: { duration: 15 },
+      at: delay,
+      tween: animP2.chargeInConfig(),
     },
     {
-      type: TIMELINE_NODETYPE.CONTROL,
-      action: TIMELINE_CONTROLTYPE.RESUME,
+      from: 170,
+      tween: animP1.shakeConfig({
+        duration: 20,
+        x: "+=5",
+        y: "+=5",
+      }),
+    },
+    {
+      from: 0,
+      tween: animP2.shakeConfig({
+        duration: 20,
+        x: "+=5",
+        y: "+=5",
+      }),
+    },
+    {
+      from: 10,
+      run: () => {
+        const result = getResult();
+
+        ctx.store.duelResultValue = substract();
+        result.winner.value = substract();
+        result.loser.value = 0;
+
+        ctx.store.winner = result.winner;
+        ctx.store.loser = result.loser;
+        ctx.store.value1 = result.winner.value;
+        ctx.store.value2 = result.loser.value;
+
+        updateSprites();
+        animP1 = undefined;
+      },
+    },
+    {
+      from: 100,
+      tween: animP1.chargeOutConfig(),
+    },
+    {
+      from: 0,
+      tween: animP2.chargeOutConfig(),
+    },
+  ];
+}
+export function skullVsSkullDuelDispose(winner, loser, ctx = {}) {
+  return [
+    {
+      at: 300,
+      tween: winner.unhighlightConfig(),
+    },
+    {
+      at: 850,
+      tween: loser.disposeConfig(),
     },
   ];
 }
 
-export function skullVsSkullUnhighlight(diceP1, diceP2) {
-  return {
-    type: TIMELINE_NODETYPE.PARALLEL,
-    label: "skull_skull_tie_unhilight",
-    steps: [
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP1,
-        animation: DICE_ANIMATIONS.UNHIGHLIGHT,
-      },
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP2,
-        animation: DICE_ANIMATIONS.UNHIGHLIGHT,
-      },
-    ],
-  };
-}
-
-export function skullVsSkullDisposeBoth(diceP1, diceP2) {
-  return {
-    type: TIMELINE_NODETYPE.PARALLEL,
-    label: "skull_skull_tie_dispose_both",
-    steps: [
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP1,
-        animation: DICE_ANIMATIONS.DISPOSE,
-      },
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP2,
-        animation: DICE_ANIMATIONS.DISPOSE,
-        onComplete: [
-          {
-            type: TIMELINE_NODETYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.LOGIC,
-            fn: (ctx) => {
-              ctx.store.dice.forEach((_d) => {
-                _d.remove(ctx.store.columnIndex);
-              });
-            },
-          },
-        ],
-      },
-    ],
-  };
-}
-
-export function skullVsSkullDuelResult(diceP1, diceP2) {
-  return {
-    type: TIMELINE_NODETYPE.PARALLEL,
-    label: "skull_skull_tie_charge",
-    steps: [
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP1,
-        animation: DICE_ANIMATIONS.CHARGE,
-        params: { offset: -70 },
-        onYoyo: [
-          {
-            type: TIMELINE_NODETYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.PAUSE,
-          },
-          {
-            type: TIMELINE_NODETYPE.TWEEN,
-            actor: diceP1,
-            animation: DICE_ANIMATIONS.SHAKE,
-            params: { duration: 15 },
-          },
-          {
-            type: TIMELINE_NODETYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.RESUME,
-          },
-        ],
-      },
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP2,
-        animation: DICE_ANIMATIONS.CHARGE,
-        params: { offset: -70 },
-        onYoyo: [
-          {
-            type: TIMELINE_NODETYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.PAUSE,
-          },
-          {
-            type: TIMELINE_NODETYPE.TWEEN,
-            actor: diceP2,
-            animation: DICE_ANIMATIONS.SHAKE,
-            params: { duration: 15 },
-          },
-
-          {
-            type: TIMELINE_NODETYPE.CONTROL,
-            action: TIMELINE_CONTROLTYPE.RESUME,
-          },
-        ],
-      },
-      {},
-    ],
-  };
-}
-
-export function skullVsSkullOnYoyoChargeWinner(winner, losser) {
+export function skullVsSkullDisposeOne(dice, ctx = {}, disposeNow = false) {
   return [
     {
-      type: TIMELINE_NODETYPE.CONTROL,
-      action: TIMELINE_CONTROLTYPE.LOGIC,
-      fn: (ctx) => {
-        winner.value = ctx.store.duelResultValue;
-        winner.sprite.setFrame(winner.value);
-
-        losser.value = DICE_EMPTY;
-        losser.sprite.setFrame(losser.value);
+      at: 0,
+      tween: dice.animator.disposeConfig(),
+    },
+    {
+      from: 450,
+      run: () => {
+        if (disposeNow) {
+          dice.remove(ctx.store.columnIndex);
+        }
       },
     },
   ];
 }
 
-export function skullVsSkullDisposeOne(dice) {
-  return {
-    type: TIMELINE_NODETYPE.SEQUENCE,
-    label: "skull_skull_tie_dispose_one",
-    steps: [
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: dice,
-        animation: DICE_ANIMATIONS.DISPOSE,
+export function skullVsSkullDisposeBoth(diceP1, diceP2, ctx) {
+  return [
+    {
+      at: 0,
+      tween: diceP1.disposeConfig(),
+    },
+    {
+      from: 0,
+      tween: diceP2.disposeConfig(),
+    },
+    {
+      from: 410,
+      run: () => {
+        ctx.store.dice.forEach((_d) => {
+          _d.remove(ctx.store.columnIndex);
+        });
       },
-    ],
-  };
+    },
+  ];
 }
 
-export function skullVsSkullChargeAgainstBoard(dice, onYoyo = []) {
-  return {
-    type: TIMELINE_NODETYPE.PARALLEL,
-    label: "skull_skull_charge",
-    steps: [
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: dice,
-        animation: DICE_ANIMATIONS.CHARGE,
-        params: { offset: -70 },
-        onYoyo: onYoyo,
+export function skullVsSkullChargeAgainstBoard(dice) {
+  return [
+    {
+      from: 400,
+      tween: dice.chargeInConfig(),
+    },
+  ];
+}
+export function skullVsLSkullChargeOut(dice, ctx) {
+  return [
+    {
+      from: 100,
+      tween: dice.chargeOutConfig(),
+    },
+    {
+      from: 500,
+      run: () => {
+        ctx.store.loser.remove(ctx.store.columnIndex);
       },
-    ],
-  };
+    },
+  ];
 }

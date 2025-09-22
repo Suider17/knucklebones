@@ -5,6 +5,29 @@ export default class BoardAnimator {
     this.board = sprite;
   }
 
+  //TWEENS CONFIGS
+  //===============
+  shakeConfig({
+    duration = 60,
+    x = "+=10",
+    y = "-=10",
+    repeat = 2,
+    onStart,
+    onYoyo,
+    onComplete,
+  } = {}) {
+    return {
+      targets: this.board,
+      x: x,
+      y: y,
+      yoyo: true,
+      repeat,
+      duration,
+      onStart,
+      onYoyo,
+      onComplete,
+    };
+  }
   //TWEENS
   shake({ onStart, onComplete }) {
     return new Promise((resolve) => {

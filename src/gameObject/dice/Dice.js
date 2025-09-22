@@ -224,10 +224,24 @@ export default class Dice extends Phaser.GameObjects.Container {
     );
   }
 
-  async charge({ onStart, onComplete, onYoyo, offset } = {}) {
+  async chargeFull({ onStart, onComplete, onYoyo, delta } = {}) {
     await this.animator.runTween(
-      { onStart, onComplete, onYoyo, offset },
-      DICE_ANIMATIONS.CHARGE
+      { onStart, onComplete, onYoyo, delta },
+      DICE_ANIMATIONS.CHARGE_FULL
+    );
+  }
+
+    async chargeIn({ onStart, onComplete, delta } = {}) {
+    await this.animator.runTween(
+      { onStart, onComplete, delta },
+      DICE_ANIMATIONS.CHARGE_IN
+    );
+  }
+
+    async chargeOut({ onStart, onComplete, onYoyo, delta } = {}) {
+    await this.animator.runTween(
+      { onStart, onComplete, onYoyo, delta },
+      DICE_ANIMATIONS.CHARGE_OUT
     );
   }
 
