@@ -42,7 +42,7 @@ export function skullVsSkullTieCharge(
   updateSprites,
   getResult,
   ctx = {},
-  delay = 1000
+  delay = 1300
 ) {
   return [
     {

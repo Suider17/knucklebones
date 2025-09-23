@@ -143,9 +143,31 @@ export function duelKnightVsKnight(scene, dice, diceP1, diceP2, columnIndex) {
   console.log("esto es knight_knight");
   TimelineCtx.scene = scene;
   TimelineCtx.store.columnIndex = columnIndex;
-  const timeline = [];
 
-  timeline.push(knightVsKnightHighlight(diceP1, diceP2));
+  // Si había un timeline anterior, límpialo
+  if (scene.duelTimeline) {
+    scene.duelTimeline.destroy();
+    scene.duelTimeline = null;
+  }
+
+  const playPhaseA = () => {
+    const nodesA = [];
+    nodesA.push(...knightVsKnightHighlight(diceP1.animator, diceP2.animator));
+    
+
+    const tl = scene.add.timeline(nodesA); // Time Timeline vacío
+    //addNodesToTimeTimeline(tl, nodesA); // Le “inyectas” los eventos
+
+    tl.once("complete", () => {
+      // Al terminar A ⇒ comienza B
+      //tl.destroy();
+      //playPhaseB();
+    });
+
+    scene.duelTimeline = tl; // Guarda ref por si necesitas abortar
+    tl.play();
+  };
+  //timeline.push();
 
   const turn = Math.floor(Math.random() * 2);
   let atacker = dice[turn];
@@ -154,8 +176,8 @@ export function duelKnightVsKnight(scene, dice, diceP1, diceP2, columnIndex) {
   TimelineCtx.store.firstAtacker = atacker;
   TimelineCtx.store.firstDefender = defender;
 
-  timeline.push(knightVsKnightFirstAtack(atacker, defender));
+  //timeline.push(knightVsKnightFirstAtack(atacker, defender));
 
-  return { timeline: timeline, ctx: TimelineCtx };
+  playPhaseA();
 }
 export function duelBerserkerVsBerserker() {}

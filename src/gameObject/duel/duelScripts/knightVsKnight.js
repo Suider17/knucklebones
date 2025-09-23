@@ -1,23 +1,11 @@
 import { DICE_ANIMATIONS, DICE_SWORD } from "../../dice/dice.definition";
 import { TIMELINE_CONTROLTYPE, TIMELINE_NODETYPE } from "../duel.definition";
 
-export function knightVsKnightHighlight(diceP1, diceP2) {
-  return {
-    type: TIMELINE_NODETYPE.PARALLEL,
-    label: "knight_knight_highlight",
-    steps: [
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP1,
-        animation: DICE_ANIMATIONS.HIGHLIGHT,
-      },
-      {
-        type: TIMELINE_NODETYPE.TWEEN,
-        actor: diceP2,
-        animation: DICE_ANIMATIONS.HIGHLIGHT,
-      },
-    ],
-  };
+export function knightVsKnightHighlight(animP1, animP2, delay1 = 0, delay2 = 0) {
+  return [
+    { at: delay1, tween: animP1.highlightConfig() },
+    { at: delay2, tween: animP2.highlightConfig() },
+  ];
 }
 
 export function knightVsKnightFirstAtack(atacker, defender) {
