@@ -189,11 +189,12 @@ export default class Dice extends Phaser.GameObjects.Container {
     }
   }
 
-  disposeMod(disposeLastInserted = true) {
+  disposeMod(disposeLastInserted = true, modToDispose) {
     let mod;
     if (disposeLastInserted) {
       mod = this.mods.find((mod) => mod.lastInserted);
     } else {
+      mod = this.mods.find((_m) => modToDispose === _m);
     }
 
     mod.reset();
@@ -231,14 +232,14 @@ export default class Dice extends Phaser.GameObjects.Container {
     );
   }
 
-    async chargeIn({ onStart, onComplete, delta } = {}) {
+  async chargeIn({ onStart, onComplete, delta } = {}) {
     await this.animator.runTween(
       { onStart, onComplete, delta },
       DICE_ANIMATIONS.CHARGE_IN
     );
   }
 
-    async chargeOut({ onStart, onComplete, onYoyo, delta } = {}) {
+  async chargeOut({ onStart, onComplete, onYoyo, delta } = {}) {
     await this.animator.runTween(
       { onStart, onComplete, onYoyo, delta },
       DICE_ANIMATIONS.CHARGE_OUT

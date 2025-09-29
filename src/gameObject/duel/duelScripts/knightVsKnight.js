@@ -9,10 +9,26 @@ export function knightVsKnightHighlight(animP1, animP2, rollMod, delay = 0) {
   ];
 }
 
-export function knightVsKnightFirstAtack(atacker, defender, delay = 650) {
+export function knightVsKnightFirstAtack(
+  atacker,
+  defender,
+  rollMod,
+  getResult,
+  delay = 650
+) {
   return [
     { at: delay, tween: atacker.animator.chargeInConfig({ delta: 120 }) },
     { from: 160, tween: defender.animator.pulseInConfig() },
+    { from: 80, tween: defender.animator.pulseOutConfig() },
+    {
+      from: 50,
+      run: rollMod,
+    },
+    {
+      from: 100,
+      run: getResult,
+    },
+    { from: 100, tween: atacker.animator.chargeOutConfig({ delta: 120 }) },
   ];
 }
 

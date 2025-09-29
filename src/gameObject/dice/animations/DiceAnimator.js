@@ -55,7 +55,6 @@ export default class DiceAnimator {
 
   chargeFullConfig({
     duration = 300,
-
     delta = -100,
     onStart,
     onYoyo,
@@ -78,18 +77,29 @@ export default class DiceAnimator {
     return {
       targets: this.dice,
       scale: { from: this.dice.scale, to: 0 },
-      ease: "Back.easeIn",
+      ease: "Back.easeOut",
       duration,
       onStart,
       onComplete,
     };
   }
 
-  pulseInConfig({ duration = 250, delta = 0.05, onStart, onComplete } = {}) {
+  pulseInConfig({ duration = 80, delta = 0.15, onStart, onComplete } = {}) {
     return {
       targets: this.dice,
-      scale: { from: this.dice.scale, to: this.dice.scale + delta },
-      ease: "Back.easeIn",
+      scale: `+=${delta}`,
+      ease: "Linear",
+      duration,
+      onStart,
+      onComplete,
+    };
+  }
+
+  pulseOutConfig({ duration = 80, delta = 0.15, onStart, onComplete } = {}) {
+    return {
+      targets: this.dice,
+      scale: `-=${delta}`,
+      ease: "Linear",
       duration,
       onStart,
       onComplete,
