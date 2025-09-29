@@ -1,4 +1,4 @@
-import { D6 } from "../dice/dice.definition";
+import { D6, DICE_SWORD } from "../dice/dice.definition";
 import { boardShake } from "./duelScripts/boardScripts";
 import {
   knightVsKnightFirstAtack,
@@ -126,8 +126,6 @@ export function duelSkullVsSkull(scene, dice, diceP1, diceP2, columnIndex) {
 
     const tl = scene.add.timeline(nodesB);
 
-    console.log(nodesB);
-
     tl.once("complete", () => {
       //tl.destroy();
       //scene.duelTimeline = null;
@@ -144,6 +142,20 @@ export function duelKnightVsKnight(scene, dice, diceP1, diceP2, columnIndex) {
   TimelineCtx.scene = scene;
   TimelineCtx.store.columnIndex = columnIndex;
 
+  const turn = Math.floor(Math.random() * 2);
+  let atacker = dice[turn];
+  let defender = Object.values(dice).find((item) => item !== atacker) || null;
+
+  TimelineCtx.store.firstAtacker = atacker;
+  TimelineCtx.store.firstDefender = defender;
+
+  const rollFirstAtackMod = () => {
+    const mod = TimelineCtx.store.firstAtacker.mods.find((mod) => {
+      return mod.value === DICE_SWORD;
+    });
+    mod.roll();
+  };
+
   // Si había un timeline anterior, límpialo
   if (scene.duelTimeline) {
     scene.duelTimeline.destroy();
@@ -152,11 +164,18 @@ export function duelKnightVsKnight(scene, dice, diceP1, diceP2, columnIndex) {
 
   const playPhaseA = () => {
     const nodesA = [];
-    nodesA.push(...knightVsKnightHighlight(diceP1.animator, diceP2.animator));
-    
+    nodesA.push(
+      ...knightVsKnightHighlight(
+        diceP1.animator,
+        diceP2.animator,
+        rollFirstAtackMod
+      )
+    );
+    nodesA.push(...knightVsKnightFirstAtack(atacker, defender));
 
     const tl = scene.add.timeline(nodesA); // Time Timeline vacío
     //addNodesToTimeTimeline(tl, nodesA); // Le “inyectas” los eventos
+    knightVsKnightFirstAtack;
 
     tl.once("complete", () => {
       // Al terminar A ⇒ comienza B
@@ -168,13 +187,6 @@ export function duelKnightVsKnight(scene, dice, diceP1, diceP2, columnIndex) {
     tl.play();
   };
   //timeline.push();
-
-  const turn = Math.floor(Math.random() * 2);
-  let atacker = dice[turn];
-  let defender = Object.values(dice).find((item) => item !== atacker) || null;
-
-  TimelineCtx.store.firstAtacker = atacker;
-  TimelineCtx.store.firstDefender = defender;
 
   //timeline.push(knightVsKnightFirstAtack(atacker, defender));
 

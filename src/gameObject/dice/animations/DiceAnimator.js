@@ -85,6 +85,17 @@ export default class DiceAnimator {
     };
   }
 
+  pulseInConfig({ duration = 250, delta = 0.05, onStart, onComplete } = {}) {
+    return {
+      targets: this.dice,
+      scale: { from: this.dice.scale, to: this.dice.scale + delta },
+      ease: "Back.easeIn",
+      duration,
+      onStart,
+      onComplete,
+    };
+  }
+
   highlightConfig({ delta = 0.15, duration = 500, onStart, onComplete } = {}) {
     return {
       targets: this.dice,
