@@ -1,8 +1,13 @@
 import { D6, DICE_SHIELD, DICE_SWORD } from "../dice/dice.definition";
 import { boardShake } from "./duelScripts/boardScripts";
 import {
+  knightVsKnightDefenderSecondAtack,
+  knightVsKnightDefenderAtacks,
+  knightVsKnightDefenderCounter,
   knightVsKnightFirstAtack,
   knightVsKnightHighlight,
+  knightVsKnightSecondAtack,
+  knightVsKnightUnhighlight,
 } from "./duelScripts/knightVsKnight";
 import {
   skullVsSkullDisposeBoth,
@@ -140,92 +145,139 @@ export function duelSkullVsSkull(scene, dice, diceP1, diceP2, columnIndex) {
 export function duelKnightVsKnight(scene, dice, diceP1, diceP2, columnIndex) {
   console.log("esto es knight_knight");
   TimelineCtx.scene = scene;
-  TimelineCtx.store.columnIndex = columnIndex;
 
-  const turn = Math.floor(Math.random() * 2);
-  let atacker = dice[turn];
+  const store = TimelineCtx.store;
+  store.columnIndex = columnIndex;
+
+  let atacker = dice[Math.floor(Math.random() * 2)];
   let defender = Object.values(dice).find((item) => item !== atacker) || null;
 
-  TimelineCtx.store.firstAtacker = atacker;
-  TimelineCtx.store.firstDefender = defender;
-  TimelineCtx.store.firstAtackerMod = atacker.mods.find((mod) => {
+  //SET CONTEXT
+  //-------------------
+
+  store.atacker = atacker;
+  store.atackerSwordMod = atacker.mods.find((mod) => {
     return mod.value === DICE_SWORD;
   });
-  TimelineCtx.store.firstDefenderMod = defender.mods.find((mod) => {
+  store.atackerShieldMod = atacker.mods.find((mod) => {
     return mod.value === DICE_SHIELD;
   });
-  TimelineCtx.store.firstAtackerWins = false;
 
-  const rollFirstAtackMod = () => {
-    TimelineCtx.store.firstAtackerMod.roll();
-  };
+  //-------------------
 
-  const rollFirstDefendMod = () => {
-    TimelineCtx.store.firstDefenderMod.roll();
-  };
+  store.defender = defender;
+  store.defenderSwordMod = defender.mods.find((mod) => {
+    return mod.value === DICE_SWORD;
+  });
+  store.defenderShieldMod = defender.mods.find((mod) => {
+    return mod.value === DICE_SHIELD;
+  });
 
-  const getModDuelResult = () => {
-    const store = TimelineCtx.store;
-    const result = Phaser.Math.Difference(
-      store.firstDefenderMod.value,
-      store.firstAtackerMod.value
-    );
-    console.log(result);
-    store.firstAtackerWins =
-      store.firstAtackerMod.value > store.firstDefenderMod.value;
+  //===================== FUNCITONS
 
-    if (store.firstAtackerWins) {
-      store.firstDefender.disposeMod(false, store.firstDefenderMod);
-      store.firstAtackerMod.value = result;
-      store.firstAtackerMod.setFrame(result);
+  diceP1.mods.forEach((_m) => {
+    _m.roll(false);
+  });
+
+  diceP2.mods.forEach((_m) => {
+    _m.roll(false);
+  });
+
+  store.atackerSwordMod.value = 5;
+  store.defenderShieldMod.value = 4;
+
+  store.defenderSwordMod.value = 5;
+  store.atackerShieldMod.value = 4;
+  //------------------- set first winner
+  store.atackerWins =
+    store.atackerSwordMod.value > store.defenderShieldMod.value;
+  store.defenderWins =
+    store.defenderSwordMod.value > store.atackerShieldMod.value;
+  //----------------
+  const substract = (value1, value2) => Phaser.Math.Difference(value1, value2);
+  //Toma los mods y dados en duelo y hace los calculos y actualizaciones de sprites antes de hacerle daño al dado
+  const modDuel = (modAtk, modDef, atacker, defender, isWinner) => {
+    const result = substract(modAtk.value, modDef.value);
+
+    if (isWinner) {
+      defender.disposeMod(false, modDef);
+      modAtk.value = result;
+      modAtk.setFrame(result);
     } else {
-      store.firstDefender.disposeMod(false, store.firstDefenderMod);
-      store.firstAtacker.disposeMod(false, store.firstAtackerMod);
+      defender.disposeMod(false, modDef);
+      atacker.disposeMod(false, modAtk);
     }
   };
 
+  //=====================
   // Si había un timeline anterior, límpialo
   if (scene.duelTimeline) {
     scene.duelTimeline.destroy();
     scene.duelTimeline = null;
   }
-
+  let finalDelay = 4400;
   const playPhaseA = () => {
     const nodesA = [];
+
     nodesA.push(
-      ...knightVsKnightHighlight(
-        diceP1.animator,
-        diceP2.animator,
-        rollFirstAtackMod
-      )
+      ...knightVsKnightHighlight(diceP1.animator, diceP2.animator, TimelineCtx)
     );
     nodesA.push(
-      ...knightVsKnightFirstAtack(
-        atacker,
-        defender,
-        rollFirstDefendMod,
-        getModDuelResult
-      )
+      ...knightVsKnightFirstAtack(atacker, defender, modDuel, TimelineCtx)
     );
 
+    if (store.atackerWins) {
+      nodesA.push(
+        ...knightVsKnightSecondAtack(atacker, defender, substract, TimelineCtx)
+      );
+
+      nodesA.push(
+        ...knightVsKnightDefenderAtacks(atacker, defender, modDuel, TimelineCtx)
+      );
+
+      if (store.defenderWins) {
+        nodesA.push(
+          ...knightVsKnightDefenderSecondAtack(
+            atacker,
+            defender,
+            substract,
+            TimelineCtx
+          )
+        );
+        finalDelay = 5400;
+      }
+    }
+    //else {
+    //   console.log("counter");
+    //   nodesA.push(
+    //     ...knightVsKnightDefenderCounter(
+    //       store.firstAtacker,
+    //       store.firstDefender,
+    //       TimelineCtx,
+    //       substract
+    //     )
+    //   );
+    // }
+    nodesA.push(
+      ...knightVsKnightUnhighlight(
+        diceP1.animator,
+        diceP2.animator,
+        TimelineCtx,
+        finalDelay
+      )
+    );
     const tl = scene.add.timeline(nodesA); // Time Timeline vacío
     //addNodesToTimeTimeline(tl, nodesA); // Le “inyectas” los eventos
 
     tl.once("complete", () => {
       // Al terminar A ⇒ comienza B
       //tl.destroy();
-      // playPhaseB();
+      //playPhaseB();
     });
 
     scene.duelTimeline = tl; // Guarda ref por si necesitas abortar
     tl.play();
   };
-
-  // const playPhaseB = () => {
-  //   const nodesB = [];
-
-  //   nodesB.push();
-  // };
 
   //timeline.push(knightVsKnightFirstAtack(atacker, defender));
 

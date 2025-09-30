@@ -49,8 +49,14 @@ export default class DiceMod extends Phaser.GameObjects.Sprite {
     this.disable();
   }
 
-  roll() {
+  roll(updateSprite = true) {
     this.value = customRandom(D6);
+    if (updateSprite) {
+      this.setTexture(DICE_NUMBER_TAG, this.value);
+    }
+  }
+
+  updateSprite() {
     this.setTexture(DICE_NUMBER_TAG, this.value);
   }
 }

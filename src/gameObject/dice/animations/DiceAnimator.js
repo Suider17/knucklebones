@@ -109,7 +109,7 @@ export default class DiceAnimator {
   highlightConfig({ delta = 0.15, duration = 500, onStart, onComplete } = {}) {
     return {
       targets: this.dice,
-      scale: { from: this.dice.scale, to: this.dice.scale + delta },
+      scale: `+=${delta}`,
       ease: "Back.easeOut",
       duration,
       onStart,
@@ -125,7 +125,7 @@ export default class DiceAnimator {
   } = {}) {
     return {
       targets: this.dice,
-      scale: { from: this.dice.scale, to: this.dice.scale - delta },
+      scale: `-=${delta}`,
       ease: "Back.easeOut",
       duration,
       onStart,

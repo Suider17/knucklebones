@@ -66,14 +66,17 @@ export default class Dice extends Phaser.GameObjects.Container {
     //==mods
     this.mods = this.mods.map((_, index) => {
       const position = DICE_MOD_RELATIVE_POSITION[index + 1];
+      const yPosition = this.board.id === 2 ? -position.y : position.y;
       const mod = new DiceMod(
         this.scene,
         position.x,
-        position.y,
+        yPosition,
         DICE_MOD_SPRITE
       );
       mod.init();
-      if (this.board == 2) mod.angle = 180;
+      // if (this.board.id === 2) {
+      //   mod.ang
+      // }
       this.add(mod);
 
       return mod;
